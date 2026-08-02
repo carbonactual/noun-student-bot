@@ -67,13 +67,6 @@
   <h1>NOUN Student Bot — Admin Dashboard</h1>
   <div class="sub" id="last-updated">Loading...</div>
 
-  <div id="setup" style="display:none;">
-    <strong>⚙️ Connect your Supabase project</strong><br/><br/>
-    Open <code>dashboard/index.html</code>, find <code>SUPABASE_URL</code> and
-    <code>SUPABASE_ANON_KEY</code> near the top of the script, paste in your real
-    values from Supabase (Project Settings → API), save, and redeploy.
-  </div>
-
   <div class="grid" id="stats"></div>
 
   <section>
@@ -101,23 +94,16 @@
   </section>
 
 <script>
-  // ---- CONFIGURE THESE ----
-  const SUPABASE_URL = "REPLACE_WITH_YOUR_SUPABASE_URL";
-  const SUPABASE_ANON_KEY = "REPLACE_WITH_YOUR_SUPABASE_ANON_KEY";
-  // --------------------------
-
-  const configured = !SUPABASE_URL.startsWith("REPLACE") && !SUPABASE_ANON_KEY.startsWith("REPLACE");
+  // Live Supabase project — publishable key only (safe for client-side use)
+  const SUPABASE_URL = "https://uxsvclrpiiiyxrzteuzf.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_B7otzzB4q1SwuchyqIFN1g_vuclTyBF";
 
   document.getElementById("last-updated").textContent =
     "Last loaded: " + new Date().toLocaleString();
 
-  if (!configured) {
-    document.getElementById("setup").style.display = "block";
-  } else {
-    const { createClient } = supabase;
-    const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    loadDashboard(client);
-  }
+  const { createClient } = supabase;
+  const client = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+  loadDashboard(client);
 
   async function loadDashboard(client) {
     const [{ data: students }, { data: deadlines }, { data: checklists }] = await Promise.all([
