@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NOUN Student Bot — Admin Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --bg: #0f1115;
+    --card: #171a21;
+    --border: #2a2e38;
+    --text: #e6e8ec;
+    --muted: #8b90a0;
+    --green: #3ddc84;
+    --amber: #f5a623;
+    --red: #ff5c5c;
+    --accent: #5b8def;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px;
+  }
+  h1 { font-size: 22px; margin-bottom: 4px; }
+  .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .stat-card .value { font-size: 28px; font-weight: 700; }
+  .stat-card .label { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  section { margin-bottom: 32px; }
+  section h2 { font-size: 16px; margin-bottom: 12px; color: var(--text); }
+  table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 10px; overflow: hidden; }
+  th, td { text-align: left; padding: 10px 14px; font-size: 13px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 500; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; }
+  tr:last-child td { border-bottom: none; }
+  .badge { padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge.ok { background: rgba(61,220,132,0.15); color: var(--green); }
+  .badge.warn { background: rgba(245,166,35,0.15); color: var(--amber); }
+  .badge.danger { background: rgba(255,92,92,0.15); color: var(--red); }
+  #setup {
+    background: var(--card);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 20px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  #setup code { background: #0a0c10; padding: 2px 6px; border-radius: 4px; color: var(--accent); }
+  .empty { color: var(--muted); padding: 20px; text-align: center; font-size: 13px; }
+</style>
+</head>
+<body>
+  <h1>NOUN Student Bot — Admin Dashboard</h1>
+  <div class="sub" id="last-updated">Loading...</div>
+
+  <div id="setup" style="display:none;">
+    <strong>⚙️ Connect your Supabase project</strong><br/><br/>
+    Open <code>dashboard/index.html</code>, find <code>SUPABASE_URL</code> and
+    <code>SUPABASE_ANON_KEY</code> near the top of the script, paste in your real
+    values from Supabase (Project Settings → API), save, and redeploy.
+  </div>
+
+  <div class="grid" id="stats"></div>
+
+  <section>
+    <h2>Recent Students</h2>
+    <table id="students-table">
+      <thead><tr><th>Level</th><th>Courses</th><th>Joined</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Upcoming Deadlines</h2>
+    <table id="deadlines-table">
+      <thead><tr><th>Level</th><th>Course</th><th>Title</th><th>Due</th><th>Status</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Exam Checklist Completion</h2>
+    <table id="checklist-table">
+      <thead><tr><th>Course</th><th>Progress</th><th>Students Tracked</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+<script>
+  // ---- CONFIGURE THESE ----
+  const SUPABASE_URL = "REPLACE_WITH_YOUR_SUPABASE_URL";
+  const SUPABASE_ANON_KEY = "REPLACE_WITH_YOUR_SUPABASE_ANON_KEY";
+  // --------------------------
+
+  const configured = !SUPABASE_URL.startsWith("REPLACE") && !SUPABASE_ANON_KEY.startsWith("REPLACE");
+
+  document.getElementById("last-updated").textContent =
+    "Last loaded: " + new Date().toLocaleString();
+
+  if (!configured) {
+    document.getElementById("setup").style.display = "block";
+  } else {
+    const { createClient } = supabase;
+    const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    loadDashboard(client);
+  }
+
+  async function loadDashboard(client) {
+    const [{ data: students }, { data: deadlines }, { data: checklists }] = await Promise.all([
+      client.from("students").select("*").order("created_at", { ascending: false }).limit(20),
+      client.from("deadlines").select("*").order("due_date", { ascending: true }).limit(20),
+      client.from("exam_checklists").select("*"),
+    ]);
+
+    renderStats(students || [], deadlines || [], checklists || []);
+    renderStudents(students || []);
+    renderDeadlines(deadlines || []);
+    renderChecklists(checklists || []);
+  }
+
+  function renderStats(students, deadlines, checklists) {
+    const totalStudents = students.length;
+    const upcoming = deadlines.filter(d => new Date(d.due_date) >= new Date()).length;
+    const fullyDone = checklists.filter(c => c.stamp1 && c.stamp2 && c.stamp3 && c.laminated).length;
+
+    document.getElementById("stats").innerHTML = `
+      <div class="stat-card"><div class="value">${totalStudents}</div><div class="label">Registered Students</div></div>
+      <div class="stat-card"><div class="value">${upcoming}</div><div class="label">Upcoming Deadlines</div></div>
+      <div class="stat-card"><div class="value">${checklists.length}</div><div class="label">Checklists In Progress</div></div>
+      <div class="stat-card"><div class="value">${fullyDone}</div><div class="label">Fully Exam-Ready</div></div>
+    `;
+  }
+
+  function renderStudents(students) {
+    const tbody = document.querySelector("#students-table tbody");
+    if (!students.length) {
+      tbody.innerHTML = `<tr><td colspan="3" class="empty">No students yet</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = students.map(s => `
+      <tr>
+        <td>${s.level}L</td>
+        <td>${(s.courses || []).join(", ")}</td>
+        <td>${new Date(s.created_at).toLocaleDateString()}</td>
+      </tr>
+    `).join("");
+  }
+
+  function renderDeadlines(deadlines) {
+    const tbody = document.querySelector("#deadlines-table tbody");
+    if (!deadlines.length) {
+      tbody.innerHTML = `<tr><td colspan="5" class="empty">No deadlines tracked yet</td></tr>`;
+      return;
+    }
+    const now = new Date();
+    tbody.innerHTML = deadlines.map(d => {
+      const due = new Date(d.due_date);
+      const daysLeft = Math.ceil((due - now) / (1000 * 60 * 60 * 24));
+      let badge = `<span class="badge ok">${daysLeft}d left</span>`;
+      if (daysLeft <= 1) badge = `<span class="badge danger">${daysLeft}d left</span>`;
+      else if (daysLeft <= 3) badge = `<span class="badge warn">${daysLeft}d left</span>`;
+      return `
+        <tr>
+          <td>${d.level}L</td>
+          <td>${d.course}</td>
+          <td>${d.title}</td>
+          <td>${d.due_date}</td>
+          <td>${badge}</td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  function renderChecklists(checklists) {
+    const byCourse = {};
+    checklists.forEach(c => {
+      byCourse[c.course] = byCourse[c.course] || { total: 0, done: 0 };
+      byCourse[c.course].total += 1;
+      const steps = [c.stamp1, c.stamp2, c.stamp3, c.laminated].filter(Boolean).length;
+      byCourse[c.course].done += steps / 4;
+    });
+    const tbody = document.querySelector("#checklist-table tbody");
+    const courses = Object.keys(byCourse);
+    if (!courses.length) {
+      tbody.innerHTML = `<tr><td colspan="3" class="empty">No checklists started yet</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = courses.map(course => {
+      const { total, done } = byCourse[course];
+      const pct = Math.round((done / total) * 100);
+      return `
+        <tr>
+          <td>${course}</td>
+          <td>${pct}%</td>
+          <td>${total}</td>
+        </tr>
+      `;
+    }).join("");
+  }
+</script>
+</body>
+</html>
