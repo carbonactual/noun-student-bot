@@ -1,14 +1,30 @@
 const { createClient } = require('@supabase/supabase-js');
 
-// Uses the public (safe-to-expose) key — narrow RLS policies on the database
-// itself restrict what this key can do (insert/update only, no delete, no reads
-// beyond what's already public via the dashboard). This avoids needing any
-// secret environment variables set up in Vercel.
+// Public-safe Supabase key — narrow RLS policies restrict what it can do.
 const SUPABASE_URL = 'https://uxsvclrpiiiyxrzteuzf.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_B7otzzB4q1SwuchyqIFN1g_vuclTyBF';
 const ADMIN_NUMBERS = ['2347046481828', '2349029591932'];
 
+// Resend sending-only API key — can only send emails, cannot manage the account.
+const RESEND_API_KEY = 're_HuL6yc88_CAcwNoibKPYxPi3xpH5nfKVXI';
+const RESEND_FROM = 'onboarding@resend.dev';
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function sendEmail(to, subject, text) {
+  try {
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ from: RESEND_FROM, to: [to], subject, text }),
+    });
+  } catch (err) {
+    console.error('Email send failed:', err.message);
+  }
+}
 
 const EXAM_STEPS = [
   { key: 'stamp1', label: 'Stamp/sign-off #1 (e.g. HOD)' },
@@ -17,7 +33,7 @@ const EXAM_STEPS = [
   { key: 'laminated', label: 'Laminated + all 4 sheets ready to bring' },
 ];
 
-const MENU_TEXT = `📚 NOUN Student Bot — Menu\n\n1️⃣ *mycourses* — see your registered level/courses\n2️⃣ *examcheck [course]* — start/view your exam-hall checklist for a course\n3️⃣ *done [course] [number]* — check off a checklist item\n4️⃣ *help* — show this menu again\n\nDeadline reminders and study-group matching happen automatically once you're registered.`;
+const MENU_TEXT = `📚 NOUN Student Bot — Menu\n\n1️⃣ *mycourses* — see your registered level/courses\n2️⃣ *examcheck [course]* — start/view your exam-hall checklist for a course\n3️⃣ *done [course] [number]* — check off a checklist item\n4️⃣ *email [address]* — register a personal email for backup deadline alerts\n5️⃣ *help* — show this menu again\n\nDeadline reminders and study-group matching happen automatically once you're registered.`;
 
 function renderExamChecklist(course, checklist) {
   let out = `📋 Exam Hall Checklist — ${course}\n\n`;
@@ -39,8 +55,8 @@ async function getStudent(phone) {
   const { data } = await supabase.from('students').select('*').eq('phone', phone).maybeSingle();
   return data;
 }
-async function saveStudent(phone, { level, courses, stage }) {
-  await supabase.from('students').upsert({ phone, level, courses: courses || [], stage });
+async function saveStudent(phone, fields) {
+  await supabase.from('students').upsert({ phone, ...fields });
 }
 async function getChecklist(phone, course) {
   const { data } = await supabase.from('exam_checklists').select('*').eq('phone', phone).eq('course', course).maybeSingle();
@@ -56,9 +72,11 @@ async function addDeadline({ level, course, title, dueDate }) {
   await supabase.from('deadlines').insert({ level, course, title, due_date: dueDate, reminded_at: [] });
 }
 async function getStudentsMatching(level, course) {
-  const { data } = await supabase.from('students').select('phone').eq('level', level).contains('courses', [course]);
-  return (data || []).map((s) => s.phone);
+  const { data } = await supabase.from('students').select('phone, email').eq('level', level).contains('courses', [course]);
+  return data || [];
 }
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -95,7 +113,7 @@ module.exports = async (req, res) => {
     if (!['100', '200', '300', '400'].includes(level)) {
       return res.status(200).json({ reply: 'Please reply with just your level: 100, 200, 300, or 400.', to: from });
     }
-    await saveStudent(from, { ...student, level, stage: 'ask_courses' });
+    await saveStudent(from, { level, stage: 'ask_courses' });
     return res.status(200).json({
       reply: `Got it — ${level}L. Now send your course codes, comma-separated (e.g. CIT301, MTH281, CIT315).`,
       to: from,
@@ -104,7 +122,7 @@ module.exports = async (req, res) => {
 
   if (student.stage === 'ask_courses') {
     const courses = text.split(',').map((c) => c.trim().toUpperCase()).filter(Boolean);
-    await saveStudent(from, { ...student, courses, stage: 'active' });
+    await saveStudent(from, { courses, stage: 'active' });
     return res.status(200).json({
       reply: `✅ Registered: ${student.level}L — ${courses.join(', ')}\n\nYou'll get deadline reminders for these automatically.\n\n${MENU_TEXT}`,
       to: from,
@@ -116,7 +134,17 @@ module.exports = async (req, res) => {
   }
 
   if (lower === 'mycourses') {
-    return res.status(200).json({ reply: `You're registered as ${student.level}L — courses: ${student.courses.join(', ')}`, to: from });
+    return res.status(200).json({ reply: `You're registered as ${student.level}L — courses: ${student.courses.join(', ')}${student.email ? `\nBackup email: ${student.email}` : ''}`, to: from });
+  }
+
+  if (lower.startsWith('email ')) {
+    const address = text.split(' ')[1]?.trim();
+    if (!address || !EMAIL_REGEX.test(address)) {
+      return res.status(200).json({ reply: 'Usage: email your@address.com — use a personal email, not your school email.', to: from });
+    }
+    await saveStudent(from, { email: address });
+    await sendEmail(address, 'NOUN Student Bot — Email Connected', `This email is now linked to your NOUN Student Bot account (${student.level}L, ${student.courses.join(', ')}). You'll get deadline alerts here as a backup to WhatsApp.`);
+    return res.status(200).json({ reply: `✅ Email registered: ${address}. A confirmation email is on its way.`, to: from });
   }
 
   if (lower.startsWith('examcheck')) {
@@ -149,15 +177,24 @@ async function handleAdminCommand(text) {
     const [meta, dateStr] = rest.split('|').map((s) => s.trim());
     const [level, course, ...titleParts] = meta.split(' ');
     const title = titleParts.join(' ');
-    await addDeadline({ level: level.toUpperCase(), course: course.toUpperCase(), title, dueDate: dateStr });
-    return `✅ Deadline added: ${level.toUpperCase()} ${course.toUpperCase()} — "${title}" due ${dateStr}`;
+    const L = level.toUpperCase();
+    const C = course.toUpperCase();
+    await addDeadline({ level: L, course: C, title, dueDate: dateStr });
+
+    const matches = await getStudentsMatching(L, C);
+    const withEmail = matches.filter((s) => s.email);
+    for (const s of withEmail) {
+      await sendEmail(s.email, `NOUN Deadline: ${C} — ${title}`, `New deadline for ${L}L ${C}:\n\n${title}\nDue: ${dateStr}\n\nCheck WhatsApp for full details and reminders.`);
+    }
+
+    return `✅ Deadline added: ${L} ${C} — "${title}" due ${dateStr}\n📧 Emailed ${withEmail.length}/${matches.length} matching students (rest have no email on file).`;
   }
 
   if (cmd === 'liststudents') {
     const level = parts[2]?.toUpperCase();
     const course = parts[3]?.toUpperCase();
-    const phones = await getStudentsMatching(level, course);
-    return `${phones.length} student(s) found for ${level}L ${course}.`;
+    const matches = await getStudentsMatching(level, course);
+    return `${matches.length} student(s) found for ${level}L ${course}, ${matches.filter((s) => s.email).length} with email on file.`;
   }
 
   return 'Admin commands:\n- admin adddeadline [level] [course] [title] | [YYYY-MM-DD]\n- admin liststudents [level] [course]';
