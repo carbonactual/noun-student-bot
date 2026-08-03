@@ -1,26 +1,14 @@
-/**
- * Vercel serverless webhook for the NOUN Student Bot.
- *
- * How it fits together:
- *   WhatsApp -> Zapier ("New Inbound Message" trigger) -> POST here -> we return { reply }
- *   -> Zapier's next step ("Send Freeform Message" action) sends `reply` back to the student
- *
- * This replaces the always-on whatsapp-web.js server entirely — no laptop or VPS
- * needs to stay running. This function only runs when a message actually arrives.
- *
- * SETUP (in Vercel Project Settings -> Environment Variables):
- *   SUPABASE_URL
- *   SUPABASE_SERVICE_ROLE_KEY   (the secret key — this is a server-side function, safe to use here)
- *   ADMIN_NUMBERS               (comma-separated, e.g. "2348031234567,2347046481828")
- */
-
 const { createClient } = require('@supabase/supabase-js');
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const ADMIN_NUMBERS = (process.env.ADMIN_NUMBERS || '').split(',').map((n) => n.trim()).filter(Boolean);
+// Uses the public (safe-to-expose) key — narrow RLS policies on the database
+// itself restrict what this key can do (insert/update only, no delete, no reads
+// beyond what's already public via the dashboard). This avoids needing any
+// secret environment variables set up in Vercel.
+const SUPABASE_URL = 'https://uxsvclrpiiiyxrzteuzf.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_B7otzzB4q1SwuchyqIFN1g_vuclTyBF';
+const ADMIN_NUMBERS = ['2347046481828', '2349029591932'];
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const EXAM_STEPS = [
   { key: 'stamp1', label: 'Stamp/sign-off #1 (e.g. HOD)' },
@@ -29,14 +17,7 @@ const EXAM_STEPS = [
   { key: 'laminated', label: 'Laminated + all 4 sheets ready to bring' },
 ];
 
-const MENU_TEXT = `📚 NOUN Student Bot — Menu
-
-1️⃣ *mycourses* — see your registered level/courses
-2️⃣ *examcheck [course]* — start/view your exam-hall checklist for a course
-3️⃣ *done [course] [number]* — check off a checklist item
-4️⃣ *help* — show this menu again
-
-Deadline reminders and study-group matching happen automatically once you're registered.`;
+const MENU_TEXT = `📚 NOUN Student Bot — Menu\n\n1️⃣ *mycourses* — see your registered level/courses\n2️⃣ *examcheck [course]* — start/view your exam-hall checklist for a course\n3️⃣ *done [course] [number]* — check off a checklist item\n4️⃣ *help* — show this menu again\n\nDeadline reminders and study-group matching happen automatically once you're registered.`;
 
 function renderExamChecklist(course, checklist) {
   let out = `📋 Exam Hall Checklist — ${course}\n\n`;
