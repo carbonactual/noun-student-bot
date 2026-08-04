@@ -3,115 +3,354 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>NOUN Student Bot — Admin Dashboard</title>
+<title>NOUN Ops Registry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
-    --bg: #0f1115;
-    --card: #171a21;
-    --border: #2a2e38;
-    --text: #e6e8ec;
-    --muted: #8b90a0;
-    --green: #3ddc84;
-    --amber: #f5a623;
-    --red: #ff5c5c;
-    --accent: #5b8def;
+    --bg: #0e241c;
+    --bg-deep: #0a1c15;
+    --card: #16332a;
+    --card-hover: #1a3b30;
+    --border: #2b4a3d;
+    --parchment: #ede6d6;
+    --parchment-dim: #c9c2ae;
+    --sage: #93a89b;
+    --stamp-red: #b3392c;
+    --stamp-red-glow: rgba(179,57,44,0.18);
+    --verify-green: #4c9a6a;
+    --verify-glow: rgba(76,154,106,0.16);
+    --amber: #c98a3a;
   }
   * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: var(--bg);
-    color: var(--text);
-    padding: 24px;
+    background-image:
+      radial-gradient(ellipse at top left, rgba(76,154,106,0.06), transparent 45%),
+      radial-gradient(ellipse at bottom right, rgba(179,57,44,0.05), transparent 50%);
+    color: var(--parchment);
+    font-family: 'Inter', sans-serif;
+    padding: 0;
+    min-height: 100vh;
   }
-  h1 { font-size: 22px; margin-bottom: 4px; }
-  .sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 40px 28px 80px; }
+
+  /* ---- Masthead ---- */
+  .masthead {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 24px;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .masthead-left .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--verify-green);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .pulse-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--verify-green);
+    box-shadow: 0 0 0 0 rgba(76,154,106,0.6);
+    animation: pulse 2.2s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(76,154,106,0.55); }
+    70% { box-shadow: 0 0 0 8px rgba(76,154,106,0); }
+    100% { box-shadow: 0 0 0 0 rgba(76,154,106,0); }
+  }
+  .masthead h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 34px;
+    letter-spacing: -0.01em;
+    margin: 0;
+    color: var(--parchment);
+  }
+  .masthead .sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--sage);
+    margin-top: 8px;
+  }
+  .masthead-right { text-align: right; font-family: 'IBM Plex Mono', monospace; }
+  .clock { font-size: 22px; color: var(--parchment); font-weight: 500; }
+  .clock-zone { font-size: 11px; color: var(--sage); letter-spacing: 0.08em; margin-top: 2px; }
+
+  /* ---- Stamp badge (signature element) ---- */
+  .stamp {
+    position: relative;
+    width: 92px; height: 92px;
+    border: 2px solid var(--stamp-red);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transform: rotate(-9deg);
+    opacity: 0.9;
+    flex-shrink: 0;
+  }
+  .stamp::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border: 1px solid var(--stamp-red);
+    border-radius: 50%;
+  }
+  .stamp-text {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--stamp-red);
+    text-align: center;
+    line-height: 1.5;
+    text-transform: uppercase;
+  }
+
+  /* ---- Record cards ---- */
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-    margin-bottom: 32px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin-bottom: 48px;
   }
-  .stat-card {
+  .record-card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 18px;
+    border-radius: 4px;
+    padding: 20px 22px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.2s ease, border-color 0.2s ease;
   }
-  .stat-card .value { font-size: 28px; font-weight: 700; }
-  .stat-card .label { color: var(--muted); font-size: 13px; margin-top: 4px; }
-  section { margin-bottom: 32px; }
-  section h2 { font-size: 16px; margin-bottom: 12px; color: var(--text); }
-  table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 10px; overflow: hidden; }
-  th, td { text-align: left; padding: 10px 14px; font-size: 13px; border-bottom: 1px solid var(--border); }
-  th { color: var(--muted); font-weight: 500; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; }
-  tr:last-child td { border-bottom: none; }
-  .badge { padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-  .badge.ok { background: rgba(61,220,132,0.15); color: var(--green); }
-  .badge.warn { background: rgba(245,166,35,0.15); color: var(--amber); }
-  .badge.danger { background: rgba(255,92,92,0.15); color: var(--red); }
-  #setup {
-    background: var(--card);
-    border: 1px solid var(--accent);
-    border-radius: 10px;
-    padding: 20px;
+  .record-card:hover { background: var(--card-hover); border-color: #3a6151; }
+  .record-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; bottom: 0;
+    width: 3px;
+    background: var(--border);
+  }
+  .record-card.verified::before { background: var(--verify-green); }
+  .record-card .value {
+    font-family: 'Fraunces', serif;
+    font-size: 38px;
+    font-weight: 600;
+    color: var(--parchment);
+    line-height: 1;
+  }
+  .record-card .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--sage);
+    margin-top: 10px;
+  }
+  .record-card .index {
+    position: absolute; top: 16px; right: 18px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--border);
+  }
+
+  /* ---- Sections ---- */
+  section { margin-bottom: 44px; }
+  .section-head {
+    display: flex; align-items: baseline; gap: 12px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+  }
+  .section-head .num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--stamp-red);
+  }
+  .section-head h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0;
+    color: var(--parchment);
+  }
+  .section-head .count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--sage);
+    margin-left: auto;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--sage);
+    font-weight: 500;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 12px;
     font-size: 13px;
-    line-height: 1.6;
+    color: var(--parchment-dim);
+    border-bottom: 1px solid rgba(43,74,61,0.5);
+    font-family: 'Inter', sans-serif;
   }
-  #setup code { background: #0a0c10; padding: 2px 6px; border-radius: 4px; color: var(--accent); }
-  .empty { color: var(--muted); padding: 20px; text-align: center; font-size: 13px; }
+  td.mono { font-family: 'IBM Plex Mono', monospace; color: var(--parchment); font-size: 12.5px; }
+  tr:hover td { background: rgba(76,154,106,0.04); }
+  tr:last-child td { border-bottom: none; }
+
+  .tag {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    padding: 3px 9px;
+    border-radius: 3px;
+    letter-spacing: 0.03em;
+  }
+  .tag.ok { background: var(--verify-glow); color: var(--verify-green); border: 1px solid rgba(76,154,106,0.3); }
+  .tag.warn { background: rgba(201,138,58,0.14); color: var(--amber); border: 1px solid rgba(201,138,58,0.3); }
+  .tag.danger { background: var(--stamp-red-glow); color: #d97a6c; border: 1px solid rgba(179,57,44,0.35); }
+
+  .bar-track {
+    width: 100px; height: 6px; background: var(--bg-deep);
+    border: 1px solid var(--border); border-radius: 3px; overflow: hidden;
+    display: inline-block; vertical-align: middle; margin-right: 8px;
+  }
+  .bar-fill { height: 100%; background: var(--verify-green); }
+
+  .empty-row {
+    text-align: center; padding: 32px 20px;
+    color: var(--sage); font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  }
+
+  footer {
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    color: var(--sage);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  }
+
+  @media (max-width: 640px) {
+    .masthead { flex-direction: column; }
+    .masthead-right { text-align: left; }
+    .stamp { display: none; }
+    .masthead h1 { font-size: 26px; }
+  }
 </style>
 </head>
 <body>
-  <h1>NOUN Student Bot — Admin Dashboard</h1>
-  <div class="sub" id="last-updated">Loading...</div>
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="masthead-left">
+      <div class="eyebrow"><span class="pulse-dot"></span>system live</div>
+      <h1>NOUN Ops Registry</h1>
+      <div class="sub">student support system — record of activity</div>
+    </div>
+    <div style="display:flex; align-items:flex-start; gap:20px;">
+      <div class="masthead-right">
+        <div class="clock" id="clock">--:--</div>
+        <div class="clock-zone" id="clock-date">_ WAT</div>
+      </div>
+      <div class="stamp"><div class="stamp-text">Verified<br/>Record<br/>· Live ·</div></div>
+    </div>
+  </div>
 
   <div class="grid" id="stats"></div>
 
   <section>
-    <h2>Recent Students</h2>
-    <table id="students-table">
+    <div class="section-head">
+      <span class="num">01</span>
+      <h2>Recent Students</h2>
+      <span class="count" id="students-count"></span>
+    </div>
+    <table>
       <thead><tr><th>Level</th><th>Courses</th><th>Joined</th></tr></thead>
-      <tbody></tbody>
+      <tbody id="students-body"></tbody>
     </table>
   </section>
 
   <section>
-    <h2>Upcoming Deadlines</h2>
-    <table id="deadlines-table">
+    <div class="section-head">
+      <span class="num">02</span>
+      <h2>Upcoming Deadlines</h2>
+      <span class="count" id="deadlines-count"></span>
+    </div>
+    <table>
       <thead><tr><th>Level</th><th>Course</th><th>Title</th><th>Due</th><th>Status</th></tr></thead>
-      <tbody></tbody>
+      <tbody id="deadlines-body"></tbody>
     </table>
   </section>
 
   <section>
-    <h2>Exam Checklist Completion</h2>
-    <table id="checklist-table">
+    <div class="section-head">
+      <span class="num">03</span>
+      <h2>Exam Checklist Completion</h2>
+      <span class="count" id="checklists-count"></span>
+    </div>
+    <table>
       <thead><tr><th>Course</th><th>Progress</th><th>Students Tracked</th></tr></thead>
-      <tbody></tbody>
+      <tbody id="checklists-body"></tbody>
     </table>
   </section>
+
+  <footer>
+    <span>NOUN Student Bot — internal registry</span>
+    <span id="last-loaded"></span>
+  </footer>
+
+</div>
 
 <script>
-  // Live Supabase project — publishable key only (safe for client-side use)
   const SUPABASE_URL = "https://uxsvclrpiiiyxrzteuzf.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_B7otzzB4q1SwuchyqIFN1g_vuclTyBF";
 
-  document.getElementById("last-updated").textContent =
-    "Last loaded: " + new Date().toLocaleString();
+  function tickClock() {
+    const now = new Date();
+    const wat = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Lagos' }));
+    const h = wat.getHours().toString().padStart(2, '0');
+    const m = wat.getMinutes().toString().padStart(2, '0');
+    document.getElementById('clock').textContent = `${h}:${m}`;
+    const dateStr = wat.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    document.getElementById('clock-date').textContent = `${dateStr} _ WAT`;
+  }
+  tickClock();
+  setInterval(tickClock, 1000 * 15);
+
+  document.getElementById('last-loaded').textContent = 'loaded ' + new Date().toLocaleTimeString();
 
   const { createClient } = supabase;
   const client = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-  loadDashboard(client);
+  loadDashboard();
 
-  async function loadDashboard(client) {
+  async function loadDashboard() {
     const [{ data: students }, { data: deadlines }, { data: checklists }] = await Promise.all([
       client.from("students").select("*").order("created_at", { ascending: false }).limit(20),
       client.from("deadlines").select("*").order("due_date", { ascending: true }).limit(20),
       client.from("exam_checklists").select("*"),
     ]);
-
     renderStats(students || [], deadlines || [], checklists || []);
     renderStudents(students || []);
     renderDeadlines(deadlines || []);
@@ -123,52 +362,61 @@
     const upcoming = deadlines.filter(d => new Date(d.due_date) >= new Date()).length;
     const fullyDone = checklists.filter(c => c.stamp1 && c.stamp2 && c.stamp3 && c.laminated).length;
 
-    document.getElementById("stats").innerHTML = `
-      <div class="stat-card"><div class="value">${totalStudents}</div><div class="label">Registered Students</div></div>
-      <div class="stat-card"><div class="value">${upcoming}</div><div class="label">Upcoming Deadlines</div></div>
-      <div class="stat-card"><div class="value">${checklists.length}</div><div class="label">Checklists In Progress</div></div>
-      <div class="stat-card"><div class="value">${fullyDone}</div><div class="label">Fully Exam-Ready</div></div>
-    `;
+    const cards = [
+      { value: totalStudents, label: 'Registered Students', idx: '(01)' },
+      { value: upcoming, label: 'Upcoming Deadlines', idx: '(02)' },
+      { value: checklists.length, label: 'Checklists In Progress', idx: '(03)' },
+      { value: fullyDone, label: 'Fully Exam-Ready', idx: '(04)', verified: fullyDone > 0 },
+    ];
+    document.getElementById('stats').innerHTML = cards.map(c => `
+      <div class="record-card ${c.verified ? 'verified' : ''}">
+        <span class="index">${c.idx}</span>
+        <div class="value">${c.value}</div>
+        <div class="label">${c.label}</div>
+      </div>
+    `).join('');
   }
 
   function renderStudents(students) {
-    const tbody = document.querySelector("#students-table tbody");
+    document.getElementById('students-count').textContent = `${students.length} shown`;
+    const tbody = document.getElementById('students-body');
     if (!students.length) {
-      tbody.innerHTML = `<tr><td colspan="3" class="empty">No students yet</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="3"><div class="empty-row">— no students registered yet —</div></td></tr>`;
       return;
     }
     tbody.innerHTML = students.map(s => `
       <tr>
-        <td>${s.level}L</td>
-        <td>${(s.courses || []).join(", ")}</td>
-        <td>${new Date(s.created_at).toLocaleDateString()}</td>
+        <td class="mono">${s.level}L</td>
+        <td>${(s.courses || []).join(', ')}</td>
+        <td class="mono">${new Date(s.created_at).toLocaleDateString()}</td>
       </tr>
-    `).join("");
+    `).join('');
   }
 
   function renderDeadlines(deadlines) {
-    const tbody = document.querySelector("#deadlines-table tbody");
+    document.getElementById('deadlines-count').textContent = `${deadlines.length} tracked`;
+    const tbody = document.getElementById('deadlines-body');
     if (!deadlines.length) {
-      tbody.innerHTML = `<tr><td colspan="5" class="empty">No deadlines tracked yet</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-row">— no deadlines logged yet —</div></td></tr>`;
       return;
     }
     const now = new Date();
     tbody.innerHTML = deadlines.map(d => {
       const due = new Date(d.due_date);
       const daysLeft = Math.ceil((due - now) / (1000 * 60 * 60 * 24));
-      let badge = `<span class="badge ok">${daysLeft}d left</span>`;
-      if (daysLeft <= 1) badge = `<span class="badge danger">${daysLeft}d left</span>`;
-      else if (daysLeft <= 3) badge = `<span class="badge warn">${daysLeft}d left</span>`;
+      let tagClass = 'ok', tagText = `${daysLeft}d left`;
+      if (daysLeft <= 1) { tagClass = 'danger'; tagText = daysLeft <= 0 ? 'due now' : `${daysLeft}d left`; }
+      else if (daysLeft <= 3) { tagClass = 'warn'; }
       return `
         <tr>
-          <td>${d.level}L</td>
-          <td>${d.course}</td>
+          <td class="mono">${d.level}L</td>
+          <td class="mono">${d.course}</td>
           <td>${d.title}</td>
-          <td>${d.due_date}</td>
-          <td>${badge}</td>
+          <td class="mono">${d.due_date}</td>
+          <td><span class="tag ${tagClass}">${tagText}</span></td>
         </tr>
       `;
-    }).join("");
+    }).join('');
   }
 
   function renderChecklists(checklists) {
@@ -179,10 +427,11 @@
       const steps = [c.stamp1, c.stamp2, c.stamp3, c.laminated].filter(Boolean).length;
       byCourse[c.course].done += steps / 4;
     });
-    const tbody = document.querySelector("#checklist-table tbody");
     const courses = Object.keys(byCourse);
+    document.getElementById('checklists-count').textContent = `${courses.length} courses`;
+    const tbody = document.getElementById('checklists-body');
     if (!courses.length) {
-      tbody.innerHTML = `<tr><td colspan="3" class="empty">No checklists started yet</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="3"><div class="empty-row">— no checklists started yet —</div></td></tr>`;
       return;
     }
     tbody.innerHTML = courses.map(course => {
@@ -190,12 +439,12 @@
       const pct = Math.round((done / total) * 100);
       return `
         <tr>
-          <td>${course}</td>
-          <td>${pct}%</td>
-          <td>${total}</td>
+          <td class="mono">${course}</td>
+          <td><span class="bar-track"><span class="bar-fill" style="width:${pct}%"></span></span><span class="mono">${pct}%</span></td>
+          <td class="mono">${total}</td>
         </tr>
       `;
-    }).join("");
+    }).join('');
   }
 </script>
 </body>
