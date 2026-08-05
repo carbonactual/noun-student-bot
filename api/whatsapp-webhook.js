@@ -33,7 +33,7 @@ const EXAM_STEPS = [
   { key: 'laminated', label: 'Laminated + all 4 sheets ready to bring' },
 ];
 
-const MENU_TEXT = `📚 NOUN Student Bot — Menu\n\n1️⃣ *mycourses* — see your registered level/courses\n2️⃣ *examcheck [course]* — start/view your exam-hall checklist for a course\n3️⃣ *done [course] [number]* — check off a checklist item\n4️⃣ *email [address]* — register a personal email for backup deadline alerts\n5️⃣ *help* — show this menu again\n\nDeadline reminders and study-group matching happen automatically once you're registered.`;
+const MENU_TEXT = `📚 NOUN Student Bot — Menu\n\n1️⃣ *mycourses* — see your registered level/courses\n2️⃣ *examcheck [course]* — start/view your exam-hall checklist for a course\n3️⃣ *done [course] [number]* — check off a checklist item\n4️⃣ *email [address]* — register a personal email for backup deadline alerts\n5️⃣ *human* — talk to a real person instead of the bot\n6️⃣ *help* — show this menu again\n\nDeadline reminders and study-group matching happen automatically once you're registered.`;
 
 function renderExamChecklist(course, checklist) {
   let out = `📋 Exam Hall Checklist — ${course}\n\n`;
@@ -75,6 +75,13 @@ async function getStudentsMatching(level, course) {
   const { data } = await supabase.from('students').select('phone, email').eq('level', level).contains('courses', [course]);
   return data || [];
 }
+async function logHelpRequest(phone, student, note) {
+  try {
+    await supabase.from('help_requests').insert({ phone, level: student?.level || null, courses: student?.courses || [], note: note || null });
+  } catch (err) {
+    console.error('logHelpRequest failed:', err.message);
+  }
+}
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -100,10 +107,24 @@ module.exports = async (req, res) => {
 
   let student = await getStudent(from);
 
+  // "human" works at any point, even mid-onboarding — someone frustrated
+  // enough to ask shouldn't have to finish a form first.
+  if (lower === 'human' || lower === 'help me' || lower === 'talk to someone' || lower === 'agent') {
+    await logHelpRequest(from, student, text);
+    for (const admin of ADMIN_NUMBERS) {
+      // fire-and-forget notification path handled by admin checking liststudents/help log;
+      // actual push to admin's WhatsApp happens via the same send-message Zap action manually for now.
+    }
+    return res.status(200).json({
+      reply: `🙋 I've flagged this for a real person to follow up with you — you'll hear back here on WhatsApp. In the meantime, reply "menu" to see what I can help with directly.`,
+      to: from,
+    });
+  }
+
   if (!student) {
     await saveStudent(from, { stage: 'ask_level', level: null, courses: [] });
     return res.status(200).json({
-      reply: `👋 Welcome to the NOUN Student Bot!\n\nLet's get you set up. What level are you? (Reply with 100, 200, 300, or 400)`,
+      reply: `👋 Welcome to the NOUN Student Bot!\n\nLet's get you set up. What level are you? (Reply with 100, 200, 300, or 400)\n\nAt any point, reply "human" to talk to a real person instead.`,
       to: from,
     });
   }
@@ -165,7 +186,7 @@ module.exports = async (req, res) => {
     return res.status(200).json({ reply: renderExamChecklist(course, checklist), to: from });
   }
 
-  return res.status(200).json({ reply: `Not sure what you mean. ${MENU_TEXT}`, to: from });
+  return res.status(200).json({ reply: `Not sure what you mean. Reply "human" if you'd rather talk to a real person.\n\n${MENU_TEXT}`, to: from });
 };
 
 async function handleAdminCommand(text) {
