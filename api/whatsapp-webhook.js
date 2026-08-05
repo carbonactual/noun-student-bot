@@ -4,6 +4,7 @@ const { createClient } = require('@supabase/supabase-js');
 const SUPABASE_URL = 'https://uxsvclrpiiiyxrzteuzf.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_B7otzzB4q1SwuchyqIFN1g_vuclTyBF';
 const ADMIN_NUMBERS = ['2347046481828', '2349029591932'];
+const ADMIN_EMAIL = 'abduhabu99@gmail.com';
 
 // Resend sending-only API key — can only send emails, cannot manage the account.
 const RESEND_API_KEY = 're_HuL6yc88_CAcwNoibKPYxPi3xpH5nfKVXI';
@@ -108,13 +109,15 @@ module.exports = async (req, res) => {
   let student = await getStudent(from);
 
   // "human" works at any point, even mid-onboarding — someone frustrated
-  // enough to ask shouldn't have to finish a form first.
+  // enough to ask shouldn't have to finish a form first. Logs it AND emails
+  // the admin immediately so it doesn't just sit unseen in the database.
   if (lower === 'human' || lower === 'help me' || lower === 'talk to someone' || lower === 'agent') {
     await logHelpRequest(from, student, text);
-    for (const admin of ADMIN_NUMBERS) {
-      // fire-and-forget notification path handled by admin checking liststudents/help log;
-      // actual push to admin's WhatsApp happens via the same send-message Zap action manually for now.
-    }
+    await sendEmail(
+      ADMIN_EMAIL,
+      `NOUN Bot: student needs a human (${from})`,
+      `Phone: ${from}\nLevel/courses on file: ${student ? `${student.level || 'not set yet'}L, ${(student.courses || []).join(', ') || 'none yet'}` : 'not registered yet'}\n\nTheir message: "${text}"\n\nReply to them directly on WhatsApp.`
+    );
     return res.status(200).json({
       reply: `🙋 I've flagged this for a real person to follow up with you — you'll hear back here on WhatsApp. In the meantime, reply "menu" to see what I can help with directly.`,
       to: from,
