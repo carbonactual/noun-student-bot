@@ -1,104 +1,304 @@
-# NOUN Student Bot — v1 Setup & Deployment
+# NOUN Student Bot — Production v2
 
-Live repo: https://github.com/carbonactual/noun-student-bot
-Live admin dashboard: https://noun-student-bot-dashboard.vercel.app
+A serverless NOUN student support and onboarding system built around **WhatsApp Business as the primary communication channel**.
 
-## What this does right now
-- Onboards a student: asks their level (100/200/300/400) and course codes
-- Exam Hall Entry Checklist: track 3 stamps + laminated-and-ready, per course
-- Deadline reminders: you (admin) add a deadline, students in that level+course get auto-reminded 3 days and 1 day before
-- Auto group creation: you run one command, it creates a WhatsApp group and adds every matching level+course student automatically — solving the mixed-level-groups problem directly
-- **Telegram admin bridge**: pushes curated updates (new student signups, completed exam checklists, groups created, and students who got stuck) into a Telegram chat you and staff watch
-- **Live admin dashboard**: a real, deployed web page showing student counts, upcoming deadlines, and exam-checklist progress — reads from the same Supabase database the bot writes to
+## Canonical architecture
 
-## What this does NOT do (by design, v1)
-- Does not log into the NOUN portal or touch registration/exams — nothing here reads or writes your academic record
-- Does not summarize course material or past questions yet — that's v2, once this core loop is proven with real users
+```text
+Student WhatsApp
+      ↓
+Meta WhatsApp Business / Cloud API
+      ↓
+Zapier — inbound event adapter + outbound sender
+      ↓
+Vercel Serverless API
+      ├── onboarding/state machine
+      ├── deterministic commands
+      ├── human escalation
+      ├── deadline/checklist logic
+      ├── campaign engine
+      ├── outbound queue
+      └── Gemini study/retrieval layer
+      ↓
+Supabase Postgres
+      ├── student registry
+      ├── academic support state
+      ├── course content
+      ├── deadlines
+      ├── audit/idempotency events
+      ├── help requests
+      ├── campaigns
+      └── outbound queue
 
-## Important architecture note
-The WhatsApp bot itself (index.js) **cannot run on Vercel** — it needs a persistent, always-on connection that serverless platforms don't support. Only the admin dashboard runs on Vercel. The bot still needs a real always-on machine (your laptop while open, or a VPS).
-
----
-
-## How to actually run it (15-20 minutes)
-
-### 1. Clone this repo
-```
-git clone https://github.com/carbonactual/noun-student-bot.git
-cd noun-student-bot
-```
-
-### 2. Set up Supabase (the shared database)
-1. Go to supabase.com → New Project → give it a name, set a database password, pick a region close to Nigeria (e.g. a European region).
-2. Once created: Project Settings → API. Copy your **Project URL**, **anon public key**, and **service_role key** — you'll need all three.
-3. Go to SQL Editor → New Query → paste the entire contents of `supabase-schema.sql` → Run. This creates the `students`, `deadlines`, and `exam_checklists` tables.
-4. (Recommended) Go to Authentication → Policies for each table and enable Row Level Security with a read-only policy for the `anon` role, so the public dashboard can only read, never write.
-
-### 3. Connect the bot to Supabase
-Open `db-supabase.js`, and either:
-- Set environment variables (recommended): `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`, or
-- Paste your values directly at the top of the file, replacing the placeholders.
-
-Use the **service_role** key here — it has write access, which the bot needs.
-
-### 4. Connect the dashboard to Supabase
-Open `dashboard/index.html`, find `SUPABASE_URL` and `SUPABASE_ANON_KEY` near the top of the script, paste in your **Project URL** and **anon public** key (not the service_role key — the dashboard should only ever get read access). Commit and push — if the Vercel project is connected to this GitHub repo, it redeploys automatically.
-
-### 5. Get a computer/server that can stay on (for the bot)
-Your laptop (while it's on and connected), or a cheap always-on VPS (DigitalOcean, a Nigerian VPS provider, or a spare Android phone running Termux). Don't use your only personal WhatsApp number if you plan to scale — consider a second SIM/number once you're past a handful of test users.
-
-### 6. Install Node.js
-If not already installed: https://nodejs.org (LTS version). Confirm with `node --version` — should show v18+.
-
-### 7. Install dependencies
-```
-npm install
+Vercel dashboard → aggregate-only /api/dashboard
+Resend → email backup + human escalation
 ```
 
-### 8. Add your admin number
-Open `index.js`, find `ADMIN_NUMBERS` near the top, replace with your real WhatsApp number in international format, no `+`, no spaces (e.g. `234803xxxxxxx`).
+There is **no WhatsApp QR session, whatsapp-web.js, laptop process, VPS bot process, Node cron or Telegram bridge** in the canonical production architecture.
 
-### 9. Set up the Telegram admin bridge
-See `telegram.js` header comments — brief version: message @BotFather → `/newbot` → get a token; create a staff Telegram group, add the bot; get the chat ID via @RawDataBot; set `TELEGRAM_TOKEN` and `TELEGRAM_ADMIN_CHAT_ID`.
+## WhatsApp is not optional
 
-### 10. Start the bot
-```
-npm start
-```
-Scan the QR code with WhatsApp → Settings → Linked Devices → Link a Device. Once connected, the bot is live, and the dashboard shows real data.
+WhatsApp is the main student acquisition, onboarding, support and notification surface. The design therefore treats every WhatsApp interaction as an event with an idempotency key and keeps student state in Supabase rather than in the messaging provider.
 
-**Keep the terminal/server running** — that's what keeps the bot live 24/7.
+Zapier remains the adapter that receives Meta WhatsApp events and sends the Vercel response back through WhatsApp Business. Vercel never stores a WhatsApp login session or QR credential.
 
----
+## Current capabilities
 
-## Connecting Vercel to this repo for auto-deploys (recommended)
-Vercel dashboard → Add New Project → Import `carbonactual/noun-student-bot` → set **Root Directory** to `dashboard` → Deploy. From then on, every push to `main` auto-redeploys the dashboard — no manual redeploy needed.
+- WhatsApp-first onboarding: unknown number → level → courses → active student
+- `mycourses`, `help/menu`, `profile`, `email`, `examcheck`, `done`
+- Human escalation from any point in onboarding
+- Gemini study support grounded in registered course material
+- Exam-hall checklist per student/course
+- Deadline registry
+- Privacy-safe aggregate operations dashboard
+- Idempotent inbound message processing
+- Outbound transactional queue
+- Campaign creation, audience targeting and launch
+- Campaign templates with `{{name}}`, `{{level}}`, `{{course}}`
+- Opt-in guard on campaign delivery
+- Message/event audit trail
+- Server-side Supabase service key only
+- Public Supabase policies restricted to non-sensitive reference data
 
----
+## Campaign system
 
-## Admin commands (send these from your admin number)
+Campaigns are deliberately separated from transactional messages.
 
-**Add a deadline:**
-```
-admin adddeadline 300 CIT301 TMA 2 submission | 2026-08-15
-```
+Example onboarding campaign:
 
-**Auto-create a level+course group with all matching students:**
-```
-admin creategroup 300 CIT301
-```
-
-**Broadcast a message to everyone in a level+course:**
-```
-admin broadcast 300 CIT301 Reminder: exam moved to Friday
+```text
+admin campaign create NOUN 2026 Onboarding | Welcome {{name}} 👋 Get NOUN Student Bot on WhatsApp for course reminders, exam checklists and study help. Reply HELP to explore.
 ```
 
----
+Then target it:
 
-## Testing it yourself first
-Before showing this to real students, message the bot from your own second number (or ask a friend) and walk through: onboarding → `examcheck CIT301` → `done CIT301 1` → confirm it tracks correctly. Then test `admin adddeadline` and `admin creategroup` with a couple of test accounts registered under the same level+course.
+```text
+admin campaign target [campaign-id] level=100
+```
 
-## Realistic next steps once this is live with real users
-1. Get 10-20 real students using it for 1-2 weeks
-2. Watch what breaks or confuses people — the fallback message ("Not sure what you mean") will tell you a lot about what students actually try to type
-3. Only then build v2: portal integration, study material summarization, past-question packs — the paid tier
+Or course-specific:
+
+```text
+admin campaign target [campaign-id] level=300 course=CIT301
+```
+
+Then launch:
+
+```text
+admin campaign launch [campaign-id]
+```
+
+The launch creates `campaign_messages`; the campaign dispatcher puts them into the shared outbound queue. Zapier is responsible for the actual WhatsApp Business send step.
+
+Recommended campaign families:
+
+1. **Acquisition** — introduce the bot to eligible NOUN students.
+2. **Onboarding completion** — students who started but did not finish registration.
+3. **Academic activation** — prompt students to add courses and try study support.
+4. **Exam readiness** — exam-checklist activation before examination periods.
+5. **Deadline awareness** — targeted reminders around TMA/exam/admin dates.
+6. **Reactivation** — opted-in students who have gone quiet.
+7. **Human support** — targeted notices when a service/process requires staff attention.
+
+Do not turn campaigns into spam. Use consent, clear identity, useful content, frequency limits and an opt-out mechanism before broad external launch.
+
+## Environment variables
+
+Configure these in Vercel. Never commit them.
+
+```text
+SUPABASE_URL
+SUPABASE_SERVICE_ROLE_KEY
+WEBHOOK_SECRET
+GEMINI_API_KEY
+RESEND_API_KEY
+RESEND_FROM
+ADMIN_NUMBERS=234xxxxxxxxxx,234xxxxxxxxxx
+ADMIN_EMAIL=admin@example.com
+```
+
+`SUPABASE_SERVICE_ROLE_KEY` is server-only. The browser must never receive it.
+
+`WEBHOOK_SECRET` must be configured in the Zapier webhook action as `x-webhook-secret`.
+
+## Zapier / WhatsApp contract
+
+### Inbound Zap
+
+Meta WhatsApp Business event → Zapier → POST to:
+
+```text
+/api/whatsapp-webhook
+```
+
+Payload should contain at least:
+
+```json
+{
+  "message_id": "provider-message-id",
+  "from": "2348000000000",
+  "text": "help",
+  "timestamp": "2026-08-10T00:00:00Z"
+}
+```
+
+Vercel returns:
+
+```json
+{
+  "reply": "...",
+  "to": "2348000000000",
+  "event_id": "..."
+}
+```
+
+Zapier then sends `reply` to `to` through the connected WhatsApp Business action.
+
+### Outbound dispatcher
+
+Use a Zapier scheduled trigger to POST:
+
+```json
+{ "action": "dispatch" }
+```
+
+The endpoint returns a bounded batch of queued messages. Loop over the messages, send each through WhatsApp Business, then POST an acknowledgement:
+
+```json
+{
+  "action": "ack",
+  "id": 123,
+  "status": "sent",
+  "provider_message_id": "meta-message-id"
+}
+```
+
+Use another scheduled Zap for:
+
+```json
+{ "action": "campaign-dispatch" }
+```
+
+This keeps Meta credentials and WhatsApp delivery inside the official/Zapier communication layer while Vercel remains the deterministic application layer.
+
+## Database
+
+`supabase-schema.sql` is now the canonical schema. It includes:
+
+- `students`
+- `deadlines`
+- `exam_checklists`
+- `help_requests`
+- `course_content`
+- `faculties`
+- `message_events`
+- `outbound_queue`
+- `campaigns`
+- `campaign_messages`
+
+Run it against the existing Supabase project as a migration. It uses `IF NOT EXISTS`/safe `ALTER TABLE` statements for the fields introduced after v1.
+
+## Security model
+
+The old architecture allowed the publishable Supabase key to perform application writes under broad public policies. That is no longer the design.
+
+Production rules:
+
+- Vercel API uses the Supabase service-role key server-side.
+- Browser dashboard never gets the service-role key.
+- Student/checklist/event/queue/campaign tables have no public write policies.
+- Dashboard exposes aggregate/non-sensitive information only.
+- Incoming Zapier calls are authenticated with `x-webhook-secret`.
+- Duplicate inbound events are rejected using `message_events.event_id`.
+- Outbound messages use a queue with attempts and leases.
+- Campaign delivery checks `whatsapp_opt_in`.
+- Credentials are environment variables only.
+
+## AI boundary
+
+Gemini is a support layer, not the source of truth.
+
+It may:
+
+- explain concepts
+- summarize supplied course material
+- answer general study questions
+- suggest study approaches
+
+It may not:
+
+- claim access to NOUN portal records
+- submit registration/exams/payments
+- impersonate NOUN
+- take exams or graded work for students
+- invent official administrative information
+
+Course retrieval is currently deterministic keyword-overlap. The next retrieval upgrade should be embeddings + hybrid search once enough course material has accumulated to justify the operational complexity.
+
+## Content pipeline
+
+Official publicly accessible NOUN courseware should be ingested into `course_content` as structured modules with source URL/hash. The bot should explain/summarize rather than republish long source passages.
+
+Recommended ingestion metadata:
+
+```text
+course_code
+module_title
+content
+source_url
+source_hash
+created_at
+```
+
+## Human support
+
+`human`, `help me`, `talk to someone` and `agent` create a `help_requests` record and notify the configured admin email. The student remains in WhatsApp and can continue using normal bot functions.
+
+## Admin commands
+
+```text
+admin adddeadline [level] [course] [title] | [YYYY-MM-DD]
+admin liststudents [level] [course]
+admin campaign create Name | Message
+admin campaign target [campaign-id] level=300 course=CIT301
+admin campaign launch [campaign-id]
+admin campaign pause [campaign-id]
+admin campaign list
+admin queue
+```
+
+## Dashboard
+
+Live dashboard:
+
+```text
+https://noun-student-bot-dashboard.vercel.app
+```
+
+The dashboard now calls `/api/dashboard` and receives aggregate/non-sensitive operational data instead of reading student records directly from Supabase.
+
+## Deployment sequence
+
+1. Apply `supabase-schema.sql`.
+2. Rotate every credential previously exposed during development.
+3. Set Vercel environment variables.
+4. Deploy the repository to Vercel.
+5. Configure Zapier Meta WhatsApp inbound webhook to the Vercel endpoint.
+6. Add `x-webhook-secret` to Zapier.
+7. Configure the Zapier reply step to send `reply` to `to`.
+8. Configure scheduled outbound dispatch and campaign-dispatch Zaps.
+9. Test onboarding from an unregistered WhatsApp number.
+10. Test duplicate Meta message delivery.
+11. Test `human` escalation.
+12. Test `examcheck` and `done`.
+13. Test campaign create → target → launch → WhatsApp send.
+14. Test failed outbound acknowledgement and retry behavior.
+15. Only then move beyond Meta development/test recipients.
+
+## Deliberate boundaries
+
+The bot does not store NOUN portal passwords, silently submit academic actions, or automate exam-taking. Any future official-system integration must use explicit confirmation and preserve the student as the final actor for consequential submissions.
+
+## Repository status
+
+The canonical production implementation lives under `api/` and `dashboard/`. The old persistent WhatsApp/QR implementation has been removed to prevent architecture drift.
