@@ -7,7 +7,6 @@ const ADMIN_EMAIL = 'abduhabu99@gmail.com';
 const RESEND_API_KEY = 're_HuL6yc88_CAcwNoibKPYxPi3xpH5nfKVXI';
 const RESEND_FROM = 'onboarding@resend.dev';
 
-// Set GEMINI_API_KEY as a Vercel environment variable (or it's injected at deploy time).
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_URL = GEMINI_API_KEY
   ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`
@@ -25,12 +24,31 @@ async function sendEmail(to, subject, text) {
   } catch (err) { console.error('Email send failed:', err.message); }
 }
 
+async function getRelevantCourseContent(studentText, courses) {
+  if (!courses || !courses.length) return null;
+  const { data } = await supabase.from('course_content').select('*').in('course_code', courses);
+  if (!data || !data.length) return null;
+  const words = studentText.toLowerCase().split(/\W+/).filter((w) => w.length > 3);
+  const scored = data.map((chunk) => {
+    const text = (chunk.module_title + ' ' + chunk.content).toLowerCase();
+    const score = words.reduce((acc, w) => acc + (text.includes(w) ? 1 : 0), 0);
+    return { chunk, score };
+  }).sort((a, b) => b.score - a.score);
+  const top = scored.filter((s) => s.score > 0).slice(0, 2);
+  if (!top.length) return null;
+  return top.map((t) => `[${t.chunk.course_code} - ${t.chunk.module_title}]\n${t.chunk.content}`).join('\n\n');
+}
+
 async function askGemini(studentText, student) {
   if (!GEMINI_URL) return null;
+  const courseContent = student ? await getRelevantCourseContent(studentText, student.courses) : null;
   const context = student
     ? `The student is ${student.level}L, registered for: ${(student.courses || []).join(', ') || 'no courses yet'}.`
     : `This student hasn't finished registering yet.`;
-  const systemPrompt = `You are a helpful assistant inside a WhatsApp bot for NOUN (National Open University of Nigeria) students. ${context}
+  const groundingBlock = courseContent
+    ? `\n\nRelevant official NOUN course material (use this to answer if it's relevant to their question, and mention it's from their course material when you use it):\n\n${courseContent}`
+    : '';
+  const systemPrompt = `You are a helpful assistant inside a WhatsApp bot for NOUN (National Open University of Nigeria) students. ${context}${groundingBlock}
 
 Rules:
 - Keep replies short and WhatsApp-friendly (a few sentences, plain text, no markdown headers).
@@ -38,6 +56,7 @@ Rules:
 - If they ask about official NOUN actions (registering courses/exams, fee payments, official results), tell them to check the NOUN portal or reply "human" to reach a real person.
 - You CAN help with: explaining concepts, study tips, general academic questions, and using this bot's commands.
 - Never claim to submit anything on their behalf or take any exam/assignment for them.
+- If course material was provided above, prefer it over general knowledge when it's relevant, but don't force it in if the question isn't actually about that course.
 
 Student's message: "${studentText}"`;
   try {
@@ -60,18 +79,11 @@ const EXAM_STEPS = [
 ];
 
 const PROFILE_FIELDS = {
-  matric: 'matric_number',
-  faculty: 'faculty',
-  dept: 'department',
-  department: 'department',
-  waec: 'waec_result',
-  neco: 'neco_result',
-  cert: 'primary_cert',
-  direntry: 'direct_entry_qualification',
-  state: 'state_of_origin',
+  matric: 'matric_number', faculty: 'faculty', dept: 'department', department: 'department',
+  waec: 'waec_result', neco: 'neco_result', cert: 'primary_cert', direntry: 'direct_entry_qualification', state: 'state_of_origin',
 };
 
-const MENU_TEXT = `📚 NOUN Student Bot — Menu\n\n1️⃣ *mycourses* — see your registered level/courses\n2️⃣ *examcheck [course]* — start/view your exam-hall checklist for a course\n3️⃣ *done [course] [number]* — check off a checklist item\n4️⃣ *email [address]* — register a personal email for backup deadline alerts\n5️⃣ *profile* — see or update your full student profile\n6️⃣ *human* — talk to a real person instead of the bot\n7️⃣ *help* — show this menu again\n\nOr just ask me anything in your own words — I'll do my best to help.`;
+const MENU_TEXT = `📚 NOUN Student Bot — Menu\n\n1️⃣ *mycourses* — see your registered level/courses\n2️⃣ *examcheck [course]* — start/view your exam-hall checklist for a course\n3️⃣ *done [course] [number]* — check off a checklist item\n4️⃣ *email [address]* — register a personal email for backup deadline alerts\n5️⃣ *profile* — see or update your full student profile\n6️⃣ *human* — talk to a real person instead of the bot\n7️⃣ *help* — show this menu again\n\nOr just ask me anything in your own words — I'll do my best to help, using your real course material where I can.`;
 
 function renderExamChecklist(course, checklist) {
   let out = `📋 Exam Hall Checklist — ${course}\n\n`;
