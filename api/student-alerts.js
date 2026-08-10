@@ -1,0 +1,3 @@
+const {planForStudent}=require('../lib/academic-alerts');
+const SECRET=process.env.WEBHOOK_SECRET;
+module.exports=async(req,res)=>{if(req.method!=='POST')return res.status(405).json({error:'POST only'});if(SECRET&&req.headers['x-webhook-secret']!==SECRET)return res.status(401).json({error:'Unauthorized'});const phone=String(req.body?.phone||'').replace(/\D/g,'');if(!phone)return res.status(400).json({error:'phone required'});try{return res.status(200).json({ok:true,result:await planForStudent(phone)})}catch(e){console.error(e);return res.status(500).json({error:'Student alert planning failed'})}};
