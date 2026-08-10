@@ -1,0 +1,15 @@
+const {createClient}=require('@supabase/supabase-js');
+const db=createClient(process.env.SUPABASE_URL,process.env.SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false}});
+const SECRET=process.env.WEBHOOK_SECRET;
+const count=async(table,filters=[])=>{let q=db.from(table).select('*',{count:'exact',head:true});for(const f of filters)q=q.eq(f[0],f[1]);const {count,error}=await q;if(error)throw error;return count||0};
+module.exports=async(req,res)=>{if(req.method!=='GET')return res.status(405).json({error:'GET only'});if(SECRET&&req.headers['x-webhook-secret']!==SECRET)return res.status(401).json({error:'Unauthorized'});try{const now=new Date(),iso=now.toISOString(),d7=new Date(now-7*86400000).toISOString();const [students,deadlines,help,events,services,insights,campaigns,signals,runs,changes]=await Promise.all([
+ count('students'),count('deadlines'),count('help_requests',[['created_at', 'gte:'+d7]]),count('academic_events',[['status','verified']]),count('student_services',[['verification_status','verified']]),count('intelligence_signals'),count('campaigns'),count('intelligence_runs'),count('intelligence_changes'),count('source_snapshots')
+]);
+const [failedSources,openHelp,upcoming,serviceDemand,recentChanges]=await Promise.all([
+ db.from('intelligence_runs').select('id,source_id,status,error_message,started_at').eq('status','failed').order('started_at',{ascending:false}).limit(20),
+ db.from('help_requests').select('id,phone,level,note,created_at').order('created_at',{ascending:false}).limit(20),
+ db.from('academic_events').select('id,event_type,title,start_at,level,course_code,authority_tier,confidence').eq('status','verified').gte('start_at',iso).order('start_at').limit(20),
+ db.from('intelligence_signals').select('category,query,course,level,created_at').eq('signal_type','service_demand').gte('created_at',d7).order('created_at',{ascending:false}).limit(100),
+ db.from('intelligence_changes').select('id,source_id,change_type,detected_at,validation_status').order('detected_at',{ascending:false}).limit(20)
+]);
+const totalSignals=serviceDemand.data?.length||0;const verifiedEvents=events;const sourceHealth=Math.max(0,Math.round(100-((failedSources.data?.length||0)*5)));const dataHealth=Math.min(100,Math.round((verifiedEvents/Math.max(1,verifiedEvents+changes))*100));return res.status(200).json({ok:true,generated_at:iso,health:{overall:Math.round((sourceHealth+dataHealth)/2),source:sourceHealth,data:dataHealth},kpis:{students,deadlines,verified_academic_events:events,verified_services:services,service_demand_7d:totalSignals,insights,campaigns,help_requests:help,runs,changes},queues:{failed_sources:failedSources.data||[],help_requests:openHelp.data||[]},upcoming:upcoming.data||[],recent_changes:recentChanges.data||[],service_demand:serviceDemand.data||[],architecture:{system_of_record:'Supabase',serverless_backend:'Vercel',interface:'WhatsApp',orchestrator:'ABBA',automation:'Zapier',ai:'Gemini',source_authority:'NOUN-first'}})}catch(e){console.error(e);return res.status(500).json({error:'Command center aggregation failed'})}};
