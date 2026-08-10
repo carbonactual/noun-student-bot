@@ -1,5 +1,7 @@
 node_modules/
-db.json
-.wwebjs_auth/
-.wwebjs_cache/
 .env
+.env.*
+!.env.example
+.vercel/
+.DS_Store
+npm-debug.log*
