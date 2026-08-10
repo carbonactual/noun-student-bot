@@ -1,0 +1,2 @@
+const {runMonitor}=require('../lib/intelligence-monitor');
+module.exports=async(req,res)=>{if(req.method!=='POST')return res.status(405).json({error:'POST only'});const secret=process.env.INTELLIGENCE_CRON_SECRET||process.env.WEBHOOK_SECRET;if(secret&&req.headers['x-intelligence-secret']!==secret)return res.status(401).json({error:'Unauthorized'});try{const result=await runMonitor();return res.status(200).json({ok:true,...result})}catch(e){console.error('intelligence-monitor',e);return res.status(500).json({ok:false,error:'Intelligence monitor failed'})}};
