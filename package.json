@@ -1,17 +1,9 @@
 {
   "name": "noun-student-bot",
-  "version": "1.0.0",
-  "description": "WhatsApp bot for NOUN students - deadline tracking, exam checklist, level/course group matching",
-  "main": "index.js",
+  "version": "2.0.0",
+  "private": true,
+  "description": "NOUN Student Bot — Meta WhatsApp Business, Zapier, Vercel, Supabase and Gemini",
   "type": "commonjs",
-  "scripts": {
-    "start": "node index.js"
-  },
-  "dependencies": {
-    "whatsapp-web.js": "^1.26.0",
-    "qrcode-terminal": "^0.12.0",
-    "node-cron": "^3.0.3",
-    "node-telegram-bot-api": "^0.66.0",
-    "@supabase/supabase-js": "^2.45.0"
-  }
+  "scripts": { "start": "node -e \"console.log('Use Vercel serverless deployment; no persistent bot process.')\"" },
+  "dependencies": { "@supabase/supabase-js": "^2.45.0" }
 }
