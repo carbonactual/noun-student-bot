@@ -1,12 +1,13 @@
--- NOUN Student Bot — Supabase schema
--- Run this in Supabase Dashboard → SQL Editor → New Query → paste → Run
+-- NOUN Student Bot — Supabase schema v2
+-- Run in Supabase SQL Editor. Existing deployments should apply the ALTER below.
 
 create table if not exists students (
   phone text primary key,
-  level text not null,
+  level text,
   courses text[] not null default '{}',
-  stage text not null default 'active',
-  created_at timestamptz not null default now()
+  stage text not null default 'ask_level',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 
 create table if not exists deadlines (
@@ -30,6 +31,12 @@ create table if not exists exam_checklists (
   primary key (phone, course)
 );
 
--- Indexes for the admin dashboard's common queries
 create index if not exists idx_students_level_course on students using gin (courses);
+create index if not exists idx_students_level on students (level);
 create index if not exists idx_deadlines_level_course on deadlines (level, course);
+create index if not exists idx_deadlines_due_date on deadlines (due_date);
+
+-- Safe migration for the original v1 schema:
+alter table students alter column level drop not null;
+alter table students add column if not exists updated_at timestamptz not null default now();
+alter table students alter column stage set default 'ask_level';
