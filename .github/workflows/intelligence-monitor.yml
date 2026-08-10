@@ -1,0 +1,30 @@
+name: NOUN Intelligence Monitor
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate monitor configuration
+        env:
+          MONITOR_URL: ${{ secrets.NOUN_INTELLIGENCE_MONITOR_URL }}
+        run: |
+          test -n "$MONITOR_URL" || { echo 'Missing NOUN_INTELLIGENCE_MONITOR_URL secret'; exit 1; }
+      - name: Run intelligence monitor
+        env:
+          MONITOR_URL: ${{ secrets.NOUN_INTELLIGENCE_MONITOR_URL }}
+          MONITOR_SECRET: ${{ secrets.INTELLIGENCE_CRON_SECRET }}
+        run: |
+          test -n "$MONITOR_SECRET" || { echo 'Missing INTELLIGENCE_CRON_SECRET secret'; exit 1; }
+          curl --fail-with-body --silent --show-error --max-time 120 \
+            -X POST "$MONITOR_URL" \
+            -H 'content-type: application/json' \
+            -H "x-intelligence-secret: $MONITOR_SECRET" \
+            --data '{"trigger":"github-actions","mode":"scheduled"}'
