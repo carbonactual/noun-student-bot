@@ -1,3 +1,0 @@
-const {run,SOURCES}=require('../lib/noun-sync');
-const SECRET=process.env.WEBHOOK_SECRET;
-module.exports=async(req,res)=>{if(req.method!=='POST')return res.status(405).json({error:'POST only'});if(SECRET&&req.headers['x-webhook-secret']!==SECRET)return res.status(401).json({error:'Unauthorized'});const key=String(req.body?.source||'').trim().toLowerCase();if(key==='list')return res.status(200).json({sources:SOURCES.map(s=>({key:s.key,url:s.url,type:s.type,title:s.title}))});if(!key)return res.status(400).json({error:'source required',sources:SOURCES.map(s=>s.key)});try{return res.status(200).json({ok:true,result:await run(key)})}catch(e){console.error('noun sync:',e);return res.status(500).json({error:'NOUN sync failed',source:key})}};
