@@ -1,0 +1,3 @@
+const {ingest,latest}=require('../lib/realtime-intelligence');
+const SECRET=process.env.WEBHOOK_SECRET;
+module.exports=async(req,res)=>{if(req.method!=='POST'&&req.method!=='GET')return res.status(405).json({error:'GET or POST only'});if(SECRET&&req.headers['x-webhook-secret']!==SECRET)return res.status(401).json({error:'Unauthorized'});try{if(req.method==='GET')return res.status(200).json({ok:true,sources:await latest(Math.min(Number(req.query.limit)||25,100))});const result=await ingest(Array.isArray(req.body?.items)?req.body.items:[]);return res.status(200).json({ok:true,result});}catch(e){console.error(e);return res.status(500).json({error:'Realtime intelligence failed'})}};
