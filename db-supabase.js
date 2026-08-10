@@ -10,12 +10,13 @@ function cleanCourses(courses) { return [...new Set((courses || []).map((c) => S
 async function getStudent(phone) {
   const { data, error } = await supabase.from('students').select('*').eq('phone', phone).maybeSingle();
   if (fail('getStudent', error) || !data) return null;
-  return { level: data.level, courses: cleanCourses(data.courses), stage: data.stage, created_at: data.created_at, updated_at: data.updated_at };
+  return { ...data, courses: cleanCourses(data.courses) };
 }
 
-async function saveStudent(phone, { level = null, courses = [], stage = 'ask_level' }) {
+async function saveStudent(phone, { level = null, courses = [], stage = 'ask_level', ...extra }) {
   const { error } = await supabase.from('students').upsert({
     phone, level, courses: cleanCourses(courses), stage,
+    ...extra,
     updated_at: new Date().toISOString(),
   }, { onConflict: 'phone' });
   fail('saveStudent', error);
@@ -57,4 +58,32 @@ async function getStudentsMatching(level, course) {
   return [...new Set((data || []).map((s) => s.phone).filter(Boolean))];
 }
 
-module.exports = { getStudent, saveStudent, getChecklist, saveChecklistStep, addDeadline, getAllDeadlines, markDeadlineReminded, getStudentsMatching };
+/** Read-only retrieval. This never writes to academic state. */
+async function getCourseContent(courseCodes, query, limit = 4) {
+  const courses = cleanCourses(courseCodes);
+  if (!courses.length) return [];
+  const { data, error } = await supabase.from('course_content').select('id,course_code,module_title,content').in('course_code', courses);
+  if (fail('getCourseContent', error) || !data?.length) return [];
+  const words = String(query || '').toLowerCase().split(/\W+/).filter((w) => w.length > 3);
+  return data.map((chunk) => {
+    const haystack = `${chunk.module_title || ''} ${chunk.content || ''}`.toLowerCase();
+    const score = words.reduce((n, word) => n + (haystack.includes(word) ? 1 : 0), 0);
+    return { ...chunk, score };
+  }).filter((x) => x.score > 0).sort((a, b) => b.score - a.score).slice(0, limit);
+}
+
+/** Best-effort durable idempotency. Missing table is non-fatal during rollout. */
+async function claimEvent(eventId, channel = 'whatsapp') {
+  if (!eventId) return true;
+  const { error } = await supabase.from('integration_events').insert({ event_id: eventId, channel, received_at: new Date().toISOString() });
+  if (!error) return true;
+  if (String(error.code) === '23505') return false;
+  console.error('claimEvent error:', error.message);
+  return true;
+}
+
+module.exports = {
+  getStudent, saveStudent, getChecklist, saveChecklistStep, addDeadline,
+  getAllDeadlines, markDeadlineReminded, getStudentsMatching,
+  getCourseContent, claimEvent,
+};
