@@ -1,205 +1,42 @@
-const crypto = require('crypto');
-const { createClient } = require('@supabase/supabase-js');
-
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const RESEND_FROM = process.env.RESEND_FROM || 'onboarding@resend.dev';
-const ADMIN_NUMBERS = (process.env.ADMIN_NUMBERS || '').split(',').map(v => v.replace(/\D/g, '')).filter(Boolean);
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || '';
-
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) throw new Error('Missing Supabase server credentials');
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
-
-const EXAM_STEPS = [
-  { key: 'stamp1', label: 'Stamp/sign-off #1' },
-  { key: 'stamp2', label: 'Stamp/sign-off #2' },
-  { key: 'stamp3', label: 'Stamp/sign-off #3' },
-  { key: 'laminated', label: 'Laminated + required sheets ready' },
-];
-
-const PROFILE_FIELDS = {
-  name: 'full_name', fullname: 'full_name', matric: 'matric_number', faculty: 'faculty',
-  dept: 'department', department: 'department', waec: 'waec_result', neco: 'neco_result',
-  cert: 'primary_cert', direntry: 'direct_entry_qualification', state: 'state_of_origin',
-};
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MENU_TEXT = `📚 NOUN Student Bot\n\nmycourses — registered level/courses\nexamcheck [course] — exam-hall checklist\ndone [course] [1-4] — check a checklist item\nemail [address] — add backup email\nprofile — view profile\nprofile field=value — update profile\nhuman — reach a real person\nhelp — show this menu\n\nYou can also ask a study question in normal language.`;
-
-function json(res, status, body) { return res.status(status).json(body); }
-function admin(number) { return ADMIN_NUMBERS.includes(number); }
-function normalizePhone(v) { return String(v || '').replace(/\D/g, ''); }
-function eventId(body, from, text) {
-  return String(body.message_id || body.event_id || crypto.createHash('sha256').update(`${from}|${text}|${body.timestamp || ''}`).digest('hex'));
-}
-function safeText(v, max = 4000) { return String(v || '').slice(0, max); }
-
-async function recordEvent(event_id, phone, direction, text, metadata = {}) {
-  const { error } = await supabase.from('message_events').insert({
-    event_id, phone, direction, message_text: safeText(text), metadata,
-    provider_message_id: metadata.provider_message_id || null,
-  });
-  if (error && !String(error.message).toLowerCase().includes('duplicate')) console.error('event:', error.message);
-}
-
-async function getStudent(phone) {
-  const { data, error } = await supabase.from('students').select('*').eq('phone', phone).maybeSingle();
-  if (error) throw error;
-  return data;
-}
-async function saveStudent(phone, fields) {
-  const { error } = await supabase.from('students').upsert({ phone, ...fields, updated_at: new Date().toISOString(), last_seen_at: new Date().toISOString() });
-  if (error) throw error;
-}
-async function queueMessage(phone, message_text, kind = 'transactional', source_id = null) {
-  const { data, error } = await supabase.from('outbound_queue').insert({ phone, message_text: safeText(message_text), kind, source_id }).select('id').single();
-  if (error) throw error;
-  return data.id;
-}
-async function sendEmail(to, subject, text) {
-  if (!RESEND_API_KEY || !to) return false;
-  try {
-    const r = await fetch('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ from: RESEND_FROM, to: [to], subject, text }) });
-    return r.ok;
-  } catch (e) { console.error('email:', e.message); return false; }
-}
-
-async function getRelevantCourseContent(question, courses) {
-  if (!courses?.length) return null;
-  const { data, error } = await supabase.from('course_content').select('course_code,module_title,content').in('course_code', courses).limit(100);
-  if (error || !data?.length) return null;
-  const stop = new Set(['what','when','where','which','with','that','this','from','have','does','about','your','their','course','please','help']);
-  const words = question.toLowerCase().split(/\W+/).filter(w => w.length > 3 && !stop.has(w));
-  const scored = data.map(c => {
-    const hay = `${c.module_title} ${c.content}`.toLowerCase();
-    const score = words.reduce((n, w) => n + (hay.includes(w) ? 1 : 0), 0);
-    return { c, score };
-  }).filter(x => x.score > 0).sort((a,b) => b.score - a.score).slice(0, 3);
-  return scored.length ? scored.map(x => `[${x.c.course_code} — ${x.c.module_title}]\n${x.c.content.slice(0, 6500)}`).join('\n\n') : null;
-}
-
-async function askGemini(question, student) {
-  if (!GEMINI_API_KEY) return null;
-  const grounded = await getRelevantCourseContent(question, student?.courses || []);
-  const prompt = `You are the study-support AI inside a WhatsApp bot for National Open University of Nigeria students.\nStudent: ${student?.level || 'unknown'}L; courses: ${(student?.courses || []).join(', ') || 'none'}.\n\nRules:\n- Be concise and useful for WhatsApp.\n- Explain and teach; do not complete graded work or exams for the student.\n- Never claim access to live NOUN records, portal status, payments, registration, results or official decisions.\n- For official administrative matters, direct the student to the official NOUN channel or "human".\n- If supplied course material is relevant, ground the answer in it and say it is from the course material.\n- If the material does not answer the question, say so rather than inventing a NOUN-specific fact.\n\nCOURSE MATERIAL:\n${grounded || 'No matching course material found.'}\n\nSTUDENT QUESTION:\n${safeText(question, 2500)}`;
-  try {
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] },), });
-    const d = await r.json();
-    return d?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
-  } catch (e) { console.error('gemini:', e.message); return null; }
-}
-
-function renderChecklist(course, c) {
-  let out = `📋 Exam Hall Checklist — ${course}\n\n`;
-  EXAM_STEPS.forEach((s,i) => { out += `${c?.[s.key] ? '✅' : '⬜'} ${i+1}. ${s.label}\n`; });
-  const done = EXAM_STEPS.filter(s => c?.[s.key]).length;
-  return `${out}\n${done}/4 complete.${done === 4 ? '\n\n🎉 Checklist complete.' : `\n\nReply "done ${course} [1-4]" to update it.`}`;
-}
-function renderProfile(s) {
-  return `📇 Profile\n\nName: ${s.full_name || 'not set'}\nLevel: ${s.level || 'not set'}\nCourses: ${(s.courses||[]).join(', ') || 'none'}\nMatric: ${s.matric_number || 'not set'}\nFaculty: ${s.faculty || 'not set'}\nDepartment: ${s.department || 'not set'}\nWAEC: ${s.waec_result || 'not set'}\nNECO: ${s.neco_result || 'not set'}\nCertificate: ${s.primary_cert || 'not set'}\nDirect entry: ${s.direct_entry_qualification || 'not set'}\nState: ${s.state_of_origin || 'not set'}\nEmail: ${s.email || 'not set'}`;
-}
-function parseProfile(text) {
-  const rest = text.replace(/^profile\s*/i, '').trim(); if (!rest) return null;
-  const updates = {};
-  rest.split(',').forEach(pair => { const p = pair.split(/[:=]/); if (p.length < 2) return; const key = p.shift().trim().toLowerCase(); const value = p.join('=').trim(); if (PROFILE_FIELDS[key] && value) updates[PROFILE_FIELDS[key]] = safeText(value, 300); });
-  return Object.keys(updates).length ? updates : null;
-}
-
-async function getChecklist(phone, course) {
-  const { data } = await supabase.from('exam_checklists').select('*').eq('phone', phone).eq('course', course).maybeSingle(); return data || {};
-}
-async function setChecklist(phone, course, key) {
-  const c = await getChecklist(phone, course); c[key] = true; c.phone = phone; c.course = course; c.updated_at = new Date().toISOString();
-  const { error } = await supabase.from('exam_checklists').upsert(c, { onConflict: 'phone,course' }); if (error) throw error; return c;
-}
-async function logHelp(phone, student, note) {
-  await supabase.from('help_requests').insert({ phone, level: student?.level || null, courses: student?.courses || [], note: safeText(note, 1000) });
-  if (ADMIN_EMAIL) await sendEmail(ADMIN_EMAIL, `NOUN Bot: human help requested`, `Phone: ${phone}\nLevel: ${student?.level || 'unknown'}\nCourses: ${(student?.courses||[]).join(', ')}\n\n${note}`);
-}
-
-async function createCampaign(name, message, filters) {
-  const { data, error } = await supabase.from('campaigns').insert({ name, message_template: message, ...filters, status: 'draft' }).select('id').single();
-  if (error) throw error; return data.id;
-}
-async function launchCampaign(id) {
-  const { data: c, error } = await supabase.from('campaigns').select('*').eq('id', id).single(); if (error) throw error;
-  let q = supabase.from('students').select('phone,full_name,level,courses,faculty,stage').eq('whatsapp_opt_in', true);
-  if (c.audience_level) q = q.eq('level', c.audience_level);
-  if (c.audience_course) q = q.contains('courses', [c.audience_course]);
-  if (c.audience_faculty) q = q.eq('faculty', c.audience_faculty);
-  if (c.audience_stage) q = q.eq('stage', c.audience_stage);
-  if (c.onboarding_only) q = q.eq('stage', 'active');
-  const { data: students, error: se } = await q.limit(5000); if (se) throw se;
-  const rows = (students || []).map(s => ({ campaign_id:id, phone:s.phone, rendered_message:c.message_template.replaceAll('{{name}}', s.full_name || 'student').replaceAll('{{level}}', s.level || '').replaceAll('{{course}}', c.audience_course || (s.courses||[])[0] || '') }));
-  if (rows.length) { const { error: ie } = await supabase.from('campaign_messages').upsert(rows, { onConflict:'campaign_id,phone', ignoreDuplicates:true }); if (ie) throw ie; }
-  await supabase.from('campaigns').update({ status:'active', updated_at:new Date().toISOString() }).eq('id',id);
-  return rows.length;
-}
-
-async function adminCommand(text, from) {
-  const p = text.trim().split(/\s+/); const cmd = p[1]?.toLowerCase();
-  if (cmd === 'adddeadline') {
-    const rest = text.split('adddeadline ')[1] || ''; const [meta,date] = rest.split('|').map(x=>x.trim()); const [level,course,...titleParts]=meta.split(/\s+/);
-    if (!level || !course || !titleParts.length || !/^\d{4}-\d{2}-\d{2}$/.test(date||'')) return 'Usage: admin adddeadline 300 CIT301 TMA | 2026-08-15';
-    const { error } = await supabase.from('deadlines').insert({level:level.toUpperCase(),course:course.toUpperCase(),title:titleParts.join(' '),due_date:date,reminded_at:[]}); if(error) throw error;
-    return `✅ Deadline added for ${level}L ${course.toUpperCase()}.`;
-  }
-  if (cmd === 'liststudents') {
-    const level=p[2], course=p[3]?.toUpperCase(); let q=supabase.from('students').select('phone',{count:'exact',head:true}); if(level) q=q.eq('level',level); if(course) q=q.contains('courses',[course]); const {count,error}=await q; if(error) throw error; return `👥 Matching students: ${count || 0}`;
-  }
-  if (cmd === 'campaign') {
-    const sub=p[2]?.toLowerCase();
-    if(sub==='create') { const rest=text.split('campaign create ')[1]||''; const [name,message]=rest.split('|').map(x=>x.trim()); if(!name||!message) return 'Usage: admin campaign create Name | Message with {{name}}, {{level}}, {{course}}'; const id=await createCampaign(name,message,{}); return `✅ Campaign created: ${id}`; }
-    if(sub==='target') { const id=p[3]; const rest=text.split(`campaign target ${id} `)[1]||''; const filters={}; rest.split(/\s+/).forEach(x=>{const [k,v]=x.split('='); if(k==='level')filters.audience_level=v; if(k==='course')filters.audience_course=v?.toUpperCase(); if(k==='faculty')filters.audience_faculty=v; if(k==='stage')filters.audience_stage=v; if(k==='onboarding')filters.onboarding_only=v==='true';}); await supabase.from('campaigns').update({...filters,updated_at:new Date().toISOString()}).eq('id',id); return '✅ Campaign audience updated.'; }
-    if(sub==='launch') { const id=p[3]; if(!id) return 'Usage: admin campaign launch [campaign-id]'; const n=await launchCampaign(id); return `🚀 Campaign launched to ${n} opted-in students. Messages are now in the WhatsApp outbox.`; }
-    if(sub==='pause') { const id=p[3]; await supabase.from('campaigns').update({status:'paused'}).eq('id',id); return '⏸️ Campaign paused.'; }
-    if(sub==='list') { const {data}=await supabase.from('campaigns').select('id,name,status,created_at').order('created_at',{ascending:false}).limit(20); return (data||[]).map(c=>`${c.id} — ${c.status} — ${c.name}`).join('\n') || 'No campaigns.'; }
-  }
-  if (cmd === 'queue') { const {count,error}=await supabase.from('outbound_queue').select('*',{count:'exact',head:true}).eq('status','queued'); if(error) throw error; return `📤 Queued outbound messages: ${count||0}`; }
-  return 'Admin commands:\nadmin adddeadline [level] [course] [title] | [YYYY-MM-DD]\nadmin liststudents [level] [course]\nadmin campaign create Name | Message\nadmin campaign target [id] level=300 course=CIT301\nadmin campaign launch [id]\nadmin campaign pause [id]\nadmin campaign list\nadmin queue';
-}
-
-async function dispatch(req, res) {
-  const action=req.body?.action;
-  if (action==='dispatch') {
-    const now=new Date().toISOString();
-    const {data,error}=await supabase.from('outbound_queue').select('*').in('status',['queued','processing']).lte('available_at',now).or(`locked_until.is.null,locked_until.lt.${now}`).order('id').limit(50); if(error) throw error;
-    const rows=data||[];
-    for(const r of rows) await supabase.from('outbound_queue').update({status:'processing',attempts:r.attempts+1,locked_until:new Date(Date.now()+5*60*1000).toISOString()}).eq('id',r.id);
-    return json(res,200,{messages:rows.map(r=>({id:r.id,to:r.phone,text:r.message_text,kind:r.kind}))});
-  }
-  if(action==='ack') { const id=Number(req.body.id); const status=req.body.status==='sent'?'sent':'failed'; await supabase.from('outbound_queue').update({status,provider_message_id:req.body.provider_message_id||null,last_error:req.body.error||null,sent_at:status==='sent'?new Date().toISOString():null,locked_until:null}).eq('id',id); return json(res,200,{ok:true}); }
-  if(action==='campaign-dispatch') { const {data,error}=await supabase.from('campaign_messages').select('*').in('status',['queued','processing']).lte('scheduled_at',new Date().toISOString()).limit(50); if(error) throw error; for(const r of data||[]) { await supabase.from('outbound_queue').insert({phone:r.phone,message_text:r.rendered_message,kind:'campaign',source_id:String(r.id)}); await supabase.from('campaign_messages').update({status:'processing',attempts:r.attempts+1}).eq('id',r.id); } return json(res,200,{messages:(data||[]).map(r=>({id:r.id,to:r.phone,text:r.rendered_message,kind:'campaign'}))}); }
-  return json(res,400,{error:'Unknown automation action'});
-}
-
-module.exports = async (req,res) => {
-  try {
-    if(req.method!=='POST') return json(res,200,{ok:true,service:'noun-student-bot'});
-    if(WEBHOOK_SECRET && req.headers['x-webhook-secret']!==WEBHOOK_SECRET) return json(res,401,{error:'Unauthorized'});
-    if(req.body?.action) return dispatch(req,res);
-    const body=req.body||{}; const from=normalizePhone(body.from||body.From||body.sender||body.wa_id); const text=safeText(body.text||body.Body||body.message||body.message_text,4000); if(!from||!text) return json(res,400,{error:'Missing from/text'});
-    const eid=eventId(body,from,text);
-    const {data:existing}=await supabase.from('message_events').select('id').eq('event_id',eid).maybeSingle(); if(existing) return json(res,200,{reply:null,to:from,event_id:eid,duplicate:true});
-    await recordEvent(eid,from,'inbound',text,{provider_message_id:body.provider_message_id||body.message_id||null,source:'whatsapp-zapier'});
-    let student=await getStudent(from); if(student) await saveStudent(from,{last_seen_at:new Date().toISOString()});
-    const lower=text.toLowerCase();
-    if(admin(from)&&lower.startsWith('admin ')) return json(res,200,{reply:await adminCommand(text,from),to:from,event_id:eid});
-    if(['human','help me','talk to someone','agent'].includes(lower)) { await logHelp(from,student,text); return json(res,200,{reply:'🙋 Your request has been sent to a real person. Someone will follow up here.',to:from,event_id:eid}); }
-    if(!student){ await saveStudent(from,{stage:'ask_level',level:null,courses:[],onboarding_source:'whatsapp'}); return json(res,200,{reply:'👋 Welcome to NOUN Student Bot!\n\nWhat level are you? Reply 100, 200, 300 or 400.\n\nReply human anytime for a real person.',to:from,event_id:eid}); }
-    if(student.stage==='ask_level'){ const level=text.replace(/\D/g,''); if(!['100','200','300','400'].includes(level)) return json(res,200,{reply:'Please reply 100, 200, 300 or 400.',to:from,event_id:eid}); await saveStudent(from,{level,stage:'ask_courses'}); return json(res,200,{reply:`Got it — ${level}L.\n\nSend course codes separated by commas, e.g. CIT301, MTH281, CIT315.`,to:from,event_id:eid}); }
-    if(student.stage==='ask_courses'){ const courses=[...new Set(text.split(',').map(x=>x.trim().toUpperCase()).filter(x=>/^[A-Z]{2,5}\d{3}$/.test(x)))]; if(!courses.length) return json(res,200,{reply:'Please send valid course codes, e.g. CIT301, MTH281.',to:from,event_id:eid}); await saveStudent(from,{courses,stage:'active'}); return json(res,200,{reply:`✅ Registered: ${student.level}L — ${courses.join(', ')}\n\n${MENU_TEXT}`,to:from,event_id:eid}); }
-    if(lower==='help'||lower==='menu') return json(res,200,{reply:MENU_TEXT,to:from,event_id:eid});
-    if(lower==='mycourses') return json(res,200,{reply:`You're registered as ${student.level}L — ${(student.courses||[]).join(', ')}${student.email?`\nEmail: ${student.email}`:''}`,to:from,event_id:eid});
-    if(lower==='profile') return json(res,200,{reply:renderProfile(student),to:from,event_id:eid});
-    if(lower.startsWith('profile ')){const u=parseProfile(text); if(!u)return json(res,200,{reply:'Use: profile matric=NOU123456, faculty=Computing, dept=Computer Science',to:from,event_id:eid}); await saveStudent(from,u); return json(res,200,{reply:`✅ Profile updated.\n\n${renderProfile(await getStudent(from))}`,to:from,event_id:eid});}
-    if(lower.startsWith('email ')){const email=text.split(/\s+/)[1]?.trim(); if(!EMAIL_REGEX.test(email||''))return json(res,200,{reply:'Usage: email your@example.com',to:from,event_id:eid}); await saveStudent(from,{email}); await sendEmail(email,'NOUN Student Bot — Email Connected',`Your email is now connected to NOUN Student Bot. You'll receive backup deadline alerts.`); return json(res,200,{reply:`✅ Email connected: ${email}`,to:from,event_id:eid});}
-    if(lower.startsWith('examcheck')){const course=text.split(/\s+/)[1]?.toUpperCase(); if(!course)return json(res,200,{reply:'Usage: examcheck CIT301',to:from,event_id:eid}); const c=await getChecklist(from,course); return json(res,200,{reply:renderChecklist(course,c),to:from,event_id:eid});}
-    if(lower.startsWith('done ')){const p=text.split(/\s+/);const course=p[1]?.toUpperCase();const n=Number(p[2]);if(!course||n<1||n>4)return json(res,200,{reply:'Usage: done CIT301 1',to:from,event_id:eid});const c=await setChecklist(from,course,EXAM_STEPS[n-1].key);return json(res,200,{reply:renderChecklist(course,c),to:from,event_id:eid});}
-    const ai=await askGemini(text,student); if(ai)return json(res,200,{reply:ai,to:from,event_id:eid,ai:true});
-    await logHelp(from,student,`AI fallback/unrecognized message: ${text}`);
-    return json(res,200,{reply:`I couldn't confidently answer that. Reply "human" for a real person, or "menu" for commands.`,to:from,event_id:eid});
-  } catch(e) { console.error('NOUN webhook error:',e); return json(res,500,{error:'Internal bot error'}); }
-};
+const crypto=require('crypto');
+const {createClient}=require('@supabase/supabase-js');
+const {tenantId}=require('../lib/knowledge');
+const SUPABASE_URL=process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY=process.env.SUPABASE_SERVICE_ROLE_KEY;
+const WEBHOOK_SECRET=process.env.WEBHOOK_SECRET;
+const GEMINI_API_KEY=process.env.GEMINI_API_KEY;
+const RESEND_API_KEY=process.env.RESEND_API_KEY;
+const RESEND_FROM=process.env.RESEND_FROM||'onboarding@resend.dev';
+const ADMIN_NUMBERS=(process.env.ADMIN_NUMBERS||'').split(',').map(v=>v.replace(/\D/g,'')).filter(Boolean);
+const ADMIN_EMAIL=process.env.ADMIN_EMAIL||'';
+if(!SUPABASE_URL||!SUPABASE_SERVICE_ROLE_KEY)throw new Error('Missing Supabase server credentials');
+const supabase=createClient(SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false}});
+const EXAM_STEPS=[{key:'stamp1',label:'Stamp/sign-off #1'},{key:'stamp2',label:'Stamp/sign-off #2'},{key:'stamp3',label:'Stamp/sign-off #3'},{key:'laminated',label:'Laminated + required sheets ready'}];
+const PROFILE_FIELDS={name:'full_name',fullname:'full_name',matric:'matric_number',faculty:'faculty',dept:'department',department:'department',waec:'waec_result',neco:'neco_result',cert:'primary_cert',direntry:'direct_entry_qualification',state:'state_of_origin'};
+const EMAIL_REGEX=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MENU_TEXT=`📚 NOUN Student Bot\n\nmycourses — registered level/courses\nexamcheck [course] — exam-hall checklist\ndone [course] [1-4] — check a checklist item\nemail [address] — add backup email\nprofile — view profile\nprofile field=value — update profile\nhuman — reach a real person\nhelp — show this menu\n\nYou can also ask a study question in normal language.`;
+function json(res,status,body){return res.status(status).json(body)}
+function admin(number){return ADMIN_NUMBERS.includes(number)}
+function normalizePhone(v){return String(v||'').replace(/\D/g,'')}
+function eventId(body,from,text){return String(body.message_id||body.event_id||crypto.createHash('sha256').update(`${from}|${text}|${body.timestamp||''}`).digest('hex'))}
+function safeText(v,max=4000){return String(v||'').slice(0,max)}
+async function tid(){return tenantId()}
+async function audit(action,actor,resourceType=null,resourceId=null,outcome='success',metadata={}){const id=await tid();await supabase.from('audit_events').insert({tenant_id:id,actor_subject_id:null,actor_type:actor,action,resource_type:resourceType,resource_id:resourceId==null?null:String(resourceId),outcome,metadata})}
+async function recordEvent(event_id,phone,direction,text,metadata={}){const id=await tid();const {error}=await supabase.from('message_events').insert({tenant_id:id,event_id,phone,direction,message_text:safeText(text),metadata,provider_message_id:metadata.provider_message_id||null});if(error&&!String(error.message).toLowerCase().includes('duplicate'))console.error('event:',error.message)}
+async function getStudent(phone){const id=await tid();const {data,error}=await supabase.from('students').select('*').eq('tenant_id',id).eq('phone',phone).maybeSingle();if(error)throw error;return data}
+async function saveStudent(phone,fields){const id=await tid();const {error}=await supabase.from('students').upsert({tenant_id:id,phone,...fields,updated_at:new Date().toISOString(),last_seen_at:new Date().toISOString()});if(error)throw error}
+async function queueMessage(phone,message_text,kind='transactional',source_id=null){const id=await tid();const {data,error}=await supabase.from('outbound_queue').insert({tenant_id:id,phone,message_text:safeText(message_text),kind,source_id}).select('id').single();if(error)throw error;return data.id}
+async function sendEmail(to,subject,text){if(!RESEND_API_KEY||!to)return false;try{const r=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${RESEND_API_KEY}`,'Content-Type':'application/json'},body:JSON.stringify({from:RESEND_FROM,to:[to],subject,text})});return r.ok}catch(e){console.error('email:',e.message);return false}}
+async function getRelevantCourseContent(question,courses){if(!courses?.length)return null;const id=await tid();const {data,error}=await supabase.from('course_content').select('course_code,module_title,content').eq('tenant_id',id).in('course_code',courses).limit(100);if(error||!data?.length)return null;const stop=new Set(['what','when','where','which','with','that','this','from','have','does','about','your','their','course','please','help']);const words=question.toLowerCase().split(/\W+/).filter(w=>w.length>3&&!stop.has(w));const scored=data.map(c=>{const hay=`${c.module_title} ${c.content}`.toLowerCase();const score=words.reduce((n,w)=>n+(hay.includes(w)?1:0),0);return{c,score}}).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,3);return scored.length?scored.map(x=>`[${x.c.course_code} — ${x.c.module_title}]\n${x.c.content.slice(0,6500)}`).join('\n\n'):null}
+async function askGemini(question,student){if(!GEMINI_API_KEY)return null;const grounded=await getRelevantCourseContent(question,student?.courses||[]);const prompt=`You are the study-support AI inside a WhatsApp bot for National Open University of Nigeria students.\nStudent: ${student?.level||'unknown'}L; courses: ${(student?.courses||[]).join(', ')||'none'}.\n\nRules:\n- Be concise and useful for WhatsApp.\n- Explain and teach; do not complete graded work or exams for the student.\n- Never claim access to live NOUN records, portal status, payments, registration, results or official decisions.\n- For official administrative matters, direct the student to the official NOUN channel or "human".\n- If supplied course material is relevant, ground the answer in it and say it is from the course material.\n- If the material does not answer the question, say so rather than inventing a NOUN-specific fact.\n\nCOURSE MATERIAL:\n${grounded||'No matching course material found.'}\n\nSTUDENT QUESTION:\n${safeText(question,2500)}`;try{const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});const d=await r.json();return d?.candidates?.[0]?.content?.parts?.[0]?.text?.trim()||null}catch(e){console.error('gemini:',e.message);return null}}
+function renderChecklist(course,c){let out=`📋 Exam Hall Checklist — ${course}\n\n`;EXAM_STEPS.forEach((s,i)=>{out+=`${c?.[s.key]?'✅':'⬜'} ${i+1}. ${s.label}\n`});const done=EXAM_STEPS.filter(s=>c?.[s.key]).length;return `${out}\n${done}/4 complete.${done===4?'\n\n🎉 Checklist complete.':`\n\nReply "done ${course} [1-4]" to update it.`}`}
+function renderProfile(s){return `📇 Profile\n\nName: ${s.full_name||'not set'}\nLevel: ${s.level||'not set'}\nCourses: ${(s.courses||[]).join(', ')||'none'}\nMatric: ${s.matric_number||'not set'}\nFaculty: ${s.faculty||'not set'}\nDepartment: ${s.department||'not set'}\nWAEC: ${s.waec_result||'not set'}\nNECO: ${s.neco_result||'not set'}\nCertificate: ${s.primary_cert||'not set'}\nDirect entry: ${s.direct_entry_qualification||'not set'}\nState: ${s.state_of_origin||'not set'}\nEmail: ${s.email||'not set'}`}
+function parseProfile(text){const rest=text.replace(/^profile\s*/i,'').trim();if(!rest)return null;const updates={};rest.split(',').forEach(pair=>{const p=pair.split(/[:=]/);if(p.length<2)return;const key=p.shift().trim().toLowerCase(),value=p.join('=').trim();if(PROFILE_FIELDS[key]&&value)updates[PROFILE_FIELDS[key]]=safeText(value,300)});return Object.keys(updates).length?updates:null}
+async function getChecklist(phone,course){const id=await tid();const {data}=await supabase.from('exam_checklists').select('*').eq('tenant_id',id).eq('phone',phone).eq('course',course).maybeSingle();return data||{}}
+async function setChecklist(phone,course,key){const id=await tid();const c=await getChecklist(phone,course);c[key]=true;c.phone=phone;c.course=course;c.tenant_id=id;c.updated_at=new Date().toISOString();const {error}=await supabase.from('exam_checklists').upsert(c,{onConflict:'phone,course'});if(error)throw error;return c}
+async function logHelp(phone,student,note){const id=await tid();await supabase.from('help_requests').insert({tenant_id:id,phone,level:student?.level||null,courses:student?.courses||[],note:safeText(note,1000)});for(const n of ADMIN_NUMBERS)await queueMessage(n,`🙋 NOUN human support request\nStudent: ${phone}\nLevel: ${student?.level||'unknown'}\nCourses: ${(student?.courses||[]).join(', ')||'none'}\n\n${safeText(note,1000)}`,'human_support');if(ADMIN_EMAIL)await sendEmail(ADMIN_EMAIL,'NOUN Bot: human help requested',`Phone: ${phone}\nLevel: ${student?.level||'unknown'}\nCourses: ${(student?.courses||[]).join(', ')}\n\n${note}`);await audit('human_support_requested','student','help_request',phone)}
+async function createCampaign(name,message,filters){const id=await tid();const {data,error}=await supabase.from('campaigns').insert({tenant_id:id,name,message_template:message,...filters,status:'draft'}).select('id').single();if(error)throw error;return data.id}
+async function launchCampaign(id){const t=await tid();const {data:c,error}=await supabase.from('campaigns').select('*').eq('tenant_id',t).eq('id',id).single();if(error)throw error;let q=supabase.from('students').select('phone,full_name,level,courses,faculty,stage').eq('tenant_id',t).eq('whatsapp_opt_in',true);if(c.audience_level)q=q.eq('level',c.audience_level);if(c.audience_course)q=q.contains('courses',[c.audience_course]);if(c.audience_faculty)q=q.eq('faculty',c.audience_faculty);if(c.audience_stage)q=q.eq('stage',c.audience_stage);if(c.onboarding_only)q=q.eq('stage','active');const {data:students,error:se}=await q.limit(5000);if(se)throw se;const rows=(students||[]).map(s=>({tenant_id:t,campaign_id:id,phone:s.phone,rendered_message:c.message_template.replaceAll('{{name}}',s.full_name||'student').replaceAll('{{level}}',s.level||'').replaceAll('{{course}}',c.audience_course||(s.courses||[])[0]||'')}));if(rows.length){const {error:ie}=await supabase.from('campaign_messages').upsert(rows,{onConflict:'campaign_id,phone',ignoreDuplicates:true});if(ie)throw ie}await supabase.from('campaigns').update({status:'active',updated_at:new Date().toISOString()}).eq('tenant_id',t).eq('id',id);await audit('campaign_launch','admin','campaign',id);return rows.length}
+async function adminCommand(text,from){const t=await tid(),p=text.trim().split(/\s+/),cmd=p[1]?.toLowerCase();if(cmd==='adddeadline'){const rest=text.split('adddeadline ')[1]||'',parts=rest.split('|').map(x=>x.trim()),meta=parts[0]||'',date=parts[1],m=meta.split(/\s+/),level=m.shift(),course=m.shift(),titleParts=m;if(!level||!course||!titleParts.length||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(date||''))return'Usage: admin adddeadline 300 CIT301 TMA | 2026-08-15';const {error}=await supabase.from('deadlines').insert({tenant_id:t,level:level.toUpperCase(),course:course.toUpperCase(),title:titleParts.join(' '),due_date:date,reminded_at:[]});if(error)throw error;await audit('deadline_create','admin','deadline',`${level}:${course}`);return`✅ Deadline added for ${level}L ${course.toUpperCase()}.`}if(cmd==='liststudents'){const level=p[2],course=p[3]?.toUpperCase();let q=supabase.from('students').select('phone',{count:'exact',head:true}).eq('tenant_id',t);if(level)q=q.eq('level',level);if(course)q=q.contains('courses',[course]);const {count,error}=await q;if(error)throw error;return`👥 Matching students: ${count||0}`}if(cmd==='campaign'){const sub=p[2]?.toLowerCase();if(sub==='create'){const rest=text.split('campaign create ')[1]||'',parts=rest.split('|').map(x=>x.trim()),name=parts[0],message=parts[1];if(!name||!message)return'Usage: admin campaign create Name | Message with {{name}}, {{level}}, {{course}}';const id=await createCampaign(name,message,{});return`✅ Campaign created: ${id}`}if(sub==='target'){const id=p[3],rest=text.split(`campaign target ${id} `)[1]||'',filters={};rest.split(/\s+/).forEach(x=>{const [k,v]=x.split('=');if(k==='level')filters.audience_level=v;if(k==='course')filters.audience_course=v?.toUpperCase();if(k==='faculty')filters.audience_faculty=v;if(k==='stage')filters.audience_stage=v;if(k==='onboarding')filters.onboarding_only=v==='true'});await supabase.from('campaigns').update({...filters,updated_at:new Date().toISOString()}).eq('tenant_id',t).eq('id',id);await audit('campaign_target_update','admin','campaign',id);return'✅ Campaign audience updated.'}if(sub==='launch'){const id=p[3];if(!id)return'Usage: admin campaign launch [campaign-id]';const n=await launchCampaign(id);return`🚀 Campaign launched to ${n} opted-in students. Messages are now in the WhatsApp outbox.`}if(sub==='pause'){const id=p[3];await supabase.from('campaigns').update({status:'paused'}).eq('tenant_id',t).eq('id',id);await audit('campaign_pause','admin','campaign',id);return'⏸️ Campaign paused.'}if(sub==='list'){const {data}=await supabase.from('campaigns').select('id,name,status,created_at').eq('tenant_id',t).order('created_at',{ascending:false}).limit(20);return(data||[]).map(c=>`${c.id} — ${c.status} — ${c.name}`).join('\n')||'No campaigns.'}}if(cmd==='queue'){const {count,error}=await supabase.from('outbound_queue').select('*',{count:'exact',head:true}).eq('tenant_id',t).eq('status','queued');if(error)throw error;return`📤 Queued outbound messages: ${count||0}`}return'Admin commands:\nadmin adddeadline [level] [course] [title] | [YYYY-MM-DD]\nadmin liststudents [level] [course]\nadmin campaign create Name | Message\nadmin campaign target [id] level=300 course=CIT301\nadmin campaign launch [id]\nadmin campaign pause [id]\nadmin campaign list\nadmin queue'}
+async function dispatch(req,res){const t=await tid(),action=req.body?.action;if(action==='dispatch'){const now=new Date().toISOString();const {data,error}=await supabase.from('outbound_queue').select('*').eq('tenant_id',t).in('status',['queued','processing']).lte('available_at',now).or(`locked_until.is.null,locked_until.lt.${now}`).order('id').limit(50);if(error)throw error;const rows=data||[];for(const r of rows)await supabase.from('outbound_queue').update({status:'processing',attempts:r.attempts+1,locked_until:new Date(Date.now()+300000).toISOString()}).eq('tenant_id',t).eq('id',r.id);return json(res,200,{messages:rows.map(r=>({id:r.id,to:r.phone,text:r.message_text,kind:r.kind}))})}if(action==='ack'){const id=Number(req.body.id),status=req.body.status==='sent'?'sent':'failed';await supabase.from('outbound_queue').update({status,provider_message_id:req.body.provider_message_id||null,last_error:req.body.error||null,sent_at:status==='sent'?new Date().toISOString():null,locked_until:null}).eq('tenant_id',t).eq('id',id);return json(res,200,{ok:true})}if(action==='campaign-dispatch'){const {data,error}=await supabase.from('campaign_messages').select('*').eq('tenant_id',t).in('status',['queued','processing']).lte('scheduled_at',new Date().toISOString()).limit(50);if(error)throw error;for(const r of data||[]){await supabase.from('outbound_queue').insert({tenant_id:t,phone:r.phone,message_text:r.rendered_message,kind:'campaign',source_id:String(r.id)});await supabase.from('campaign_messages').update({status:'processing',attempts:r.attempts+1}).eq('tenant_id',t).eq('id',r.id)}return json(res,200,{messages:(data||[]).map(r=>({id:r.id,to:r.phone,text:r.rendered_message,kind:'campaign'}))})}return json(res,400,{error:'Unknown automation action'})}
+module.exports=async(req,res)=>{try{if(req.method!=='POST')return json(res,200,{ok:true,service:'noun-student-bot'});if(WEBHOOK_SECRET&&req.headers['x-webhook-secret']!==WEBHOOK_SECRET)return json(res,401,{error:'Unauthorized'});if(req.body?.action)return dispatch(req,res);const body=req.body||{},from=normalizePhone(body.from||body.From||body.sender||body.wa_id),text=safeText(body.text||body.Body||body.message||body.message_text,4000);if(!from||!text)return json(res,400,{error:'Missing from/text'});const eid=eventId(body,from,text);const t=await tid();const {data:existing}=await supabase.from('message_events').select('id').eq('tenant_id',t).eq('event_id',eid).maybeSingle();if(existing)return json(res,200,{reply:null,to:from,event_id:eid,duplicate:true});await recordEvent(eid,from,'inbound',text,{provider_message_id:body.provider_message_id||body.message_id||null,source:'whatsapp-zapier'});let student=await getStudent(from);if(student)await saveStudent(from,{last_seen_at:new Date().toISOString()});const lower=text.toLowerCase();if(admin(from)&&lower.startsWith('admin ')){await audit('admin_command','admin','whatsapp',from);return json(res,200,{reply:await adminCommand(text,from),to:from,event_id:eid})}if(['human','help me','talk to someone','agent'].includes(lower)){await logHelp(from,student,text);return json(res,200,{reply:'🙋 Your request has been sent to a real person. You can continue here while the support team follows up.',to:from,event_id:eid})}if(!student){await saveStudent(from,{stage:'ask_level',level:null,courses:[],onboarding_source:'whatsapp',whatsapp_opt_in:true});return json(res,200,{reply:'👋 Welcome to NOUN Student Bot!\n\nWhat level are you? Reply 100, 200, 300 or 400.\n\nReply human anytime for a real person.',to:from,event_id:eid})}if(student.stage==='ask_level'){const level=text.replace(/\D/g,'');if(!['100','200','300','400'].includes(level))return json(res,200,{reply:'Please reply 100, 200, 300 or 400.',to:from,event_id:eid});await saveStudent(from,{level,stage:'ask_courses'});return json(res,200,{reply:`Got it — ${level}L.\n\nSend course codes separated by commas, e.g. CIT301, MTH281, CIT315.`,to:from,event_id:eid})}if(student.stage==='ask_courses'){const courses=[...new Set(text.split(',').map(x=>x.trim().toUpperCase()).filter(x=>/^[A-Z]{2,5}\d{3}$/.test(x)))];if(!courses.length)return json(res,200,{reply:'Please send valid course codes, e.g. CIT301, MTH281.',to:from,event_id:eid});await saveStudent(from,{courses,stage:'active'});return json(res,200,{reply:`✅ Registered: ${student.level}L — ${courses.join(', ')}\n\n${MENU_TEXT}`,to:from,event_id:eid})}if(lower==='help'||lower==='menu')return json(res,200,{reply:MENU_TEXT,to:from,event_id:eid});if(lower==='mycourses')return json(res,200,{reply:`You're registered as ${student.level}L — ${(student.courses||[]).join(', ')}${student.email?`\nEmail: ${student.email}`:''}`,to:from,event_id:eid});if(lower==='profile')return json(res,200,{reply:renderProfile(student),to:from,event_id:eid});if(lower.startsWith('profile ')){const u=parseProfile(text);if(!u)return json(res,200,{reply:'Use: profile matric=NOU123456, faculty=Computing, dept=Computer Science',to:from,event_id:eid});await saveStudent(from,u);await audit('student_profile_update','student','student',from);return json(res,200,{reply:`✅ Profile updated.\n\n${renderProfile(await getStudent(from))}`,to:from,event_id:eid})}if(lower.startsWith('email ')){const email=text.split(/\s+/)[1]?.trim();if(!EMAIL_REGEX.test(email||''))return json(res,200,{reply:'Usage: email your@example.com',to:from,event_id:eid});await saveStudent(from,{email});await sendEmail(email,'NOUN Student Bot — Email Connected','Your email is now connected to NOUN Student Bot. You will receive permitted backup alerts.');return json(res,200,{reply:`✅ Email connected: ${email}`,to:from,event_id:eid})}if(lower.startsWith('examcheck')){const course=text.split(/\s+/)[1]?.toUpperCase();if(!course)return json(res,200,{reply:'Usage: examcheck CIT301',to:from,event_id:eid});return json(res,200,{reply:renderChecklist(course,await getChecklist(from,course)),to:from,event_id:eid})}if(lower.startsWith('done ')){const p=text.split(/\s+/),course=p[1]?.toUpperCase(),n=Number(p[2]);if(!course||n<1||n>4)return json(res,200,{reply:'Usage: done CIT301 1',to:from,event_id:eid});return json(res,200,{reply:renderChecklist(course,await setChecklist(from,course,EXAM_STEPS[n-1].key)),to:from,event_id:eid})}const ai=await askGemini(text,student);if(ai)return json(res,200,{reply:ai,to:from,event_id:eid,ai:true});await logHelp(from,student,`AI fallback/unrecognized message: ${text}`);return json(res,200,{reply:'I could not confidently answer that. Reply "human" for a real person, or "menu" for commands.',to:from,event_id:eid})}catch(e){console.error('NOUN webhook error:',e);return json(res,500,{error:'Internal bot error'})}};
