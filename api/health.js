@@ -12,10 +12,30 @@ module.exports = async function handler(req, res) {
   const required = ['supabase_url', 'supabase_service_role_key', 'webhook_secret'];
   const ready = required.every((key) => checks[key]);
 
+  if (req.method === 'GET' && req.query?.check === 'gemini') {
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(503).json({ ok: false, service: 'noun-student-bot', test: 'gemini', configured: false, error: 'GEMINI_API_KEY missing' });
+    }
+    try {
+      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=' + encodeURIComponent(process.env.GEMINI_API_KEY), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: 'Reply with exactly: NOUN GEMINI OK' }] }], generationConfig: { maxOutputTokens: 20, temperature: 0 } })
+      });
+      const d = await r.json();
+      const answer = d?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+      const ok = r.ok && answer.length > 0;
+      return res.status(ok ? 200 : 502).json({ ok, service: 'noun-student-bot', test: 'gemini', model: 'gemini-3.6-flash', configured: true, upstream_status: r.status, response: answer.slice(0, 80) });
+    } catch (e) {
+      console.error('gemini smoke test:', e?.message || e);
+      return res.status(502).json({ ok: false, service: 'noun-student-bot', test: 'gemini', configured: true, error: 'Gemini smoke test failed' });
+    }
+  }
+
   return res.status(ready ? 200 : 503).json({
     ok: ready,
     service: 'noun-student-bot',
-    version: '2.0.1',
+    version: '2.0.2',
     environment: process.env.VERCEL_ENV || 'unknown',
     checks,
     timestamp: new Date().toISOString()
