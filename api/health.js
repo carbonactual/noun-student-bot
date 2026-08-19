@@ -17,10 +17,10 @@ module.exports = async function handler(req, res) {
       return res.status(503).json({ ok: false, service: 'noun-student-bot', test: 'gemini', configured: false, error: 'GEMINI_API_KEY missing' });
     }
     try {
-      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + encodeURIComponent(process.env.GEMINI_API_KEY), {
+      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: 'Reply with exactly: NOUN GEMINI OK' }] }], generationConfig: { maxOutputTokens: 128, temperature: 0 } })
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY },
+        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'Reply with exactly: NOUN GEMINI OK' }] }] })
       });
       const d = await r.json();
       const candidates = Array.isArray(d?.candidates) ? d.candidates : [];
@@ -32,7 +32,7 @@ module.exports = async function handler(req, res) {
         ok,
         service: 'noun-student-bot',
         test: 'gemini',
-        model: 'gemini-2.0-flash',
+        model: 'gemini-3.6-flash',
         configured: true,
         upstream_status: r.status,
         candidate_count: candidates.length,
@@ -50,7 +50,7 @@ module.exports = async function handler(req, res) {
   return res.status(ready ? 200 : 503).json({
     ok: ready,
     service: 'noun-student-bot',
-    version: '2.0.4',
+    version: '2.0.5',
     environment: process.env.VERCEL_ENV || 'unknown',
     checks,
     timestamp: new Date().toISOString()
