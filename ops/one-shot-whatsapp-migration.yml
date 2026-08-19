@@ -1,0 +1,72 @@
+name: one-shot WhatsApp migration
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: !contains(github.event.head_commit.message, 'chore: one-shot migrate WhatsApp canonical AI')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Patch WhatsApp AI path
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          path = Path('api/whatsapp-webhook.js')
+          text = path.read_text()
+
+          text = text.replace(
+              "const {tenantId}=require('../lib/knowledge');",
+              "const {tenantId,searchKnowledge,buildStudentGrounding,recordActivity}=require('../lib/knowledge');",
+              1,
+          )
+
+          pattern = re.compile(r"async function askGemini\(question,student\)\{.*?\}\nfunction renderChecklist", re.S)
+          replacement = r'''async function askGemini(question,student,phone){
+  if(!GEMINI_API_KEY)return null;
+  const knowledge=await searchKnowledge(question,{limit:8});
+  const grounded=await getRelevantCourseContent(question,student?.courses||[]);
+  const routing=buildStudentGrounding({knowledge,courseContent:grounded});
+  if(phone)await recordActivity(phone,'study_question',null,safeText(question,300),{source:'whatsapp',knowledge_confidence:routing.confidence});
+  const prompt=`You are the study-support AI inside a WhatsApp bot for National Open University of Nigeria students.\nStudent: ${student?.level||'unknown'}L; courses: ${(student?.courses||[]).join(', ')||'none'}.\n\nRules:\n- Be concise and useful for WhatsApp.\n- Explain and teach; do not complete graded work or exams for the student.\n- Never claim access to live NOUN records, portal status, payments, registration, results or official decisions.\n- For official administrative matters, direct the student to the official NOUN channel or "human".\n- Official NOUN evidence outranks all other evidence. If sources conflict, say so.\n- If supplied evidence is insufficient, say so instead of inventing a NOUN-specific fact.\n\nCANONICAL NOUN EVIDENCE:\n${routing.text||'No verified evidence found.'}\n\nQUESTION:\n${safeText(question,2500)}`;
+  try{
+    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':GEMINI_API_KEY},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}]})});
+    const d=await r.json();
+    const answer=d?.candidates?.[0]?.content?.parts?.map(p=>p?.text||'').join('').trim()||null;
+    if(answer&&phone)await recordActivity(phone,'study_answered',null,safeText(question,300),{source:'whatsapp',knowledge_confidence:routing.confidence,ai_model:'gemini-3.6-flash'});
+    if(!answer&&phone)await recordActivity(phone,'study_fallback',null,safeText(question,300),{source:'whatsapp',knowledge_confidence:routing.confidence});
+    return answer;
+  }catch(e){
+    console.error('gemini:',e.message);
+    if(phone)await recordActivity(phone,'study_fallback',null,safeText(question,300),{source:'whatsapp',knowledge_confidence:routing.confidence});
+    return null;
+  }
+}
+function renderChecklist'''
+          new_text, count = pattern.subn(replacement, text, count=1)
+          if count != 1:
+              raise SystemExit('askGemini function replacement failed')
+          new_text = new_text.replace('const ai=await askGemini(text,student);', 'const ai=await askGemini(text,student,from);', 1)
+          path.write_text(new_text)
+
+      - name: Remove this migration workflow
+        run: rm ops/one-shot-whatsapp-migration.yml
+
+      - name: Validate source contract
+        run: npm test
+
+      - name: Commit migration
+        run: |
+          git config user.name "carbonactual-bot"
+          git config user.email "carbonactuall@gmail.com"
+          git add api/whatsapp-webhook.js ops/one-shot-whatsapp-migration.yml
+          git commit -m "chore: one-shot migrate WhatsApp canonical AI"
+          git push
