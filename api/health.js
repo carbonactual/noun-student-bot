@@ -23,9 +23,24 @@ module.exports = async function handler(req, res) {
         body: JSON.stringify({ contents: [{ parts: [{ text: 'Reply with exactly: NOUN GEMINI OK' }] }], generationConfig: { maxOutputTokens: 20, temperature: 0 } })
       });
       const d = await r.json();
-      const answer = d?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+      const candidates = Array.isArray(d?.candidates) ? d.candidates : [];
+      const first = candidates[0] || {};
+      const parts = Array.isArray(first?.content?.parts) ? first.content.parts : [];
+      const answer = parts.map(p => p?.text || '').join('').trim();
       const ok = r.ok && answer.length > 0;
-      return res.status(ok ? 200 : 502).json({ ok, service: 'noun-student-bot', test: 'gemini', model: 'gemini-3.6-flash', configured: true, upstream_status: r.status, response: answer.slice(0, 80) });
+      return res.status(ok ? 200 : 502).json({
+        ok,
+        service: 'noun-student-bot',
+        test: 'gemini',
+        model: 'gemini-3.6-flash',
+        configured: true,
+        upstream_status: r.status,
+        candidate_count: candidates.length,
+        parts_count: parts.length,
+        finish_reason: first?.finishReason || null,
+        prompt_feedback: d?.promptFeedback ? Object.keys(d.promptFeedback) : [],
+        response: answer.slice(0, 80)
+      });
     } catch (e) {
       console.error('gemini smoke test:', e?.message || e);
       return res.status(502).json({ ok: false, service: 'noun-student-bot', test: 'gemini', configured: true, error: 'Gemini smoke test failed' });
@@ -35,7 +50,7 @@ module.exports = async function handler(req, res) {
   return res.status(ready ? 200 : 503).json({
     ok: ready,
     service: 'noun-student-bot',
-    version: '2.0.2',
+    version: '2.0.3',
     environment: process.env.VERCEL_ENV || 'unknown',
     checks,
     timestamp: new Date().toISOString()
