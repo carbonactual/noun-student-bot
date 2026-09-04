@@ -6,13 +6,18 @@ async function dashboardQuery(label, query) {
     if (result && result.error) throw result.error;
     return result;
   } catch (error) {
-    console.error(`dashboard:${label}`, {
+    const details = {
+      label,
       name: error && error.name,
       message: error && error.message,
       cause: error && error.cause ? String(error.cause.message || error.cause) : undefined,
       code: error && error.code
-    });
-    throw error;
+    };
+    console.error('dashboard-query-failure', details);
+    const wrapped = new Error(`dashboard query failed: ${label}`);
+    wrapped.cause = error;
+    wrapped.details = details;
+    throw wrapped;
   }
 }
 
@@ -56,6 +61,6 @@ module.exports = async function handler(req, res) {
     });
   } catch (error) {
     console.error('dashboard:', error.message);
-    return res.status(503).json({ ok: false, error: 'Dashboard data source unavailable' });
+    return res.status(503).json({ ok: false, error: 'Dashboard data source unavailable', debug: error && error.details ? error.details : undefined });
   }
 };
