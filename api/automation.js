@@ -35,7 +35,7 @@ async function queueDeadlineNotifications(){
   for(const d of deadlines||[]){
     const due=new Date(`${d.due_date}T23:59:59Z`),days=Math.ceil((due-now)/DAY);
     if(![3,1].includes(days)||(d.reminded_at||[]).includes(days))continue;
-    const {data:students,error:studentError}=await db.from('students').select('phone,level,courses').eq('tenant_id',tid).eq('level',d.level).contains('courses',[d.course]).eq('whatsapp_opt_in',true);
+    let sq=db.from('students').select('phone,level,courses').eq('tenant_id',tid).eq('level',d.level).eq('whatsapp_opt_in',true);if(d.course)sq=sq.contains('courses',[d.course]);const {data:students,error:studentError}=await sq;
     if(studentError) throw studentError;
     for(const s of students||[]){
       const text=`⏰ NOUN reminder\n\n${d.title}\n${d.course}\nDue: ${d.due_date}\n\n${days} day${days===1?'':'s'} remaining.`;
