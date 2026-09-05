@@ -48,6 +48,38 @@ alter table students add column if not exists onboarding_source text not null de
 alter table students add column if not exists last_seen_at timestamptz;
 alter table students add column if not exists updated_at timestamptz not null default now();
 
+-- Full NOUN learner ladder: certificate → undergraduate → postgraduate → master's → PhD.
+-- Keep legacy `level` for backward-compatible undergraduate operations while `study_level`
+-- and `student_programmes` provide the canonical multi-programme academic identity.
+alter table students add column if not exists study_level text not null default 'undergraduate' check(study_level in ('certificate','undergraduate','postgraduate_diploma','masters','doctoral'));
+alter table students add column if not exists programme_id bigint references programmes(id) on delete set null;
+alter table students add column if not exists programme_title text;
+alter table students add column if not exists award_title text;
+alter table students add column if not exists academic_status text not null default 'applicant' check(academic_status in ('prospective','applicant','admitted','active','deferred','graduated','alumni','withdrawn'));
+alter table students add column if not exists admission_session text;
+alter table students add column if not exists expected_completion_date date;
+
+create table if not exists academic_levels (code text primary key, name text not null unique, rank int not null unique, description text, active boolean not null default true);
+insert into academic_levels(code,name,rank,description) values
+('certificate','Certificate / Professional Certificate',1,'Short-cycle certificate and professional certificate pathways.'),
+('undergraduate','Undergraduate',2,'Diploma and bachelor-level undergraduate pathways.'),
+('postgraduate_diploma','Postgraduate Diploma',3,'Postgraduate diploma pathways.'),
+('masters','Master''s',4,'Master''s degree pathways.'),
+('doctoral','PhD / Doctoral',5,'Doctoral and PhD pathways.')
+on conflict(code) do update set name=excluded.name,rank=excluded.rank,description=excluded.description;
+
+create table if not exists student_programmes (id bigint generated always as identity primary key, phone text not null, programme_id bigint references programmes(id) on delete set null, study_level text not null check(study_level in ('certificate','undergraduate','postgraduate_diploma','masters','doctoral')), programme_title text not null, award_title text, student_number text, academic_status text not null default 'active' check(academic_status in ('prospective','applicant','admitted','active','deferred','graduated','alumni','withdrawn')), admission_session text, expected_completion_date date, started_at timestamptz, completed_at timestamptz, is_primary boolean not null default false, metadata jsonb not null default '{}', created_at timestamptz not null default now(), updated_at timestamptz not null default now());
+create unique index if not exists ux_student_programmes_primary on student_programmes(phone) where is_primary=true;
+create index if not exists idx_student_programmes_level on student_programmes(study_level);
+create index if not exists idx_student_programmes_programme on student_programmes(programme_id);
+create index if not exists idx_students_study_level on students(study_level);
+create index if not exists idx_students_programme_id on students(programme_id);
+
+create table if not exists programme_admissions (id bigint generated always as identity primary key, programme_id bigint references programmes(id) on delete cascade, study_level text not null check(study_level in ('certificate','undergraduate','postgraduate_diploma','masters','doctoral')), entry_route text, requirement_text text, source_url text, source_tier int not null default 1, verification_status text not null default 'unknown' check(verification_status in('official','verified_secondary','unknown','conflicting','stale')), admission_cycle text, active boolean not null default true, created_at timestamptz not null default now());
+create index if not exists idx_programme_admissions_level on programme_admissions(study_level,active);
+
+create policy public_academic_levels_read on academic_levels for select to public using(true);
+
 create index if not exists idx_students_level_course on students using gin(courses);
 create index if not exists idx_students_last_seen on students(last_seen_at desc);
 create index if not exists idx_deadlines_level_course on deadlines(level,course);
@@ -81,7 +113,6 @@ alter table campaign_messages enable row level security;
 alter table academic_faculties enable row level security;
 alter table academic_departments enable row level security;
 alter table programmes enable row level security;
-alter table courses enable row level security;
 alter table programme_courses enable row level security;
 alter table course_offerings enable row level security;
 alter table knowledge_sources enable row level security;
@@ -94,6 +125,9 @@ alter table student_preferences enable row level security;
 alter table insights enable row level security;
 alter table insight_evidence enable row level security;
 alter table insight_recommendations enable row level security;
+alter table academic_levels enable row level security;
+alter table student_programmes enable row level security;
+alter table programme_admissions enable row level security;
 
 drop policy if exists public_students_read on students;
 drop policy if exists public_deadlines_read on deadlines;
