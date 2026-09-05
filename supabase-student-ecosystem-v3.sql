@@ -184,15 +184,13 @@ create table if not exists student_opportunity_matches (
   unique(subject_id,opportunity_id,opportunity_kind)
 );
 
--- Student business visibility extends the existing peer-economy provider contract.
 alter table if exists service_providers add column if not exists public_profile boolean not null default false;
 alter table if exists service_providers add column if not exists business_category text;
 alter table if exists service_providers add column if not exists verified_business boolean not null default false;
 alter table if exists service_providers add column if not exists service_area text;
 
--- Helpful indexes.
 create index if not exists idx_student_events_tenant_time on student_events(tenant_id,start_at,status);
-create index if not exists idx_student_groups_tenant on student_groups(tenant_id,group_type,status) where status is not null;
+create index if not exists idx_student_groups_tenant on student_groups(tenant_id,group_type,verification_status);
 create index if not exists idx_governance_cycle_tenant on student_governance_cycles(tenant_id,status,starts_at);
 create index if not exists idx_student_skills_subject on student_skills(tenant_id,subject_id,public_profile);
 create index if not exists idx_skill_opps_tenant on skill_opportunities(tenant_id,verification_status,starts_at);
@@ -200,7 +198,6 @@ create index if not exists idx_work_opps_tenant on work_opportunities(tenant_id,
 create index if not exists idx_opportunity_interest_subject on student_opportunity_interests(tenant_id,subject_id);
 create index if not exists idx_opportunity_matches_subject on student_opportunity_matches(tenant_id,subject_id,surfaced_at desc);
 
--- RLS. Existing deployment helpers own exact member policies; these tables remain non-public until explicitly exposed.
 alter table student_events enable row level security;
 alter table student_event_participants enable row level security;
 alter table student_groups enable row level security;
