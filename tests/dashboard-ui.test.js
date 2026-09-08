@@ -10,7 +10,7 @@ test('public NOUN BOT landing page presents the student-first product', () => {
   assert.match(source, /Prepare/);
   assert.match(source, /Plan/);
   assert.match(source, /Get help/);
-  assert.match(source, /Meet ABBA/);
+  assert.match(source, /Ask ABBA/);
 });
 
 test('public landing page uses a modern rounded sans typography system', () => {
