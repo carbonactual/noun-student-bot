@@ -2,6 +2,12 @@
 
 A serverless NOUN student continuity and value network built around **WhatsApp Business as the primary communication channel**.
 
+## Entry points
+
+The public root route (`/`) is the product landing page for NOUN BOT. It explains the learner operating layer, academic pathway coverage, ecosystem position and trust boundaries.
+
+The existing `/dashboard/` route remains the operational student hub and dashboard surface. The landing page links into it rather than replacing or duplicating its operational data views.
+
 NOUN Student Bot is more than a chatbot. It is a personalized student operating layer under InstituteGPT, connecting academic progression, institutional services, student life, research, skills, work opportunities, student businesses, marketplace discovery, governance participation and financial-access intelligence around one persistent student identity.
 
 ## Expanded student environment
