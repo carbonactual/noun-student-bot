@@ -1,0 +1,60 @@
+name: NOUN BOT Production Smoke
+
+on:
+  workflow_run:
+    workflows: ["NOUN BOT CI"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: noun-bot-production-smoke
+  cancel-in-progress: true
+
+env:
+  BASE_URL: https://noun-student-bot-dashboard.vercel.app
+
+jobs:
+  smoke:
+    name: Verify production surface
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Wait for the matching Vercel deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in {1..18}; do
+            response="$(curl --silent --show-error --max-time 15 --write-out $'\\n%{http_code}' "$BASE_URL/" || true)"
+            body="${response%$'\\n'*}"
+            status="${response##*$'\\n'}"
+            if [[ "$status" == "200" && "$body" == *"NOUN BOT"* ]]; then
+              echo "Production is serving NOUN BOT (attempt $attempt)."
+              exit 0
+            fi
+            echo "Production not ready yet (attempt $attempt, HTTP $status)."
+            sleep 10
+          done
+          echo "Production smoke preflight failed."
+          exit 1
+
+      - name: Verify public pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in / /dashboard/ /student/; do
+            echo "Checking $BASE_URL$path"
+            curl --fail-with-body --silent --show-error --max-time 20 "$BASE_URL$path" >/dev/null
+          done
+
+      - name: Verify product markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          html="$(curl --fail-with-body --silent --show-error --max-time 20 "$BASE_URL/dashboard/")"
+          grep -q "Your AI academic companion" <<<"$html"
+          grep -q "NOUN BOT" <<<"$html"
+          grep -q "Privacy" <<<"$html"
