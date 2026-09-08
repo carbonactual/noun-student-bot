@@ -1,5 +1,0 @@
-const { db, tenantId } = require('../lib/knowledge');
-const { cleanPhone } = require('../lib/student-intelligence');
-const SECRET=process.env.WEBHOOK_SECRET;
-function matches(row,q){if(!q)return true;const blob=JSON.stringify(row).toLowerCase();return String(q).toLowerCase().split(/\s+/).filter(Boolean).every(t=>blob.includes(t));}
-module.exports=async(req,res)=>{if(req.method!=='GET')return res.status(405).json({error:'GET only'});if(SECRET&&req.headers['x-webhook-secret']!==SECRET)return res.status(401).json({error:'Unauthorized'});try{const tid=await tenantId();const phone=cleanPhone(req.query?.phone);const q=String(req.query?.q||'').slice(0,160);if(!phone)return res.status(400).json({error:'phone required'});const {data,error}=await db.from('student_services').select('*').eq('tenant_id',tid).limit(100);if(error)throw error;return res.status(200).json({ok:true,services:(data||[]).filter(x=>matches(x,q)).slice(0,30),handoff:'For a request, NOUN BOT can route the student to the appropriate human support workflow.'});}catch(e){console.error('student-services:',e);return res.status(503).json({ok:false,error:'Student service discovery unavailable'});}};
