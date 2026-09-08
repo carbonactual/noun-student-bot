@@ -5,13 +5,18 @@ const fs = require('node:fs');
 const source = fs.readFileSync('dashboard/index.html', 'utf8');
 
 test('public NOUN BOT landing page presents the student-first product', () => {
-  assert.match(source, /Your <span class="accent">AI academic companion\.<\/span>/);
-  assert.match(source, /What it helps with/);
-  assert.match(source, /How it works/);
-  assert.match(source, /Join NOUN BOT/);
-  assert.match(source, /Personalised support/);
-  assert.match(source, /Prepare with confidence/);
-  assert.match(source, /Stay on track/);
+  assert.match(source, /Your <span class="accent">AI academic companion<\/span>/);
+  assert.match(source, /Learn/);
+  assert.match(source, /Prepare/);
+  assert.match(source, /Plan/);
+  assert.match(source, /Get help/);
+  assert.match(source, /Meet ABBA/);
+});
+
+test('public landing page uses a modern rounded sans typography system', () => {
+  assert.match(source, /ui-rounded/);
+  assert.match(source, /system-ui/);
+  assert.doesNotMatch(source, /Iowan Old Style|Palatino Linotype|Book Antiqua|Georgia,serif/i);
 });
 
 test('public landing page does not expose private student data', () => {
@@ -25,4 +30,5 @@ test('public landing page has accessible responsive structure', () => {
   assert.match(source, /type="email"/);
   assert.match(source, /aria-label|role="status"/);
   assert.match(source, /@media\(max-width:850px\)/);
+  assert.match(source, /prefers-reduced-motion/);
 });
