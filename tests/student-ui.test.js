@@ -5,22 +5,20 @@ const fs = require('node:fs');
 const source = fs.readFileSync('student/index.html', 'utf8');
 
 test('student space is centered on the academic day', () => {
-  assert.match(source, /Academic pulse/);
-  assert.match(source, /What needs your attention/);
-  assert.match(source, /Learn/);
-  assert.match(source, /Prepare/);
-  assert.match(source, /Plan/);
-  assert.match(source, /Get help/);
-  assert.match(source, /Ask ABBA/);
+  for (const marker of ['Academic pulse', 'Your priorities', 'Your courses', 'Deadlines & events', 'Past-question matches', 'Human support', 'Ask ABBA']) {
+    assert.match(source, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  }
 });
 
 test('student space retains the core AI study modes and live APIs', () => {
-  assert.match(source, /data-mode="tutor"/);
-  assert.match(source, /data-mode="tutorial"/);
-  assert.match(source, /data-mode="practice"/);
-  assert.match(source, /data-mode="revision"/);
+  for (const mode of ['tutor', 'tutorial', 'practice', 'revision']) assert.match(source, new RegExp(`data-mode="${mode}"`));
   assert.match(source, /\/api\/student-intelligence/);
   assert.match(source, /\/api\/ai-study/);
+});
+
+test('student space surfaces actionable intelligence without exposing raw student records', () => {
+  for (const marker of ['course_momentum', 'support_recommendations', 'deadlines', 'events', 'practice', 'priorities']) assert.match(source, new RegExp(marker));
+  assert.doesNotMatch(source, /password_hash|waec_result|neco_result/);
 });
 
 test('student space uses rounded sans typography and accessible responsive behavior', () => {
@@ -29,5 +27,5 @@ test('student space uses rounded sans typography and accessible responsive behav
   assert.doesNotMatch(source, /Iowan Old Style|Palatino Linotype|Book Antiqua|Georgia,serif/i);
   assert.match(source, /aria-label/);
   assert.match(source, /prefers-reduced-motion/);
-  assert.match(source, /@media\(max-width:(900|620)px\)/);
+  assert.match(source, /@media\(max-width:(920|620)px\)/);
 });
