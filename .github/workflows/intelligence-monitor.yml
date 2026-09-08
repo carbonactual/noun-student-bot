@@ -1,24 +1,62 @@
-name: NOUN Intelligence Monitor
+name: NOUN Intelligence Automation
 
 on:
   schedule:
     - cron: '*/15 * * * *'
+    - cron: '17 * * * *'
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: noun-intelligence-automation
+  cancel-in-progress: true
+
 jobs:
-  monitor:
+  intelligence:
+    name: Refresh and maintain intelligence
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - name: Run intelligence monitor
+      - name: Run service intelligence maintenance
+        if: github.event.schedule == '*/15 * * * *' || github.event_name == 'workflow_dispatch'
         env:
-          MONITOR_SECRET: ${{ secrets.INTELLIGENCE_CRON_SECRET }}
+          SECRET: ${{ secrets.INTELLIGENCE_CRON_SECRET }}
+          BASE_URL: https://noun-student-bot-dashboard.vercel.app
         run: |
-          test -n "$MONITOR_SECRET" || { echo 'Missing INTELLIGENCE_CRON_SECRET secret'; exit 1; }
+          set -euo pipefail
+          test -n "$SECRET"
           curl --fail-with-body --silent --show-error --max-time 120 \
-            -X POST "https://noun-student-bot-dashboard.vercel.app/api/service-intelligence" \
+            -X POST "$BASE_URL/api/service-intelligence" \
             -H 'content-type: application/json' \
-            -H "x-intelligence-secret: $MONITOR_SECRET" \
+            -H "x-intelligence-secret: $SECRET" \
             --data '{"trigger":"github-actions","mode":"scheduled","action":"expire"}'
+
+      - name: Sync official NOUN courseware
+        if: github.event.schedule == '17 * * * *' || github.event_name == 'workflow_dispatch'
+        env:
+          SECRET: ${{ secrets.WEBHOOK_SECRET }}
+          BASE_URL: https://noun-student-bot-dashboard.vercel.app
+        run: |
+          set -euo pipefail
+          test -n "$SECRET"
+          curl --fail-with-body --silent --show-error --max-time 240 \
+            -X POST "$BASE_URL/api/courseware-sync" \
+            -H 'content-type: application/json' \
+            -H "x-webhook-secret: $SECRET" \
+            --data '{}'
+
+      - name: Queue due student reminders
+        if: github.event.schedule == '17 * * * *' || github.event_name == 'workflow_dispatch'
+        env:
+          SECRET: ${{ secrets.WEBHOOK_SECRET }}
+          BASE_URL: https://noun-student-bot-dashboard.vercel.app
+        run: |
+          set -euo pipefail
+          test -n "$SECRET"
+          curl --fail-with-body --silent --show-error --max-time 120 \
+            -X POST "$BASE_URL/api/automation" \
+            -H 'content-type: application/json' \
+            -H "x-webhook-secret: $SECRET" \
+            --data '{"action":"deadline-dispatch"}'
