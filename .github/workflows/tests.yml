@@ -1,17 +1,43 @@
-name: tests
+name: NOUN BOT CI
 
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: noun-bot-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  node-tests:
+  test:
+    name: Test and validate
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
-      - run: npm install
-      - run: npm test
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Validate serverless JavaScript
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            node --check "$file"
+          done < <(find api lib scripts tests -type f -name '*.js' -print)
+
+      - name: Run test suite
+        run: npm test
