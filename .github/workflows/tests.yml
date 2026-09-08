@@ -18,6 +18,10 @@ jobs:
     name: Test and validate
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      SUPABASE_URL: https://example.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: ci-test-placeholder
+      DEFAULT_TENANT_SLUG: noun
     steps:
       - name: Checkout
         uses: actions/checkout@v4
