@@ -26,16 +26,28 @@ The AI must:
 - never claim to have accessed a student's NOUN portal unless a verified integration actually exists;
 - support learning and revision, not live examination assistance or misconduct.
 
+## Live-source retrieval
+
+The database is not required to contain a copy of every academic source. `lib/live-sources.js` can retrieve bounded, current HTTPS content from official NOUN pages plus approved registered/configured source URLs at answer time. `lib/knowledge.js` merges this live evidence with tenant-scoped cached knowledge, preserving authority tier, provenance, freshness and source URL.
+
+Configured external domains may be constrained with `NOUN_ALLOWED_SOURCE_DOMAINS`. Additional source URLs may be supplied with `NOUN_SOURCE_URLS`, while active records in `knowledge_sources` can also participate in live retrieval without copying their full content into the database.
+
+Live evidence is never treated as evidence of private NOUN portal access. Retrieval failures degrade back to available verified database evidence rather than inventing an answer.
+
 ## Timetable and alert contract
 
 Only `verified` academic events generate automatic alerts. Student alerts require matching course/level context and WhatsApp opt-in. Duplicate alerts are suppressed by event/window key.
 
 ## Assessment contract
 
-Past questions may be used for revision only. Each assessment record carries provenance and verification status. Student-submitted material is never presented as official without verification.
+Past questions may be used for revision only. Each assessment record carries provenance and verification status. Student-submitted material is never presented as official without verification. Live-source discovery does not change that rule.
 
 ## Insight-to-campaign contract
 
 `draft insight -> review -> approved insight -> draft campaign -> explicit launch`.
 
 Approval never automatically sends a WhatsApp campaign. Campaigns require explicit launch and opt-in targeting.
+
+## Product typography
+
+Public and student-facing pages share `--font-display` for editorial headings and `--font-body` for interface text. The implementation intentionally uses local/system font stacks rather than adding a third-party font dependency.
