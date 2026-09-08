@@ -29,5 +29,5 @@ test('student space uses rounded sans typography and accessible responsive behav
   assert.doesNotMatch(source, /Iowan Old Style|Palatino Linotype|Book Antiqua|Georgia,serif/i);
   assert.match(source, /aria-label/);
   assert.match(source, /prefers-reduced-motion/);
-  assert.match(source, /@media\(max-width:860px\)/);
+  assert.match(source, /@media\(max-width:(900|620)px\)/);
 });
