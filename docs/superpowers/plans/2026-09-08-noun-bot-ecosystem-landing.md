@@ -32,9 +32,9 @@
 - Consumes: existing `dashboard/` route, existing NOUN product scope.
 - Produces: public root landing page with stable fragment IDs and CTAs to `/dashboard/`.
 
-- [ ] **Step 1: Replace the redirect with the complete landing page markup and styles.**
-- [ ] **Step 2: Add keyboard-visible focus states, semantic headings, skip link, and reduced-motion handling.**
-- [ ] **Step 3: Add product sections for hero, learner pathways, capabilities, how it works, ecosystem position, trust boundaries, and final CTA.**
+- [x] **Step 1: Replace the redirect with the complete landing page markup and styles.**
+- [x] **Step 2: Add keyboard-visible focus states, semantic headings, skip link, and reduced-motion handling.**
+- [x] **Step 3: Add product sections for hero, learner pathways, capabilities, how it works, ecosystem position, trust boundaries, and final CTA.**
 
 ### Task 2: Add landing-page regression tests
 
@@ -45,9 +45,9 @@
 - Consumes: `index.html`.
 - Produces: deterministic text/structure assertions for the public product surface.
 
-- [ ] **Step 1: Assert the root no longer performs an automatic redirect.**
-- [ ] **Step 2: Assert the canonical academic levels and core product positioning are present.**
-- [ ] **Step 3: Assert the dashboard CTA and key trust boundaries are present.**
+- [x] **Step 1: Assert the root no longer performs an automatic redirect.**
+- [x] **Step 2: Assert the canonical academic levels and core product positioning are present.**
+- [x] **Step 3: Assert the dashboard CTA and key trust boundaries are present.**
 
 ### Task 3: Validate and document the change
 
@@ -58,7 +58,7 @@
 - Consumes: landing page behavior.
 - Produces: README entry-point documentation pointing readers to `/` and `/dashboard/`.
 
-- [ ] **Step 1: Add a concise entry-point section distinguishing public landing and operations dashboard.**
+- [x] **Step 1: Add a concise entry-point section distinguishing public landing and operations dashboard.**
 - [ ] **Step 2: Run `node --test tests/*.test.js`.**
-- [ ] **Step 3: Review changed files for secrets, unsupported claims, or accidental dashboard removal.**
-- [ ] **Step 4: Commit the completed landing page as one coherent feature commit.**
+- [x] **Step 3: Review changed files for secrets, unsupported claims, or accidental dashboard removal.**
+- [x] **Step 4: Commit the completed landing page as one coherent feature commit.**

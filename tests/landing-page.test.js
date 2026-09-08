@@ -20,7 +20,7 @@ test('landing page covers the canonical NOUN academic pathway', () => {
     "Master's",
     'PhD / Doctoral'
   ]) {
-    assert.match(source, new RegExp(label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'));
+    assert.ok(source.includes(label), `missing academic pathway: ${label}`);
   }
 });
 
@@ -34,7 +34,7 @@ test('landing page communicates product position and core capabilities', () => {
     'Governance + participation',
     'WhatsApp'
   ]) {
-    assert.match(source, new RegExp(phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'));
+    assert.ok(source.includes(phrase), `missing landing-page phrase: ${phrase}`);
   }
 });
 
