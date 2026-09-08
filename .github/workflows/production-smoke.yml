@@ -1,9 +1,8 @@
 name: NOUN BOT Production Smoke
 
 on:
-  workflow_run:
-    workflows: ["NOUN BOT CI"]
-    types: [completed]
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -19,7 +18,6 @@ env:
 jobs:
   smoke:
     name: Verify production surface
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 7
     steps:
