@@ -63,4 +63,4 @@
 - [x] **Step 3: Review changed files for secrets, unsupported claims, or accidental dashboard removal.**
 - [x] **Step 4: Commit the completed landing page as one coherent feature commit.**
 
-**Verification note:** The GitHub connector available in this session can inspect and write repository content but does not provide an arbitrary shell/runtime execution endpoint. The regression test file is included and statically reviewed here; the full `node --test tests/*.test.js` command must be run by CI/Vercel or a local checkout before merge.
+**Verification note:** The available GitHub connector does not expose arbitrary shell execution. The regression tests are included and statically reviewed; runtime test execution must be performed by repository CI or a local checkout before merge.
