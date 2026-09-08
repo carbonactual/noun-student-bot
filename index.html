@@ -1,190 +1,60 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#071018">
-  <meta name="description" content="NOUN BOT is the student operating layer under InstituteGPT — one persistent identity for study, progression, research, services, opportunities and student life.">
-  <title>NOUN BOT — Your NOUN Student Operating Layer</title>
-  <style>
-    :root {
-      color-scheme: dark;
-      --bg:#061018;
-      --panel:#0b1821;
-      --panel-2:#0e202a;
-      --line:#1c3643;
-      --text:#edf7f9;
-      --muted:#91a9b3;
-      --soft:#67818c;
-      --accent:#80e5d0;
-      --accent-2:#9fc7ff;
-      --ok:#95e7ab;
-      --shadow:0 24px 80px rgba(0,0,0,.34);
-      --r:22px;
-      --max:1200px;
-    }
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{margin:0;background:
-      radial-gradient(circle at 78% -5%,rgba(128,229,208,.14),transparent 28rem),
-      radial-gradient(circle at 12% 12%,rgba(159,199,255,.10),transparent 26rem),
-      var(--bg);color:var(--text);font:15px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    a{color:inherit;text-decoration:none}
-    img{max-width:100%}
-    button{font:inherit}
-    :focus-visible{outline:2px solid var(--accent);outline-offset:4px}
-    .skip{position:absolute;left:14px;top:-48px;padding:10px 14px;border-radius:12px;background:var(--accent);color:#05211c;font-weight:700;z-index:50}.skip:focus{top:14px}
-    .shell{min-height:100vh}
-    .top{position:sticky;top:0;z-index:20;border-bottom:1px solid rgba(28,54,67,.8);background:rgba(6,16,24,.78);backdrop-filter:blur(18px)}
-    .nav{max-width:var(--max);margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:18px}
-    .brand{display:flex;align-items:center;gap:11px;min-width:0}.sigil{width:38px;height:38px;border:1px solid rgba(128,229,208,.46);border-radius:50%;display:grid;place-items:center;color:var(--accent);font-weight:800;box-shadow:0 0 28px rgba(128,229,208,.08)}.brand-copy strong{display:block;letter-spacing:.05em;font-size:14px}.brand-copy span{display:block;color:var(--soft);font-size:9px;letter-spacing:.12em;margin-top:1px}
-    .nav-links{display:flex;align-items:center;gap:18px;color:#a9bdc5;font-size:12px}.nav-links a:hover{color:var(--text)}
-    .nav-cta{display:inline-flex;align-items:center;justify-content:center;padding:9px 13px;border:1px solid rgba(128,229,208,.32);border-radius:12px;background:#102730;color:var(--text);font-weight:700}
-    .hero{max-width:var(--max);margin:0 auto;padding:86px 22px 64px;display:grid;grid-template-columns:minmax(0,1.08fr) minmax(320px,.92fr);gap:28px;align-items:center}
-    .eyebrow{color:var(--accent);font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}.hero h1{font-size:clamp(42px,6vw,78px);line-height:.96;letter-spacing:-.055em;margin:14px 0 18px;max-width:800px}.hero h1 span{color:var(--accent)}.hero p{margin:0;max-width:720px;color:var(--muted);font-size:17px}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 16px;border-radius:14px;border:1px solid var(--line);font-weight:750;font-size:13px}.btn.primary{background:var(--accent);color:#05211c;border-color:var(--accent)}.btn.secondary{background:#0c1b24;color:var(--text)}.micro{margin-top:14px;color:var(--soft);font-size:10px}
-    .hero-card{position:relative;padding:20px;border:1px solid var(--line);border-radius:var(--r);background:linear-gradient(180deg,rgba(14,32,42,.96),rgba(8,19,26,.96));box-shadow:var(--shadow);overflow:hidden}.hero-card:after{content:"";position:absolute;right:-80px;bottom:-120px;width:300px;height:300px;border-radius:50%;border:1px solid rgba(128,229,208,.12);box-shadow:0 0 100px rgba(128,229,208,.06)}
-    .card-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.card-head strong{font-size:12px}.live{display:inline-flex;align-items:center;gap:6px;padding:5px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:9px}.live i{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px rgba(149,231,171,.8)}
-    .student-id{margin-top:20px;padding:17px;border:1px solid rgba(128,229,208,.22);border-radius:16px;background:linear-gradient(135deg,#0d242c,#0b1821)}.student-id .caption{color:var(--soft);font-size:9px;text-transform:uppercase;letter-spacing:.15em}.student-id .name{font-size:22px;font-weight:780;letter-spacing:-.02em;margin-top:6px}.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.chip{padding:6px 8px;border:1px solid var(--line);border-radius:999px;color:#bcd0d7;background:#0b1a22;font-size:9px}.chip.accent{border-color:rgba(128,229,208,.28);color:var(--accent)}
-    .mini-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}.mini{padding:12px;border:1px solid var(--line);border-radius:13px;background:#0a1720}.mini span{display:block;color:var(--soft);font-size:9px;text-transform:uppercase;letter-spacing:.12em}.mini strong{display:block;margin-top:5px;font-size:12px}.mini p{margin:3px 0 0;color:var(--muted);font-size:9px}
-    section{scroll-margin-top:90px}.section{max-width:var(--max);margin:0 auto;padding:34px 22px 26px}.section.alt{max-width:none;background:linear-gradient(180deg,rgba(9,21,29,.5),rgba(7,16,24,.2));border-top:1px solid rgba(28,54,67,.48);border-bottom:1px solid rgba(28,54,67,.48)}.section.alt .inner{max-width:var(--max);margin:0 auto}.kicker{color:var(--accent);font-size:9px;text-transform:uppercase;letter-spacing:.16em}.section h2{font-size:clamp(27px,4vw,43px);letter-spacing:-.04em;line-height:1.05;margin:8px 0 10px}.lede{color:var(--muted);max-width:760px;margin:0}
-    .pathways{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:22px}.path{padding:16px;border:1px solid var(--line);border-radius:16px;background:#0b1720}.path .num{font-size:10px;color:var(--accent)}.path strong{display:block;margin-top:7px;font-size:13px}.path span{display:block;margin-top:4px;color:var(--muted);font-size:10px}
-    .cap-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:22px}.cap{padding:18px;border:1px solid var(--line);border-radius:17px;background:linear-gradient(180deg,#0b1922,#09151c)}.icon{width:31px;height:31px;border-radius:10px;display:grid;place-items:center;border:1px solid rgba(128,229,208,.17);color:var(--accent);background:#10232b;font-size:12px}.cap strong{display:block;font-size:13px;margin-top:11px}.cap p{margin:4px 0 0;color:var(--muted);font-size:10px}
-    .how{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:22px}.step{position:relative;padding:18px;border:1px solid var(--line);border-radius:17px;background:#0b1720}.step .n{font-size:10px;color:var(--accent);font-weight:800}.step strong{display:block;margin-top:8px;font-size:13px}.step p{margin:4px 0 0;color:var(--muted);font-size:10px}
-    .ecosystem{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:12px;margin-top:22px}.system-card,.boundary{padding:22px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,#0b1922,#09151c)}.system-map{display:grid;grid-template-columns:1fr;gap:7px}.system-node{padding:12px 14px;border:1px solid var(--line);border-radius:13px;background:#0a1720}.system-node strong{display:block;font-size:11px}.system-node span{display:block;color:var(--muted);font-size:9px;margin-top:2px}.system-node.core{border-color:rgba(128,229,208,.3);background:linear-gradient(135deg,#0d262d,#0b1821)}.connector{height:8px;border-left:1px dashed rgba(128,229,208,.35);margin-left:28px}
-    .boundary + .boundary{margin-top:10px}.boundary h3{font-size:12px;margin:0 0 7px}.boundary p{margin:0;color:var(--muted);font-size:10px}.checks{display:grid;gap:8px;margin-top:10px}.check{display:flex;gap:8px;align-items:flex-start;padding:10px 11px;border:1px solid var(--line);border-radius:12px;background:#0a1720;color:#c5d5da;font-size:10px}.check b{color:var(--accent);font-size:12px;line-height:1}
-    .final{max-width:var(--max);margin:0 auto;padding:55px 22px 70px;text-align:center}.final h2{max-width:760px;margin:0 auto;font-size:clamp(31px,4vw,52px);letter-spacing:-.045em}.final p{max-width:700px;margin:13px auto 0;color:var(--muted)}.final .actions{justify-content:center}.foot{max-width:var(--max);margin:0 auto;padding:0 22px 32px;color:var(--soft);font-size:10px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}.foot a:hover{color:var(--text)}
-    @media (max-width:1000px){.hero,.ecosystem{grid-template-columns:1fr}.pathways{grid-template-columns:repeat(3,minmax(0,1fr))}.cap-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.how{grid-template-columns:repeat(2,minmax(0,1fr))}.nav-links a:not(.nav-cta){display:none}}
-    @media (max-width:640px){.nav{padding:11px 14px}.hero{padding:62px 14px 44px}.section{padding:28px 14px 20px}.final{padding:44px 14px 58px}.foot{padding:0 14px 28px}.hero h1{font-size:45px}.hero p{font-size:15px}.pathways,.cap-grid,.how{grid-template-columns:1fr}.mini-grid{grid-template-columns:1fr}.nav-links{gap:8px}.nav-cta{padding:8px 10px}.actions .btn{width:100%;justify-content:center}}
-    @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#050b10">
+<meta name="description" content="NOUN BOT is the learner operating layer under InstituteGPT — one persistent identity across the NOUN journey, services, opportunity and student life.">
+<title>NOUN BOT — The NOUN Learner Operating Layer</title>
+<style>
+:root{color-scheme:dark;--bg:#050b10;--ink:#eef7f7;--muted:#9ab0b7;--soft:#657d85;--line:rgba(145,193,201,.17);--panel:rgba(10,22,29,.76);--panel2:rgba(14,29,37,.9);--teal:#7de6d4;--blue:#9bc5ff;--gold:#e5c98e;--ok:#93e6aa;--shadow:0 30px 110px rgba(0,0,0,.38);--max:1240px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;overflow-x:hidden;background:radial-gradient(900px 500px at 80% -5%,rgba(125,230,212,.12),transparent 70%),radial-gradient(800px 500px at 5% 20%,rgba(155,197,255,.08),transparent 70%),var(--bg);color:var(--ink);font:15px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(150,190,198,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(150,190,198,.025) 1px,transparent 1px);background-size:46px 46px;mask-image:linear-gradient(to bottom,black,transparent 82%)}a{color:inherit;text-decoration:none}button{font:inherit;color:inherit}.skip{position:fixed;left:12px;top:-60px;z-index:100;padding:10px 14px;background:var(--teal);color:#05231e;border-radius:12px;font-weight:800}.skip:focus{top:12px}:focus-visible{outline:2px solid var(--teal);outline-offset:4px}
+.progress{position:fixed;z-index:50;left:0;right:0;top:0;height:2px;transform-origin:left;background:linear-gradient(90deg,var(--teal),var(--blue))}.nav{position:sticky;top:0;z-index:40;border-bottom:1px solid var(--line);background:rgba(5,11,16,.74);backdrop-filter:blur(18px)}.nav-in{max-width:var(--max);margin:auto;padding:13px 22px;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{display:flex;align-items:center;gap:11px}.sigil{width:38px;height:38px;border:1px solid rgba(125,230,212,.46);border-radius:50%;display:grid;place-items:center;color:var(--teal);font-weight:900;box-shadow:0 0 34px rgba(125,230,212,.08)}.brand b{display:block;font-size:14px;letter-spacing:.08em}.brand small{display:block;color:var(--soft);font-size:9px;letter-spacing:.15em;margin-top:1px}.links{display:flex;gap:20px;align-items:center;color:#adc2c8;font-size:12px}.links a:hover{color:var(--ink)}.cta{display:inline-flex;align-items:center;justify-content:center;padding:9px 13px;border-radius:12px;border:1px solid rgba(125,230,212,.3);background:#10252d;font-weight:800}
+.wrap{max-width:var(--max);margin:auto}.hero{min-height:calc(100vh - 64px);display:grid;grid-template-columns:minmax(0,1.03fr) minmax(420px,.97fr);align-items:center;gap:34px;padding:72px 22px 74px}.eyebrow{display:inline-flex;gap:8px;align-items:center;color:var(--teal);font-size:10px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}.eyebrow:before{content:"";width:22px;height:1px;background:var(--teal)}h1{font-size:clamp(50px,7vw,92px);line-height:.91;letter-spacing:-.065em;margin:16px 0 22px;max-width:900px}h1 span{color:var(--teal)}.hero-copy>p{max-width:720px;font-size:17px;color:var(--muted);margin:0}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:27px}.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 16px;border-radius:14px;border:1px solid var(--line);font-size:13px;font-weight:850;transition:transform .25s ease,border-color .25s ease,background .25s ease}.btn:hover{transform:translateY(-2px);border-color:rgba(125,230,212,.45)}.btn.primary{background:var(--teal);color:#05221d;border-color:var(--teal)}.btn.secondary{background:rgba(11,25,33,.75)}.micro{margin-top:13px;color:var(--soft);font-size:10px}
+.visual{position:relative;min-height:580px;display:grid;place-items:center}.orbit{position:absolute;border:1px solid rgba(125,230,212,.12);border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%)}.o1{width:260px;height:260px}.o2{width:405px;height:405px}.o3{width:548px;height:548px}.core{position:relative;width:198px;height:198px;border-radius:28%;transform:rotate(12deg);border:1px solid rgba(125,230,212,.38);background:linear-gradient(145deg,#0e2b30,#0a171e 65%);box-shadow:0 0 100px rgba(125,230,212,.1),var(--shadow);display:grid;place-items:center;overflow:hidden}.core:before{content:"";position:absolute;width:155px;height:155px;border-radius:50%;border:1px solid rgba(155,197,255,.18);box-shadow:inset 0 0 55px rgba(125,230,212,.08)}.core:after{content:"";position:absolute;width:70px;height:70px;border-radius:50%;background:radial-gradient(circle,rgba(125,230,212,.55),rgba(125,230,212,.02) 72%);filter:blur(1px)}.core-label{transform:rotate(-12deg);position:relative;z-index:2;text-align:center}.core-label strong{display:block;font-size:31px;letter-spacing:-.04em}.core-label span{display:block;color:var(--soft);font-size:9px;letter-spacing:.16em;text-transform:uppercase;margin-top:4px}.node{position:absolute;z-index:3;min-width:106px;padding:10px 12px;border:1px solid var(--line);border-radius:13px;background:rgba(7,18,24,.91);backdrop-filter:blur(10px);box-shadow:0 18px 50px rgba(0,0,0,.3);text-align:center}.node strong{display:block;font-size:11px}.node span{display:block;color:var(--muted);font-size:8px;margin-top:2px}.n1{left:5%;top:17%}.n2{right:2%;top:12%}.n3{right:-2%;top:54%}.n4{right:11%;bottom:7%}.n5{left:4%;bottom:12%}.n6{left:0%;top:54%}.node.accent{border-color:rgba(125,230,212,.33)}
+.section{padding:82px 22px}.band{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(9,22,29,.62),rgba(7,14,19,.25))}.section-head{max-width:820px}.label{color:var(--teal);font-size:9px;letter-spacing:.18em;text-transform:uppercase;font-weight:900}.section h2{font-size:clamp(32px,5vw,56px);line-height:.99;letter-spacing:-.05em;margin:10px 0 12px}.section-head p{color:var(--muted);margin:0;font-size:15px}.timeline{margin-top:34px;display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.stage{position:relative;min-height:180px;padding:18px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(13,28,36,.95),rgba(9,18,24,.82));border-radius:18px;overflow:hidden}.stage:after{content:"";position:absolute;right:-20px;bottom:-20px;width:80px;height:80px;border-radius:50%;border:1px solid rgba(125,230,212,.12)}.stage .n{color:var(--teal);font-size:10px;font-weight:900}.stage strong{display:block;font-size:14px;margin-top:15px}.stage span{display:block;color:var(--muted);font-size:10px;margin-top:5px}.rail{height:1px;margin:7px 0 0;background:linear-gradient(90deg,rgba(125,230,212,.35),rgba(155,197,255,.05))}
+.cap-grid{margin-top:34px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.cap{position:relative;padding:21px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(12,26,34,.92),rgba(8,18,24,.92));border-radius:18px;min-height:160px;overflow:hidden;transition:transform .35s ease,border-color .35s ease,box-shadow .35s ease}.cap:hover{transform:translateY(-5px);border-color:rgba(125,230,212,.33);box-shadow:0 22px 70px rgba(0,0,0,.23)}.cap i{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:#10252c;border:1px solid rgba(125,230,212,.14);color:var(--teal);font-style:normal;font-size:12px}.cap strong{display:block;font-size:13px;margin-top:13px}.cap p{margin:5px 0 0;color:var(--muted);font-size:10px}
+.split{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:12px;align-items:stretch}.plate{padding:25px;border:1px solid var(--line);background:linear-gradient(160deg,rgba(15,31,39,.96),rgba(8,17,23,.95));border-radius:20px;box-shadow:var(--shadow)}.plate.kit{display:grid;gap:8px}.flow{display:grid;grid-template-columns:32px 1fr;gap:11px;align-items:start;padding:12px;border:1px solid var(--line);border-radius:14px;background:rgba(8,17,23,.65)}.flow b{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:#10252c;color:var(--teal);font-size:11px}.flow strong{display:block;font-size:11px}.flow span{display:block;color:var(--muted);font-size:9px;margin-top:2px}.system{margin-top:12px;padding:15px;border:1px dashed rgba(125,230,212,.24);border-radius:14px}.system .tag{color:var(--soft);font-size:8px;text-transform:uppercase;letter-spacing:.14em}.system .path{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}.pill{padding:6px 8px;border-radius:999px;border:1px solid var(--line);background:#09171d;color:#c8d6da;font-size:9px}.pill.core{border-color:rgba(125,230,212,.34);color:var(--teal)}
+.boundaries{display:grid;gap:8px;margin-top:15px}.boundary{padding:12px 13px;border:1px solid var(--line);border-radius:14px;background:rgba(7,17,23,.68)}.boundary strong{font-size:11px}.boundary p{margin:3px 0 0;color:var(--muted);font-size:9px}
+.quote{margin-top:24px;padding:18px 20px;border-left:2px solid var(--teal);background:rgba(125,230,212,.04);color:#d7e5e7;font-size:12px}.final{padding:92px 22px 110px;text-align:center}.final .section-head{margin:auto}.final .actions{justify-content:center}.foot{max-width:var(--max);margin:auto;padding:0 22px 34px;color:var(--soft);font-size:10px;display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}
+@media (max-width:1000px){.hero{grid-template-columns:1fr;padding-top:62px}.visual{min-height:470px;order:-1}.o3{width:470px;height:470px}.n1{left:5%}.n2{right:2%}.cap-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.timeline{grid-template-columns:repeat(3,1fr)}.split{grid-template-columns:1fr}.links a:not(.cta){display:none}}
+@media (max-width:640px){.nav-in{padding:10px 14px}.hero{padding:48px 14px 55px}.visual{min-height:390px}.o1{width:190px;height:190px}.o2{width:295px;height:295px}.o3{width:385px;height:385px}.core{width:145px;height:145px}.core-label strong{font-size:23px}.node{min-width:80px;padding:7px 8px}.node strong{font-size:9px}.node span{font-size:7px}.n1{left:0;top:10%}.n2{right:0;top:10%}.n3{right:-4%;top:50%}.n4{right:4%;bottom:5%}.n5{left:0;bottom:6%}.n6{left:-4%;top:50%}.section{padding:64px 14px}.timeline,.cap-grid{grid-template-columns:1fr}.stage{min-height:auto}.hero h1{font-size:50px}.hero-copy>p{font-size:15px}.actions .btn{width:100%;justify-content:center}.final{padding:65px 14px 80px}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn,.cap{transition:none}}
+</style>
 </head>
 <body>
-  <a class="skip" href="#main">Skip to content</a>
-  <header class="top">
-    <nav class="nav" aria-label="Primary">
-      <a class="brand" href="/" aria-label="NOUN BOT home">
-        <div class="sigil">N</div>
-        <div class="brand-copy"><strong>NOUN BOT</strong><span>INSTITUTEGPT · CARBON ACTUAL</span></div>
-      </a>
-      <div class="nav-links">
-        <a href="#pathways">Pathways</a>
-        <a href="#capabilities">Capabilities</a>
-        <a href="#ecosystem">Ecosystem</a>
-        <a class="nav-cta" href="/dashboard/">Open Student Hub</a>
-      </div>
-    </nav>
-  </header>
+<div class="progress" id="progress" aria-hidden="true"></div><a class="skip" href="#main">Skip to content</a>
+<header class="nav"><div class="nav-in"><a class="brand" href="/" aria-label="NOUN BOT home"><span class="sigil">N</span><span><b>NOUN BOT</b><small>INSTITUTEGPT · CARBON ACTUAL</small></span></a><div class="links"><a href="#pathways">Pathway</a><a href="#capabilities">Capabilities</a><a href="#habitat">Habitat</a><a class="cta" href="/dashboard/">Open Student Hub →</a></div></div></header>
+<main id="main">
+<section class="hero wrap" aria-labelledby="hero-title"><div class="hero-copy"><div class="eyebrow">The NOUN learner operating layer</div><h1 id="hero-title">Your whole NOUN journey. <span>One identity.</span></h1><p>NOUN BOT is the NOUN avenue inside InstituteGPT: a persistent learner environment that connects academic progression with research, services, student life, skills, work, commerce, governance and economic-access intelligence.</p><div class="actions"><a class="btn primary" href="/dashboard/">Enter the Student Hub <b aria-hidden="true">↗</b></a><a class="btn secondary" href="#capabilities">See the ecosystem</a></div><div class="micro">WhatsApp is a primary communication channel. The web hub is the wider operating surface.</div></div>
+<div class="visual" aria-label="Animated relationship map of a NOUN student within the InstituteGPT habitat"><div class="orbit o3"></div><div class="orbit o2"></div><div class="orbit o1"></div><div class="core"><div class="core-label"><strong>YOU</strong><span>persistent learner</span></div></div><div class="node n1 accent"><strong>InstituteGPT</strong><span>education system</span></div><div class="node n2"><strong>Research</strong><span>projects · supervisors</span></div><div class="node n3"><strong>Student life</strong><span>clubs · sports · governance</span></div><div class="node n4"><strong>Work</strong><span>SIWES · internships</span></div><div class="node n5"><strong>Services</strong><span>forms · documents</span></div><div class="node n6 accent"><strong>Opportunity</strong><span>skills · finance access</span></div></div></section>
 
-  <main id="main">
-    <section class="hero" aria-labelledby="hero-title">
-      <div>
-        <div class="eyebrow">The NOUN learner operating layer</div>
-        <h1 id="hero-title">Your whole NOUN journey. <span>One identity.</span></h1>
-        <p>NOUN BOT brings study, progression, research, student services, opportunities, student life and economic access intelligence into one persistent learner environment under InstituteGPT.</p>
-        <div class="actions">
-          <a class="btn primary" href="/dashboard/">Open Student Hub <span aria-hidden="true">→</span></a>
-          <a class="btn secondary" href="#capabilities">Explore capabilities</a>
-        </div>
-        <div class="micro">WhatsApp is a primary communication channel; the web hub gives you the wider student environment.</div>
-      </div>
-      <div class="hero-card" aria-label="Illustrative student identity overview">
-        <div class="card-head"><strong>Persistent learner context</strong><span class="live"><i></i> connected surface</span></div>
-        <div class="student-id">
-          <div class="caption">One person · many academic stages</div>
-          <div class="name">Your NOUN identity</div>
-          <div class="chips"><span class="chip accent">Certificate → PhD</span><span class="chip">Programme aware</span><span class="chip">Progress aware</span></div>
-        </div>
-        <div class="mini-grid">
-          <div class="mini"><span>Academic</span><strong>Study + progression</strong><p>Courses, revision, practice and learning media.</p></div>
-          <div class="mini"><span>Research</span><strong>Projects + supervisors</strong><p>Research topics, projects and authentic assessment support.</p></div>
-          <div class="mini"><span>Services</span><strong>Requests + documents</strong><p>Forms, service discovery and request tracking.</p></div>
-          <div class="mini"><span>Opportunity</span><strong>Skills + careers</strong><p>Training, internships, fellowships and work pathways.</p></div>
-        </div>
-      </div>
-    </section>
+<section id="pathways" class="section band" aria-labelledby="path-title"><div class="inner wrap"><div class="section-head"><div class="label">Continuity before fragmentation</div><h2 id="path-title">One person. Many academic states.</h2><p>The identity continues through the learner's journey rather than resetting at every qualification.</p></div><div class="timeline"><div class="stage"><div class="n">01</div><strong>Certificate</strong><span>Entry and foundational learning.</span></div><div class="stage"><div class="n">02</div><strong>Undergraduate</strong><span>Courses, progression, practice and student life.</span></div><div class="stage"><div class="n">03</div><strong>Postgraduate Diploma</strong><span>Advanced learning and professional progression.</span></div><div class="stage"><div class="n">04</div><strong>Master's</strong><span>Research, specialisation and career depth.</span></div><div class="stage"><div class="n">05</div><strong>PhD / Doctoral</strong><span>Doctoral research, continuity and alumni state.</span></div></div><div class="rail" aria-hidden="true"></div></div></section>
 
-    <section id="pathways" class="section alt" aria-labelledby="pathways-title">
-      <div class="inner">
-        <div class="kicker">One identity across the pathway</div>
-        <h2 id="pathways-title">From first certificate to doctoral work.</h2>
-        <p class="lede">The learner context follows the human instead of forcing a new identity at every academic stage. Multiple programmes can exist under the same person.</p>
-        <div class="pathways">
-          <div class="path"><div class="num">01</div><strong>Certificate</strong><span>Build your first academic record.</span></div>
-          <div class="path"><div class="num">02</div><strong>Undergraduate</strong><span>Study, progress and prepare.</span></div>
-          <div class="path"><div class="num">03</div><strong>Postgraduate Diploma</strong><span>Deepen your professional path.</span></div>
-          <div class="path"><div class="num">04</div><strong>Master's</strong><span>Research, specialise and advance.</span></div>
-          <div class="path"><div class="num">05</div><strong>PhD / Doctoral</strong><span>Carry the identity into advanced research.</span></div>
-        </div>
-      </div>
-    </section>
+<section id="capabilities" class="section" aria-labelledby="cap-title"><div class="wrap"><div class="section-head"><div class="label">The student ecosystem</div><h2 id="cap-title">Not a chatbot. A living learner environment.</h2><p>The surface is broad because the learner's reality is broad. Each capability is a connected domain, not a disconnected feature.</p></div><div class="cap-grid">
+<div class="cap"><i>A</i><strong>Academic + progression</strong><p>Study, course context, revision, practice, progression and learning support.</p></div><div class="cap"><i>R</i><strong>Research + projects</strong><p>Research topics, projects, supervisors/facilitators and authentic assessment support.</p></div><div class="cap"><i>S</i><strong>Student services</strong><p>Study centres, library, forms, requests, documents and physical-service workflows.</p></div><div class="cap"><i>M</i><strong>Learning media</strong><p>E-courseware, instructional media, how-to videos and practice-oriented learning.</p></div><div class="cap"><i>C</i><strong>Skills + careers</strong><p>Training, mentorship, apprenticeships, employment, internships, SIWES, NYSC and fellowships.</p></div><div class="cap"><i>E</i><strong>Student economy</strong><p>Businesses, providers, marketplace discovery and service requests around the student network.</p></div><div class="cap"><i>F</i><strong>Financial access intelligence</strong><p>Loans, grants, scholarships, device funding, literacy and verified opportunity discovery.</p></div><div class="cap"><i>G</i><strong>Governance + participation</strong><p>Elections, ballot information, consultations, associations, clubs and collective life.</p></div><div class="cap"><i>∞</i><strong>Graduation + alumni continuity</strong><p>Matriculation, graduation, gowns, certificates, transcripts and the path beyond NOUN.</p></div>
+</div></div></section>
 
-    <section id="capabilities" class="section" aria-labelledby="capabilities-title">
-      <div class="kicker">The student environment</div>
-      <h2 id="capabilities-title">More than a chatbot.</h2>
-      <p class="lede">NOUN BOT connects the pieces around the student so information, next actions and opportunities do not live in isolated places.</p>
-      <div class="cap-grid">
-        <article class="cap"><div class="icon">A</div><strong>Academic + progression</strong><p>Study context, progression, revision, mock exams and practice sets.</p></article>
-        <article class="cap"><div class="icon">L</div><strong>Learning media</strong><p>How-to videos, e-courseware and instructional learning media.</p></article>
-        <article class="cap"><div class="icon">R</div><strong>Research + projects</strong><p>Topics, supervisors/facilitators, projects, seminars and authentic assessments.</p></article>
-        <article class="cap"><div class="icon">S</div><strong>Student services</strong><p>Study-centre, library, forms, requests and physical-service workflows.</p></article>
-        <article class="cap"><div class="icon">C</div><strong>Skills + careers</strong><p>Training, workshops, mentorship, apprenticeships, jobs, SIWES and fellowships.</p></article>
-        <article class="cap"><div class="icon">M</div><strong>Student economy</strong><p>Student businesses, providers, marketplaces and opportunity discovery.</p></article>
-        <article class="cap"><div class="icon">F</div><strong>Financial access intelligence</strong><p>Scholarship, grant, loan and device-funding discovery plus financial literacy.</p></article>
-        <article class="cap"><div class="icon">G</div><strong>Governance + participation</strong><p>Student governance, elections, consultations and civic participation information.</p></article>
-        <article class="cap"><div class="icon">A</div><strong>Alumni continuity</strong><p>Matriculation, graduation, certificates, transcripts and continuity beyond school.</p></article>
-      </div>
-    </section>
+<section id="habitat" class="section band" aria-labelledby="habitat-title"><div class="wrap"><div class="section-head"><div class="label">Audubon Continuum × Carbon Actual rails</div><h2 id="habitat-title">The student is the subject. The habitat is the system around them.</h2><p>NOUN BOT is designed as a relationship surface: identity at the centre, capabilities around it, and controlled boundaries between the learner, InstituteGPT and external institutions/providers.</p></div><div class="split" style="margin-top:28px"><div class="plate"><div class="label">How the experience moves</div><div class="flow" style="margin-top:14px"><b>1</b><div><strong>Identify</strong><span>Understand the learner's persistent NOUN context.</span></div></div><div class="flow"><b>2</b><div><strong>Understand</strong><span>Use programme, course, stage and intent context.</span></div></div><div class="flow"><b>3</b><div><strong>Assist</strong><span>Teach, explain, discover and coordinate within permitted scope.</span></div></div><div class="flow"><b>4</b><div><strong>Escalate</strong><span>Bring in a human or authorised institutional path when consequence or authority requires it.</span></div></div><div class="system"><div class="tag">System rail</div><div class="path"><span class="pill">Carbon Actual Identity</span><span>→</span><span class="pill core">InstituteGPT</span><span>→</span><span class="pill core">NOUN BOT</span><span>→</span><span class="pill">WhatsApp / Web Hub</span></div></div></div>
+<div><div class="boundary"><strong>Official claims stay sourced.</strong><p>Authority, freshness and verification metadata remain part of the underlying product contract.</p></div><div class="boundary"><strong>Consequential actions stay controlled.</strong><p>Institutional submissions remain user-controlled or institution-authorised.</p></div><div class="boundary"><strong>Academic practice is not the live exam.</strong><p>Mock tests and study support teach; they do not take examinations or impersonate students.</p></div><div class="boundary"><strong>Financial intelligence is not financial execution.</strong><p>The product can discover and explain permitted opportunities but does not originate credit, move money or execute investments.</p></div><div class="boundary"><strong>Private learner data remains private.</strong><p>Academic information is not exposed to marketplace customers unless deliberately published by the student.</p></div></div></div><div class="quote">The goal is not to put more buttons around a student. The goal is to make the student's actual environment visible, navigable and continuously useful.</div></div></section>
 
-    <section class="section alt" aria-labelledby="how-title">
-      <div class="inner">
-        <div class="kicker">How the product behaves</div>
-        <h2 id="how-title">Context first. Action second.</h2>
-        <p class="lede">The goal is not another inbox. It is a student operating layer that knows where you are in the journey and helps you move.</p>
-        <div class="how">
-          <div class="step"><div class="n">01 · IDENTIFY</div><strong>One persistent student identity</strong><p>Your academic stages and programmes sit under the same learner identity.</p></div>
-          <div class="step"><div class="n">02 · UNDERSTAND</div><strong>Build the current context</strong><p>Progress, requests, learning needs and opportunities are brought into view.</p></div>
-          <div class="step"><div class="n">03 · ASSIST</div><strong>Guide the next useful action</strong><p>Get explanations, study support, service discovery and structured next steps.</p></div>
-          <div class="step"><div class="n">04 · ESCALATE</div><strong>Keep consequential control human</strong><p>Requests that affect records, institutions or regulated activity remain user- or institution-controlled.</p></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="ecosystem" class="section" aria-labelledby="ecosystem-title">
-      <div class="kicker">Carbon Actual ecosystem rail</div>
-      <h2 id="ecosystem-title">A product bubble inside a larger system.</h2>
-      <p class="lede">NOUN BOT is an InstituteGPT product. It can communicate with other ecosystem bubbles through defined interfaces, while keeping its own student domain and authority boundaries clear.</p>
-      <div class="ecosystem">
-        <div class="system-card">
-          <div class="system-map" aria-label="NOUN BOT ecosystem relationships">
-            <div class="system-node core"><strong>Human / Carbon Actual Identity</strong><span>The person remains the root identity.</span></div>
-            <div class="connector" aria-hidden="true"></div>
-            <div class="system-node"><strong>InstituteGPT</strong><span>Education system and shared intelligence context.</span></div>
-            <div class="connector" aria-hidden="true"></div>
-            <div class="system-node"><strong>NOUN BOT</strong><span>Student operating layer for the NOUN learner journey.</span></div>
-            <div class="connector" aria-hidden="true"></div>
-            <div class="system-node"><strong>WhatsApp + Web Hub</strong><span>Communication and experience surfaces.</span></div>
-            <div class="connector" aria-hidden="true"></div>
-            <div class="system-node"><strong>Institution / Provider Boundaries</strong><span>Authoritative records and consequential actions stay at the proper boundary.</span></div>
-          </div>
-        </div>
-        <aside>
-          <div class="boundary"><h3>Trust by design</h3><div class="checks"><div class="check"><b>✓</b><span>Official institutional claims should be source-backed and freshness-aware.</span></div><div class="check"><b>✓</b><span>Private academic information is not exposed to marketplace customers unless deliberately published.</span></div><div class="check"><b>✓</b><span>Marketplace and provider listings require appropriate provider consent and verification.</span></div></div></div>
-          <div class="boundary"><h3>Clear boundaries</h3><div class="checks"><div class="check"><b>✓</b><span>Mock assessments support learning; they are not live exams.</span></div><div class="check"><b>✓</b><span>NOUN BOT does not impersonate a student or take examinations.</span></div><div class="check"><b>✓</b><span>Finance features explain and discover; they do not originate credit, move money or execute investments.</span></div></div></div>
-        </aside>
-      </div>
-    </section>
-
-    <section class="final" aria-labelledby="final-title">
-      <div class="kicker">Start from where you are</div>
-      <h2 id="final-title">Your programme is only one part of the student journey.</h2>
-      <p>Open the NOUN student hub and see the wider operating environment built around your identity — with the same student context extending across the journey.</p>
-      <div class="actions"><a class="btn primary" href="/dashboard/">Open Student Hub <span aria-hidden="true">→</span></a><a class="btn secondary" href="mailto:carbonactuall@gmail.com">Contact the team</a></div>
-    </section>
-  </main>
-
-  <footer class="foot">
-    <span>NOUN BOT · InstituteGPT · Carbon Actual</span>
-    <span><a href="/dashboard/">Operations dashboard</a> · Built on the NOUN Student Ecosystem domain model</span>
-  </footer>
+<section class="final wrap" aria-labelledby="final-title"><div class="section-head"><div class="label">The next state</div><h2 id="final-title">Enter the environment. Let your NOUN identity do the organising.</h2><p>Use the operating hub for the detailed experience while this surface remains the public doorway into the product.</p></div><div class="actions"><a class="btn primary" href="/dashboard/">Open Student Hub →</a><a class="btn secondary" href="#main">Back to top ↑</a></div></section>
+</main>
+<footer class="foot"><span>NOUN BOT · InstituteGPT · Carbon Actual</span><span>Public landing: / · Operations hub: /dashboard/</span></footer>
+<script type="module">
+import { animate, inView, scroll, stagger } from 'https://cdn.jsdelivr.net/npm/motion@12.23.12/+esm';
+const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const progress=document.getElementById('progress');
+if(!reduce){
+  scroll(progress,{offset:['start start','end end']});
+  animate('.hero-copy',{opacity:[0,1],y:[28,0]},{duration:1,ease:[.22,1,.36,1]});
+  animate('.visual',{opacity:[0,1],scale:[.94,1]},{duration:1.15,delay:.12,ease:[.22,1,.36,1]});
+  animate('.orbit',{rotate:360},{duration:36,repeat:Infinity,ease:'linear'});
+  animate('.core',{rotate:[12,15,12],scale:[1,1.025,1]},{duration:5,repeat:Infinity,ease:'easeInOut'});
+  animate('.node',{y:[0,-5,0]},{duration:3.8,delay:stagger(.18),repeat:Infinity,ease:'easeInOut'});
+  document.querySelectorAll('.section,.stage,.cap,.plate,.boundary').forEach(el=>inView(el,()=>animate(el,{opacity:[0,1],y:[22,0]},{duration:.65,ease:[.22,1,.36,1]}),{margin:'-14% 0px -7% 0px'}));
+  document.querySelectorAll('.cap').forEach(card=>{card.addEventListener('mouseenter',()=>animate(card,{scale:1.018},{duration:.2}));card.addEventListener('mouseleave',()=>animate(card,{scale:1},{duration:.2}))});
+}
+</script>
 </body>
 </html>
