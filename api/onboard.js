@@ -44,13 +44,24 @@ module.exports = async (req, res) => {
       last_seen_at: new Date().toISOString()
     };
 
-    const { data, error } = await db
+    const { data: existing, error: lookupError } = await db
       .from('students')
-      .upsert(payload, { onConflict: 'tenant_id,phone' })
-      .select('phone,full_name,email,study_level,programme_title,level')
-      .single();
+      .select('phone')
+      .eq('tenant_id', tenant_id)
+      .eq('phone', phone)
+      .maybeSingle();
+    if (lookupError) throw lookupError;
 
-    if (error) throw error;
+    let data;
+    if (existing) {
+      const updated = await db.from('students').update(payload).eq('tenant_id', tenant_id).eq('phone', phone).select('phone,full_name,email,study_level,programme_title,level').single();
+      if (updated.error) throw updated.error;
+      data = updated.data;
+    } else {
+      const created = await db.from('students').insert(payload).select('phone,full_name,email,study_level,programme_title,level').single();
+      if (created.error) throw created.error;
+      data = created.data;
+    }
 
     await db.from('student_activity').insert({
       tenant_id,
