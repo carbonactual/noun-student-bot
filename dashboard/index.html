@@ -2,226 +2,108 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#071018">
-  <title>Omni — Carbon Actual</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="NOUN BOT — your AI academic companion for National Open University of Nigeria students.">
+  <title>NOUN BOT — Your AI academic companion</title>
   <style>
     :root{
-      color-scheme:dark;
-      --bg:#071018;--panel:#0c1821;--panel-2:#0a141c;--line:#1b3441;
-      --text:#eaf3f7;--muted:#8ea7b3;--soft:#66808c;--accent:#80e5d0;
-      --accent-2:#9fc7ff;--warm:#e8c88f;--danger:#ef9b9b;--ok:#95e7ab;
-      --shadow:0 20px 60px rgba(0,0,0,.28);--r:18px
+      --green:#087f5b;--green-dark:#075b43;--green-soft:#eaf7f1;--green-pale:#f4fbf7;
+      --ink:#17332a;--muted:#60746d;--line:#dcebe4;--white:#fff;--shadow:0 24px 70px rgba(12,70,49,.10)
     }
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{margin:0;background:
-      radial-gradient(circle at 78% 0%,rgba(128,229,208,.09),transparent 28rem),
-      radial-gradient(circle at 15% 18%,rgba(159,199,255,.07),transparent 26rem),
-      var(--bg);color:var(--text);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    button{font:inherit;color:inherit}
-    a{color:inherit;text-decoration:none}
-    .shell{min-height:100vh;display:grid;grid-template-columns:250px minmax(0,1fr)}
-    .rail{position:sticky;top:0;height:100vh;border-right:1px solid var(--line);background:rgba(6,15,22,.84);backdrop-filter:blur(16px);padding:22px 16px;display:flex;flex-direction:column}
-    .brand{display:flex;align-items:center;gap:12px;padding:4px 10px 24px}
-    .sigil{width:38px;height:38px;border:1px solid rgba(128,229,208,.38);border-radius:50%;display:grid;place-items:center;box-shadow:0 0 30px rgba(128,229,208,.09);font-weight:800;color:var(--accent)}
-    .brand strong{display:block;font-size:15px;letter-spacing:.05em}.brand span{display:block;color:var(--muted);font-size:11px;margin-top:2px}
-    .nav-label{padding:0 10px;margin:16px 0 7px;color:var(--soft);font-size:10px;letter-spacing:.16em;text-transform:uppercase}
-    nav{display:grid;gap:4px}nav a{padding:10px 11px;border-radius:11px;color:#b5c7ce;display:flex;align-items:center;gap:10px}nav a:hover,nav a.active{background:#10222c;color:var(--text)}
-    .dot{width:7px;height:7px;border-radius:50%;background:#38515d}.active .dot{background:var(--accent);box-shadow:0 0 12px rgba(128,229,208,.7)}
-    .authority{margin-top:auto;border:1px solid var(--line);border-radius:15px;background:linear-gradient(180deg,#0d1b24,#09131a);padding:14px}
-    .authority small{color:var(--soft);text-transform:uppercase;letter-spacing:.12em;font-size:9px}.authority strong{display:block;margin-top:5px;font-size:13px}.authority p{margin:5px 0 0;color:var(--muted);font-size:11px}
-    .main{min-width:0}.top{position:sticky;top:0;z-index:5;border-bottom:1px solid rgba(27,52,65,.72);background:rgba(7,16,24,.79);backdrop-filter:blur(18px);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px}
-    .crumb{color:var(--muted);font-size:12px}.crumb b{color:var(--text)}
-    .top-actions{display:flex;align-items:center;gap:10px}.status{padding:7px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:11px}.status i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--ok);margin-right:7px}
-    .content{max-width:1460px;margin:0 auto;padding:34px 28px 70px}
-    .hero{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.65fr);gap:18px;align-items:stretch}.hero-copy,.pulse-card,.panel{border:1px solid var(--line);background:linear-gradient(180deg,rgba(13,28,38,.93),rgba(9,20,28,.93));box-shadow:var(--shadow);border-radius:var(--r)}
-    .hero-copy{padding:30px;position:relative;overflow:hidden}.hero-copy:after{content:"";position:absolute;inset:auto -80px -140px auto;width:330px;height:330px;border-radius:50%;border:1px solid rgba(128,229,208,.1);box-shadow:0 0 80px rgba(128,229,208,.05)}
-    .eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:10px}.hero h1{font-size:clamp(30px,4vw,54px);line-height:1.02;margin:12px 0 12px;max-width:720px;letter-spacing:-.035em}.hero p{margin:0;color:var(--muted);max-width:700px;font-size:15px}
-    .signal-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}.signal{border:1px solid var(--line);background:#0b1720;border-radius:999px;padding:7px 10px;color:#bfd0d7;font-size:11px}.signal em{color:var(--accent);font-style:normal}
-    .pulse-card{padding:22px;display:flex;flex-direction:column;justify-content:space-between}.pulse-top{display:flex;justify-content:space-between;align-items:center}.pulse-top h2{font-size:13px;margin:0}.pulse-mark{width:32px;height:32px;border-radius:10px;border:1px solid rgba(128,229,208,.25);display:grid;place-items:center;color:var(--accent)}.pulse-card .big{font-size:40px;font-weight:720;letter-spacing:-.04em;margin:18px 0 0}.pulse-card .sub{color:var(--muted);font-size:11px}.bar{height:6px;background:#132630;border-radius:999px;overflow:hidden;margin-top:18px}.bar span{display:block;height:100%;width:68%;background:linear-gradient(90deg,#6cb6aa,var(--accent));border-radius:inherit}.pulse-meta{display:flex;justify-content:space-between;gap:12px;margin-top:9px;color:var(--soft);font-size:10px}
-    .section{margin-top:20px}.section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:10px}.section-head h2{font-size:13px;letter-spacing:.03em;margin:0}.section-head p{margin:2px 0 0;color:var(--muted);font-size:11px}.section-head a{color:var(--accent);font-size:11px}
-    .metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.metric{padding:17px;border:1px solid var(--line);background:#0b1720;border-radius:15px}.metric .k{color:var(--soft);font-size:10px;text-transform:uppercase;letter-spacing:.12em}.metric .v{font-size:27px;font-weight:700;margin-top:7px;letter-spacing:-.03em}.metric .hint{margin-top:3px;color:var(--muted);font-size:10px}
-    .ecosystem{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);gap:12px}.panel{box-shadow:none;padding:20px}.habitat{min-height:390px;position:relative;overflow:hidden;background:
-      radial-gradient(circle at 50% 45%,rgba(128,229,208,.07),transparent 10rem),
-      linear-gradient(180deg,#0b1821,#08131a)}
-    .habitat-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(128,159,170,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(128,159,170,.05) 1px,transparent 1px);background-size:34px 34px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.9),transparent)}
-    .orbit{position:absolute;border:1px solid rgba(128,229,208,.08);border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%)}.o1{width:230px;height:230px}.o2{width:355px;height:355px}.o3{width:480px;height:480px}
-    .node{position:absolute;transform:translate(-50%,-50%);padding:10px 13px;border:1px solid var(--line);background:rgba(8,21,29,.92);border-radius:13px;min-width:95px;text-align:center;box-shadow:0 12px 35px rgba(0,0,0,.23)}.node strong{display:block;font-size:12px}.node span{display:block;color:var(--muted);font-size:9px;margin-top:3px}.node.main-node{left:50%;top:50%;border-color:rgba(128,229,208,.38);box-shadow:0 0 50px rgba(128,229,208,.09)}.node.noun{left:18%;top:32%}.node.rites{left:80%;top:26%}.node.ngin{left:79%;top:72%}.node.naire{left:19%;top:76%}.node.hapi{left:50%;top:14%}.node.omni{left:50%;top:86%}
-    .links{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.links line{stroke:rgba(128,229,208,.18);stroke-width:1.2;stroke-dasharray:4 8;animation:dash 9s linear infinite}.links line.strong{stroke:rgba(128,229,208,.35)}@keyframes dash{to{stroke-dashoffset:-80}}
-    .flow-side{display:grid;gap:12px}.flow-card{padding:19px;border:1px solid var(--line);background:#0b1720;border-radius:15px}.flow-row{display:flex;gap:10px;align-items:flex-start}.flow-icon{width:30px;height:30px;border-radius:9px;background:#10252e;color:var(--accent);display:grid;place-items:center;flex:0 0 auto}.flow-copy{min-width:0}.flow-copy strong{display:block;font-size:12px}.flow-copy span{display:block;color:var(--muted);font-size:10px;margin-top:2px}.flow-line{height:1px;background:var(--line);margin:14px 0}.flow-value{font-size:12px;color:#c6d7dc}.flow-value b{color:var(--accent);font-weight:600}
-    .lower{display:grid;grid-template-columns:1fr 1fr;gap:12px}.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:11px 7px;text-align:left;border-bottom:1px solid rgba(27,52,65,.8);white-space:nowrap}.table th{color:var(--soft);font-size:9px;text-transform:uppercase;letter-spacing:.12em}.table td{font-size:11px;color:#cbd8dd}.badge{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;font-size:9px;background:#11232b;color:#9fb8c1}.badge.ok{background:#10251b;color:var(--ok)}
-    .opps{display:grid;gap:9px}.opp{padding:13px 14px;border:1px solid var(--line);background:#0b1720;border-radius:13px;display:flex;justify-content:space-between;gap:14px;align-items:center}.opp strong{font-size:11px}.opp p{margin:3px 0 0;color:var(--muted);font-size:10px}.opp .score{color:var(--accent);font-size:11px;white-space:nowrap}
-    .footer{margin-top:20px;color:var(--soft);font-size:10px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
-    .error{border:1px solid rgba(239,155,155,.25);background:#211316;color:#efb0b0;padding:14px;border-radius:12px;margin-top:16px}
-    @media (max-width:1080px){.shell{grid-template-columns:82px 1fr}.rail{padding:16px 9px}.brand{justify-content:center;padding:4px 0 24px}.brand>div:last-child,.nav-label,.authority{display:none}.brand .sigil{width:42px;height:42px}.rail nav a{justify-content:center;font-size:0}.rail nav a .dot{width:8px;height:8px}.hero,.ecosystem{grid-template-columns:1fr}.lower{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(3,minmax(0,1fr))}}
-    @media (max-width:680px){.shell{display:block}.rail{position:fixed;z-index:10;bottom:12px;left:12px;right:12px;top:auto;height:auto;border:1px solid var(--line);border-radius:18px;padding:8px;flex-direction:row}.brand,.authority{display:none}.rail nav{display:flex;width:100%;justify-content:space-around}.rail nav a{padding:10px 13px}.content{padding:24px 14px 100px}.top{padding:12px 14px}.hero-copy,.pulse-card{padding:22px}.hero h1{font-size:36px}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.metric:last-child{grid-column:1/-1}.node{min-width:78px;padding:8px 9px}.node strong{font-size:10px}.node span{font-size:8px}.o1{width:185px;height:185px}.o2{width:290px;height:290px}.o3{width:390px;height:390px}.habitat{min-height:330px}.node.noun{left:16%;top:32%}.node.rites{left:82%;top:25%}.node.ngin{left:82%;top:72%}.node.naire{left:17%;top:76%}.node.hapi{top:12%}.node.omni{top:88%}}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}
+    body{margin:0;background:var(--white);color:var(--ink);font:16px/1.6 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    a{color:inherit;text-decoration:none}button,input,select{font:inherit}
+    .wrap{width:min(1120px,calc(100% - 40px));margin:auto}
+    header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(220,235,228,.8)}
+    .nav{height:72px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:-.02em}.mark{width:38px;height:38px;border-radius:12px;background:var(--green);color:#fff;display:grid;place-items:center;font-weight:900;box-shadow:0 8px 22px rgba(8,127,91,.18)}
+    .brand small{display:block;color:#7a8c86;font-size:9px;letter-spacing:.12em;margin-top:1px;font-weight:700}
+    .navlinks{display:flex;align-items:center;gap:26px;color:#50665e;font-size:14px}.navlinks a:hover{color:var(--green)}
+    .nav-cta,.hero-cta{background:var(--green);color:#fff;padding:11px 18px;border-radius:10px;font-weight:700;transition:transform .2s,background .2s,box-shadow .2s}.nav-cta:hover,.hero-cta:hover{background:var(--green-dark);transform:translateY(-2px);box-shadow:0 10px 24px rgba(8,127,91,.18)}
+    .hero{padding:92px 0 76px;background:linear-gradient(180deg,#fff 0%,#f7fcf9 100%);overflow:hidden}
+    .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:70px;align-items:center}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--green);font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.eyebrow i{width:7px;height:7px;border-radius:50%;background:#21a474}
+    h1{font-size:clamp(46px,6.4vw,76px);line-height:.98;letter-spacing:-.055em;margin:18px 0 22px;max-width:690px}.accent{color:var(--green)}
+    .lead{font-size:19px;line-height:1.65;color:var(--muted);max-width:610px;margin:0}.hero-actions{display:flex;align-items:center;gap:15px;margin-top:30px}.secondary{color:var(--green);font-weight:700;padding:11px 4px}.secondary:hover{text-decoration:underline}
+    .trust{display:flex;gap:18px;flex-wrap:wrap;margin-top:28px;color:#71837d;font-size:12px}.trust span{display:flex;align-items:center;gap:7px}.check{width:18px;height:18px;border-radius:50%;background:var(--green-soft);color:var(--green);display:grid;place-items:center;font-size:11px;font-weight:900}
+    .hero-card{position:relative;background:#fff;border:1px solid var(--line);border-radius:28px;padding:30px;box-shadow:var(--shadow);transform:rotate(1deg);transition:transform .35s ease}.hero-card:hover{transform:rotate(0) translateY(-4px)}
+    .bot-head{display:flex;align-items:center;gap:13px;padding-bottom:22px;border-bottom:1px solid var(--line)}.bot-avatar{width:48px;height:48px;border-radius:16px;background:var(--green-soft);color:var(--green);display:grid;place-items:center;font-size:22px;font-weight:800}.bot-head strong{display:block}.bot-head span{display:block;color:#81918b;font-size:12px;margin-top:2px}
+    .chat{padding:22px 0 6px;display:grid;gap:13px}.bubble{padding:14px 16px;border-radius:16px;max-width:88%;font-size:14px;line-height:1.5}.bot{background:var(--green-pale);border:1px solid #e2f0e9}.student{justify-self:end;background:var(--green);color:#fff}.mini-links{display:flex;gap:7px;flex-wrap:wrap;margin-top:2px}.mini-links span{border:1px solid var(--line);padding:7px 10px;border-radius:999px;font-size:11px;color:#5f716b;background:#fff}
+    section{padding:82px 0}.section-intro{max-width:650px;margin-bottom:38px}.section-intro h2{font-size:clamp(31px,4vw,46px);line-height:1.05;letter-spacing:-.04em;margin:10px 0 13px}.section-intro p{color:var(--muted);margin:0;font-size:17px}
+    .features{background:#fff}.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.feature{padding:28px;border:1px solid var(--line);border-radius:20px;background:#fff;transition:transform .25s,box-shadow .25s}.feature:hover{transform:translateY(-5px);box-shadow:0 18px 45px rgba(12,70,49,.08)}.icon{width:42px;height:42px;border-radius:13px;background:var(--green-soft);color:var(--green);display:grid;place-items:center;font-weight:900;margin-bottom:20px}.feature h3{margin:0 0 8px;font-size:18px}.feature p{margin:0;color:var(--muted);font-size:14px}
+    .how{background:var(--green-pale)}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0}.step{padding:8px 34px 8px 0;border-right:1px solid #d6e9df;margin-right:34px}.step:last-child{border:0;margin:0}.number{color:var(--green);font-weight:900;font-size:13px}.step h3{font-size:21px;margin:10px 0 6px}.step p{color:var(--muted);font-size:14px;margin:0}
+    .signup{padding:88px 0}.signup-box{display:grid;grid-template-columns:.85fr 1.15fr;gap:55px;align-items:center;background:var(--green);color:#fff;border-radius:28px;padding:48px}.signup-box h2{font-size:clamp(32px,4vw,48px);line-height:1.03;letter-spacing:-.04em;margin:12px 0}.signup-box p{color:#d8eee6;margin:0}.form{background:#fff;border-radius:18px;padding:22px;display:grid;gap:13px}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:grid;gap:6px}.field label{font-size:11px;color:#6d7e78;font-weight:700}.field input,.field select{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px 12px;outline:none;background:#fff;color:var(--ink)}.field input:focus,.field select:focus{border-color:#83bea9;box-shadow:0 0 0 3px #eaf7f1}.submit{border:0;background:var(--green-dark);color:#fff;border-radius:10px;padding:12px;font-weight:800;cursor:pointer}.form-note{color:#8a9893;font-size:10px;text-align:center}.success{display:none;text-align:center;padding:25px;color:var(--green-dark)}
+    footer{border-top:1px solid var(--line);padding:28px 0;color:#75857f;font-size:12px}.footer-row{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+    @media(max-width:850px){.navlinks{display:none}.hero{padding:65px 0}.hero-grid,.signup-box{grid-template-columns:1fr;gap:38px}.hero-card{transform:none}.feature-grid,.steps{grid-template-columns:1fr}.step{border:0;border-bottom:1px solid #d6e9df;margin:0;padding:22px 0}.signup-box{padding:30px}.wrap{width:min(100% - 28px,1120px)}}
+    @media(max-width:560px){h1{font-size:48px}.lead{font-size:17px}.hero-actions{align-items:flex-start;flex-direction:column}.form-row{grid-template-columns:1fr}section{padding:62px 0}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
   </style>
 </head>
 <body>
-  <div class="shell">
-    <aside class="rail">
-      <div class="brand"><div class="sigil">A</div><div><strong>OMNI</strong><span>CARBON ACTUAL</span></div></div>
-      <div class="nav-label">Observe</div>
-      <nav aria-label="Primary navigation">
-        <a class="active" href="#ecosystem"><i class="dot"></i>Habitat</a>
-        <a href="#pulse"><i class="dot"></i>Pulse</a>
-        <a href="#flows"><i class="dot"></i>Flows</a>
-        <a href="#opportunities"><i class="dot"></i>Opportunities</a>
-      </nav>
-      <div class="nav-label">Product bubbles</div>
-      <nav>
-        <a href="#ecosystem"><i class="dot"></i>NOÚN BOT</a>
-        <a href="#ecosystem"><i class="dot"></i>RITES</a>
-        <a href="#ecosystem"><i class="dot"></i>NGIN</a>
-        <a href="#ecosystem"><i class="dot"></i>NAIRE</a>
-      </nav>
-      <div class="authority"><small>Authority</small><strong>Human ABBA</strong><p>ABBA Master Intelligence operates within delegated authority and the ecosystem constitution.</p></div>
-    </aside>
-
-    <div class="main">
-      <header class="top">
-        <div class="crumb"><b>Omni</b> <span>/ Carbon Actual habitat</span></div>
-        <div class="top-actions"><div class="status"><i></i>Pulse live</div><div class="status">Privacy-safe view</div></div>
-      </header>
-
-      <main class="content">
-        <section class="hero" id="pulse">
-          <div class="hero-copy">
-            <div class="eyebrow">Living ecosystem interface</div>
-            <h1>See what exists.<br>See what is moving.<br>See what can emerge.</h1>
-            <p>Omni brings the ecosystem into one field of view without flattening its habitats. Value given and pulse received are interpreted by ABBA so relationships, flows and opportunities become visible.</p>
-            <div class="signal-row">
-              <span class="signal">Identity <em>connected</em></span>
-              <span class="signal">WhatsApp <em>active</em></span>
-              <span class="signal">ABBA <em>orchestrating</em></span>
-              <span class="signal">External actions <em>verified</em></span>
-            </div>
-          </div>
-          <div class="pulse-card">
-            <div>
-              <div class="pulse-top"><h2>Pulse received</h2><div class="pulse-mark">↝</div></div>
-              <div class="big" id="pulseValue">—</div>
-              <div class="sub">interpretable signals across the current NOUN habitat</div>
-              <div class="bar"><span id="pulseBar"></span></div>
-              <div class="pulse-meta"><span id="pulseDetail">Awaiting live data</span><span>ABBA</span></div>
-            </div>
-            <div class="pulse-meta"><span>Value given</span><strong id="valueValue">—</strong></div>
-          </div>
-        </section>
-
-        <section class="section" id="ecosystem">
-          <div class="section-head"><div><h2>The habitat</h2><p>Independent bubbles, communicating signals and value without becoming one monolith.</p></div><a href="#flows">Follow the flows ↓</a></div>
-          <div class="metrics" id="metrics"></div>
-        </section>
-
-        <section class="section">
-          <div class="ecosystem">
-            <div class="panel habitat" aria-label="Carbon Actual ecosystem relationship map">
-              <div class="habitat-grid"></div><div class="orbit o3"></div><div class="orbit o2"></div><div class="orbit o1"></div>
-              <svg class="links" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                <line x1="50" y1="50" x2="18" y2="32" class="strong"/><line x1="50" y1="50" x2="80" y2="26" class="strong"/><line x1="50" y1="50" x2="79" y2="72"/><line x1="50" y1="50" x2="19" y2="76"/><line x1="50" y1="50" x2="50" y2="14"/><line x1="50" y1="50" x2="50" y2="86" class="strong"/>
-              </svg>
-              <div class="node main-node"><strong>Carbon Actual</strong><span>core / floor</span></div>
-              <div class="node noun"><strong>NOUN BOT</strong><span>education avenue</span></div>
-              <div class="node rites"><strong>RITES</strong><span>continuity avenue</span></div>
-              <div class="node ngin"><strong>NGIN</strong><span>organization avenue</span></div>
-              <div class="node naire"><strong>NAIRE</strong><span>human habitat</span></div>
-              <div class="node hapi"><strong>HAPI / #</strong><span>identity bridge</span></div>
-              <div class="node omni"><strong>OMNI</strong><span>visible command surface</span></div>
-            </div>
-
-            <div class="flow-side">
-              <div class="panel" id="flows">
-                <div class="section-head"><div><h2>Flows</h2><p>How the habitat is communicating.</p></div></div>
-                <div class="flow-card"><div class="flow-row"><div class="flow-icon">↗</div><div class="flow-copy"><strong>WhatsApp → NOUN BOT</strong><span>study interactions become learning signals</span></div></div><div class="flow-line"></div><div class="flow-value">Pulse <b id="questionsFlow">—</b> · answered <b id="answeredFlow">—</b></div></div>
-                <div class="flow-card"><div class="flow-row"><div class="flow-icon">◇</div><div class="flow-copy"><strong>NOUN BOT ↔ ecosystem</strong><span>learner activity informs relationships and progression</span></div></div><div class="flow-line"></div><div class="flow-value">Support requests <b id="supportFlow">—</b> · fallback <b id="fallbackFlow">—</b></div></div>
-                <div class="flow-card"><div class="flow-row"><div class="flow-icon">◎</div><div class="flow-copy"><strong>ABBA → opportunity</strong><span>signals are interpreted rather than merely displayed</span></div></div><div class="flow-line"></div><div class="flow-value">Verification boundary <b>enforced</b></div></div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="section lower">
-          <div class="panel">
-            <div class="section-head"><div><h2>Current activity</h2><p>Operational reality from the live NOUN source.</p></div></div>
-            <div class="table-wrap"><table class="table"><thead><tr><th>Signal</th><th>Value</th><th>Meaning</th></tr></thead><tbody id="activity"></tbody></table></div>
-          </div>
-          <div class="panel" id="opportunities">
-            <div class="section-head"><div><h2>Opportunities ABBA can see</h2><p>Derived from existing value and received pulse; not fabricated actions.</p></div></div>
-            <div class="opps" id="opps"></div>
-          </div>
-        </section>
-
-        <section class="section panel">
-          <div class="section-head"><div><h2>Operational horizon</h2><p>Deadlines and campaigns remain available without taking over the screen.</p></div></div>
-          <div class="table-wrap"><table class="table"><thead><tr><th>Horizon</th><th>Course / campaign</th><th>Detail</th><th>Status</th></tr></thead><tbody id="horizon"></tbody></table></div>
-        </section>
-
-        <div id="error" class="error" hidden></div>
-        <footer class="footer"><span>Omni · Carbon Actual · Audubon Continuum</span><span id="loaded">Loading ecosystem pulse…</span></footer>
-      </main>
-    </div>
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#top" aria-label="NOUN BOT home"><span class="mark">N</span><span>NOUN BOT<small>AI FOR NOUN STUDENTS</small></span></a>
+    <nav class="navlinks"><a href="#features">What it helps with</a><a href="#how">How it works</a><a class="nav-cta" href="#join">Get started</a></nav>
   </div>
-
-  <script>
-    const nf = new Intl.NumberFormat('en-NG');
-    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-
-    function setMetrics(d){
-      const s=d.stats||{}, i=d.intelligence||{};
-      const metrics=[
-        ['Learners',s.students||0,'ecosystem participants'],
-        ['Active',s.active_students||0,'currently active'],
-        ['Deadlines',s.upcoming_deadlines||0,'next visible horizon'],
-        ['Open help',s.open_help||0,'support signals'],
-        ['Learning pulse',i.study_questions||0,'study questions received']
-      ];
-      document.querySelector('#metrics').innerHTML=metrics.map(([k,v,h])=>`<div class="metric"><div class="k">${esc(k)}</div><div class="v">${nf.format(v)}</div><div class="hint">${esc(h)}</div></div>`).join('');
-      document.querySelector('#pulseValue').textContent=nf.format(i.study_questions||0);
-      document.querySelector('#pulseDetail').textContent=`${nf.format(i.study_answered||0)} answered · ${nf.format(i.human_help_requests||0)} human support`; 
-      const q=i.study_questions||0,a=i.study_answered||0;
-      document.querySelector('#pulseBar').style.width=(q?Math.max(10,Math.min(100,(a/q)*100)):14)+'%';
-      document.querySelector('#valueValue').textContent=nf.format((s.active_students||0)+(i.study_answered||0));
-      document.querySelector('#questionsFlow').textContent=nf.format(q);
-      document.querySelector('#answeredFlow').textContent=nf.format(a);
-      document.querySelector('#supportFlow').textContent=nf.format(i.human_help_requests||0);
-      document.querySelector('#fallbackFlow').textContent=nf.format(i.study_fallback||0);
-      document.querySelector('#activity').innerHTML=[
-        ['Study questions',i.study_questions||0,'incoming learning pulse'],
-        ['Answered',i.study_answered||0,'value returned to learners'],
-        ['Fallback',i.study_fallback||0,'signals needing better coverage'],
-        ['Human support',i.human_help_requests||0,'escalation opportunity'],
-        ['Open help',s.open_help||0,'unresolved service demand']
-      ].map(r=>`<tr><td>${esc(r[0])}</td><td>${nf.format(r[1])}</td><td>${esc(r[2])}</td></tr>`).join('');
-
-      const opportunities=[];
-      if((i.study_fallback||0)>0) opportunities.push(['Knowledge coverage','Fallback signals indicate a knowledge gap worth curating.','high']);
-      if((i.human_help_requests||0)>0) opportunities.push(['Human + AI handoff','Human support demand can reveal where services or relationships need strengthening.','high']);
-      if((s.upcoming_deadlines||0)>0) opportunities.push(['Timing window','Upcoming deadlines create a natural moment for proactive learner support.','medium']);
-      if((s.active_students||0)>0) opportunities.push(['Learner value','Active learners are a live habitat for progression, skill and institutional relationships.','medium']);
-      if(!opportunities.length) opportunities.push(['Emergence','As pulse arrives, ABBA will surface relationships here without inventing opportunities.','watch']);
-      document.querySelector('#opps').innerHTML=opportunities.map(([t,p,score])=>`<div class="opp"><div><strong>${esc(t)}</strong><p>${esc(p)}</p></div><div class="score">${esc(score)}</div></div>`).join('');
-
-      const rows=[];
-      (d.deadlines||[]).slice(0,12).forEach(x=>rows.push(['Deadline',`${x.course||'—'}`,x.title||'—',x.due_date||'—']));
-      (d.campaigns||[]).slice(0,10).forEach(x=>rows.push(['Campaign',x.name||'—',x.status||'—',x.created_at?new Date(x.created_at).toLocaleDateString('en-NG'):'—']));
-      document.querySelector('#horizon').innerHTML=rows.length?rows.map(r=>`<tr><td>${esc(r[0])}</td><td><b>${esc(r[1])}</b></td><td>${esc(r[2])}</td><td><span class="badge ${r[0]==='Campaign'?'ok':''}">${esc(r[3])}</span></td></tr>`).join(''):`<tr><td colspan="4">No horizon items yet.</td></tr>`;
-    }
-
-    async function load(){
-      const error=document.querySelector('#error');
-      try{
-        const r=await fetch('/api/dashboard',{cache:'no-store'});
-        if(!r.ok) throw Error('Dashboard data source unavailable');
-        const d=await r.json();
-        setMetrics(d);
-        error.hidden=true;
-        document.querySelector('#loaded').textContent='Pulse refreshed '+new Date(d.generated_at||Date.now()).toLocaleString('en-NG',{timeZone:'Africa/Lagos'});
-      }catch(e){error.hidden=false;error.textContent=e.message;document.querySelector('#loaded').textContent='Waiting for source recovery';}
-    }
-    load();
-    setInterval(load,60000);
-  </script>
+</header>
+<main id="top">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="eyebrow"><i></i> Built for NOUN students</div>
+        <h1>Your <span class="accent">AI academic companion.</span></h1>
+        <p class="lead">NOUN BOT helps you understand your courses, prepare for exams, stay organized and make progress — with guidance tailored to your student journey.</p>
+        <div class="hero-actions"><a class="hero-cta" href="#join">Join NOUN BOT</a><a class="secondary" href="#features">See what it does →</a></div>
+        <div class="trust"><span><b class="check">✓</b> Personalised support</span><span><b class="check">✓</b> Student-first</span><span><b class="check">✓</b> Available when you need it</span></div>
+      </div>
+      <div class="hero-card" aria-label="NOUN BOT example conversation">
+        <div class="bot-head"><div class="bot-avatar">N</div><div><strong>NOUN BOT</strong><span>Your academic companion</span></div></div>
+        <div class="chat">
+          <div class="bubble student">Help me understand this week's course topic.</div>
+          <div class="bubble bot">Of course. I can explain it step by step, give you a simpler example, and then test your understanding with a few questions.</div>
+          <div class="mini-links"><span>Explain simply</span><span>Study questions</span><span>Exam prep</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="features" id="features">
+    <div class="wrap">
+      <div class="section-intro"><div class="eyebrow">One place to study better</div><h2>Made around the way you actually study.</h2><p>From your first course to your final project, NOUN BOT gives you practical academic support without making things complicated.</p></div>
+      <div class="feature-grid">
+        <article class="feature"><div class="icon">01</div><h3>Understand your courses</h3><p>Break difficult topics into clear explanations, examples and guided study sessions.</p></article>
+        <article class="feature"><div class="icon">02</div><h3>Prepare with confidence</h3><p>Revise smarter with practice questions, summaries and exam-focused preparation.</p></article>
+        <article class="feature"><div class="icon">03</div><h3>Stay on track</h3><p>Keep your academic priorities, courses and important next steps easier to manage.</p></article>
+      </div>
+    </div>
+  </section>
+  <section class="how" id="how">
+    <div class="wrap">
+      <div class="section-intro"><div class="eyebrow">Simple by design</div><h2>Tell us about your student journey. We do the rest.</h2></div>
+      <div class="steps">
+        <div class="step"><span class="number">01</span><h3>Create your profile</h3><p>Tell NOUN BOT your programme, level and what you want help with.</p></div>
+        <div class="step"><span class="number">02</span><h3>Ask for help</h3><p>Bring your course questions, revision needs, plans or academic challenges.</p></div>
+        <div class="step"><span class="number">03</span><h3>Keep moving</h3><p>Your support becomes more useful as NOUN BOT learns the context you choose to share.</p></div>
+      </div>
+    </div>
+  </section>
+  <section class="signup" id="join">
+    <div class="wrap signup-box">
+      <div><div class="eyebrow" style="color:#bde8d7">Start here</div><h2>Ready to make studying a little easier?</h2><p>Join the NOUN BOT student experience. It starts with a few details about you.</p></div>
+      <form class="form" id="signupForm">
+        <div class="form-row"><div class="field"><label for="name">Your name</label><input id="name" name="name" required placeholder="Full name"></div><div class="field"><label for="email">Email</label><input id="email" name="email" type="email" required placeholder="you@example.com"></div></div>
+        <div class="form-row"><div class="field"><label for="programme">Programme</label><input id="programme" name="programme" required placeholder="e.g. B.Sc. Computer Science"></div><div class="field"><label for="level">Level</label><select id="level" name="level" required><option value="">Select level</option><option>100 Level</option><option>200 Level</option><option>300 Level</option><option>400 Level</option><option>500 Level</option><option>Postgraduate</option><option>Certificate / Other</option></select></div></div>
+        <div class="field"><label for="need">What do you want help with?</label><input id="need" name="need" placeholder="Courses, exams, research, planning..." required></div>
+        <button class="submit" type="submit">Create my NOUN BOT profile</button><div class="form-note">We’ll use these details to tailor your student experience.</div>
+        <div class="success" id="success">✓ Thanks. Your interest has been captured. We’ll take you to the next step soon.</div>
+      </form>
+    </div>
+  </section>
+</main>
+<footer><div class="wrap footer-row"><span>© 2026 NOUN BOT</span><span>AI academic support for National Open University of Nigeria students.</span></div></footer>
+<script>
+  const form=document.getElementById('signupForm');
+  form.addEventListener('submit',e=>{e.preventDefault();form.querySelectorAll('input,select,button,.form-note').forEach(el=>el.style.display='none');document.getElementById('success').style.display='block';});
+</script>
 </body>
 </html>
