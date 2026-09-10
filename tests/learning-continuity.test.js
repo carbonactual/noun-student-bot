@@ -37,3 +37,8 @@ test('study mode normalization rejects arbitrary modes', () => {
   assert.equal(normalizeMode('teach me'), 'tutorial');
   assert.equal(normalizeMode('unknown'), 'tutor');
 });
+
+test('today plan is deterministic for identical inputs', () => {
+  const input = { deadlines: [{ title: 'LAW302 exam', course_code: 'LAW302', due_date: '2026-09-15' }], course_momentum: [], now: '2026-09-10T00:00:00.000Z' };
+  assert.deepEqual(buildTodayPlan(input), buildTodayPlan(input));
+});
