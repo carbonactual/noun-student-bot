@@ -72,6 +72,21 @@ External institutional/provider boundaries when explicitly authorized
 Carbon Actual I/O remains the regulated financial execution boundary.
 ```
 
+## Learning continuity layer
+
+The canonical Supabase project now contains tenant-scoped persistence for:
+
+- student course enrolments
+- study questions and tutor modes
+- learner notes linked to questions when useful
+- learning sessions and continuity metadata
+
+The database migration is captured in `supabase-noun-learning-continuity.sql`. Row-level security uses the existing Carbon Actual tenant boundary rather than exposing student records publicly.
+
+## AI study layer
+
+`api/ai-study.js` is the course-aware AI study endpoint. It combines student intelligence, verified knowledge retrieval, live evidence where available, matched practice material and explicit tutor modes (`tutor`, `tutorial`, `practice`, `revision`). It is designed to distinguish official evidence from secondary evidence and to avoid fabricating NOUN rules or pretending to access private student portals.
+
 ## Important boundaries
 
 - Mock assessments are for practice and learning only.
@@ -86,9 +101,11 @@ Carbon Actual I/O remains the regulated financial execution boundary.
 ## Current implementation artifacts
 
 - `lib/student-ecosystem.js` — widened domains, intents and boundaries.
+- `api/ai-study.js` — grounded course-aware study endpoint.
 - `tests/student-ecosystem-v4.test.js` — coverage for widened scope and boundaries.
 - `supabase-student-ecosystem-v4.sql` — state-bearing contracts for forms, requests, learning media, mock practice, physical services and authorized representation.
+- `supabase-noun-learning-continuity.sql` — canonical learner continuity persistence applied to Supabase.
 - `docs/NOUN_STUDENT_ECOSYSTEM_SCOPE_V4.md` — full product scope.
 - `docs/superpowers/plans/2026-09-05-noun-student-ecosystem-v4.md` — implementation plan.
 
-The canonical production implementation remains under `api/` and `dashboard/`; new V4 database capabilities should be activated only after the reviewed Supabase migration is applied and end-to-end tests pass.
+The canonical production implementation remains under `api/` and `dashboard/`; Supabase is the system of record and Vercel is the student/operator delivery surface.
