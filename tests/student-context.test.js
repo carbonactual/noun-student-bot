@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { buildStudentContext } = require('../lib/student-context');
+const { buildStudentContext, buildCourseWorkspace } = require('../lib/student-context');
 
 test('buildStudentContext preserves multiple programmes and derives a primary academic state', () => {
   const context = buildStudentContext(
@@ -25,4 +25,31 @@ test('buildStudentContext preserves multiple programmes and derives a primary ac
   assert.equal(context.academic.programmes.length, 2);
   assert.equal(context.interests.skills[0], 'data analysis');
   assert.equal(context.visibility.marketplace_public, false);
+});
+
+test('buildCourseWorkspace joins enrolled course context to canonical course records', () => {
+  const workspace = buildCourseWorkspace(
+    [
+      { course_code: 'CIT701', status: 'active', study_level: 'masters', semester: 2 },
+      { course_code: 'GST801', status: 'completed', study_level: 'masters', semester: 1 }
+    ],
+    [
+      { course_code: 'CIT701', title: 'Advanced Computing', credit_units: 3, verification_status: 'verified', source_url: 'https://example.test/cit701' },
+      { course_code: 'GST801', title: 'Research Methods', credit_units: 2, verification_status: 'verified', source_url: 'https://example.test/gst801' }
+    ]
+  );
+  assert.deepEqual(workspace, [{
+    course_code: 'CIT701', title: 'Advanced Computing', credit_units: 3,
+    study_level: 'masters', semester: 2, status: 'active',
+    verification_status: 'verified', source_url: 'https://example.test/cit701'
+  }]);
+});
+
+test('buildCourseWorkspace makes missing canonical course metadata explicit', () => {
+  const workspace = buildCourseWorkspace([{ course_code: 'ABC999', status: 'active' }], []);
+  assert.deepEqual(workspace[0], {
+    course_code: 'ABC999', title: null, credit_units: null,
+    study_level: null, semester: null, status: 'active',
+    verification_status: null, source_url: null
+  });
 });
