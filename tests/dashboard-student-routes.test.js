@@ -1,3 +1,4 @@
+const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
@@ -10,7 +11,8 @@ test('dashboard consolidates student context, exam readiness and support routes'
   assert.match(source, /req\.query\?\.route/);
 });
 
-test('student route consolidation removes the need for three extra Vercel functions', () => {
-  const apiFiles = fs.readdirSync('api').filter(name => name.endsWith('.js'));
-  assert.ok(apiFiles.length <= 12, `Vercel Hobby function budget exceeded: ${apiFiles.length}`);
+test('consolidation removes the redundant serverless entrypoints', () => {
+  assert.equal(fs.existsSync('api/student-context.js'), false);
+  assert.equal(fs.existsSync('api/exam-readiness.js'), false);
+  assert.equal(fs.existsSync('api/support-case.js'), false);
 });
