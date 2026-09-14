@@ -1,0 +1,19 @@
+{
+  "product_id":"noun-bot",
+  "name":"NOUN BOT",
+  "purpose":"Personalized NOUN student operating layer under InstituteGPT for academic support, student services, progression, opportunities and continuity.",
+  "unique_capabilities":["NOUN-specific student guidance","course-aware study","mock practice","revision","research/project support","forms and requests","study-centre workflows","student services","skills and careers","student marketplace discovery","student governance information","graduation and alumni continuity"],
+  "foundation_dependencies":["human","entity","#","hapi","relationship","consent","abba","product_abba","agent","swarm","seal","delegation","root","index","actual","becoming","atlas","vault","terminal","continuum","pulse","proof","event","provenance","audit","value","commitment","contract","movement"],
+  "floor_dependencies":["identity_entity_resolution","consent_authority","seal_delegation","abba_orchestration","ai_agent_runtime","search_discovery","relationship_graph","event_pulse_proof","audit_provenance","value_measurement","files_media_data_lifecycle","location_logistics","notifications_communications","integration_api_sdk_adapters","analytics_observability","governance_compliance_policy","data_protection_retention"],
+  "identity_model":"One persistent learner identity spans certificate, undergraduate, postgraduate diploma, master's and PhD stages and multiple programmes.",
+  "authority_model":"Students control their accounts and consequential requests; institutional actions remain user-controlled or institution-authorized and are never impersonated by the AI.",
+  "abba_role":"NOUN-specific product orchestration under InstituteGPT and canonical ABBA, with human escalation for consequential or ambiguous matters.",
+  "pulse_model":"Study questions, learning sessions, requests, progression signals and service outcomes are recorded as auditable activity/Pulse where persistence is appropriate.",
+  "value_measurement_model":"Measures learning effort, time, evidence, capability, service fulfilment and progression independently from money.",
+  "provenance_model":"Official claims carry source, authority, freshness and verification metadata; secondary evidence is distinguished from official evidence.",
+  "security_model":"Uses canonical identity, tenant, authorization, privacy, audit and Ash/Phoenix boundaries; private academic data is never implicitly marketplace-public.",
+  "recovery_model":"Learner continuity is recoverable through verified identity, persistent context, Supabase history, audit trails and human escalation.",
+  "integrations":["InstituteGPT","ABBA","WhatsApp Business","Supabase","Vercel","NOUN public sources","student-service providers"],
+  "data_lifecycle":"Student records are tenant-scoped and purpose-bound; public marketplace publication requires deliberate student action.",
+  "constitutional_compliance":true
+}
