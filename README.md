@@ -87,6 +87,18 @@ The database migration is captured in `supabase-noun-learning-continuity.sql`. R
 
 `api/ai-study.js` is the course-aware AI study endpoint. It combines student intelligence, verified knowledge retrieval, live evidence where available, matched practice material and explicit tutor modes (`tutor`, `tutorial`, `practice`, `revision`). It is designed to distinguish official evidence from secondary evidence and to avoid fabricating NOUN rules or pretending to access private student portals.
 
+## Ecosystem economic, security and no-waste inheritance
+
+NOUN Student Bot is an education branch under InstituteGPT and Carbon Actual. It consumes shared ecosystem semantics rather than creating student-specific versions of identity, authority, Value, Pulse, Ash or Phoenix.
+
+- **Nothing Is Lost:** student actions, requests, learning outcomes, failed requests, costs, evidence and continuity states remain attributable and recoverable rather than silently disappearing.
+- **Value:** learning, time, capability, knowledge, services, opportunities and other student outcomes can carry value without everything becoming money.
+- **Pulse:** feedback and outcome signals can be emitted for learning, service and progression; Pulse is not the underlying value or authority.
+- **Ash:** failed, expired, quarantined, retired or recoverable residue remains traceable as evidence/security/continuity intelligence.
+- **Phoenix:** recovery, rollback, replacement and regeneration are governed; the bot does not acquire unrestricted destructive autonomy.
+- **Financial boundary:** student loans, grants, scholarships, device funding and investment opportunities are discovery/explanation domains in this product. Financial execution remains in the explicitly authorized financial boundary rather than being silently embedded in the student bot.
+- **Human boundary:** the bot cannot sit live examinations or submit graded work for students; human escalation remains available for consequential cases.
+
 ## Important boundaries
 
 - Mock assessments are for practice and learning only.
