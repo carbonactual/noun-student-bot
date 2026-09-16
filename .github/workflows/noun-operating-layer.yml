@@ -1,0 +1,40 @@
+name: NOUN Operating Layer
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: noun-operating-layer-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Run NOUN operating-layer tests
+        run: node --test tests/noun-operating-layer.test.js
+      - name: Run existing test suite
+        run: npm test
+      - name: Verify operating-layer contract
+        run: node scripts/verify-noun-operating-layer.mjs
+      - name: Verify production surface and health
+        if: github.event_name != 'pull_request'
+        env:
+          BASE_URL: https://noun-student-bot-dashboard.vercel.app
+        run: node scripts/verify-noun-operating-layer.mjs
