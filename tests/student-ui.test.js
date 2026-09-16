@@ -6,18 +6,18 @@ const source = fs.readFileSync('student/index.html', 'utf8');
 
 test('student space keeps the home simple and student-centered', () => {
   for (const marker of ['Academic pulse', 'Your priorities', 'Your profile', 'ABBA', 'Learn', 'Prepare', 'Plan', 'Get help', 'Ask ABBA']) {
-    assert.match(source, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    assert.match(source, new RegExp(marker.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')));
   }
   for (const removed of ['Your courses', 'Deadlines & events', 'Past-question matches', 'Human support']) {
-    assert.doesNotMatch(source, new RegExp(removed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    assert.doesNotMatch(source, new RegExp(removed.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')));
   }
 });
 
-test('student space keeps the intelligence and AI underneath the simpler surface', () => {
+test('student space keeps intelligence and AI underneath the simpler surface', () => {
   for (const mode of ['tutor', 'tutorial', 'practice', 'revision']) assert.match(source, new RegExp(`data-mode="${mode}"`));
-  assert.match(source, /\/api\/student-intelligence/);
-  assert.match(source, /\/api\/ai-study/);
-  for (const marker of ['course_momentum', 'support_recommendations', 'deadlines', 'events', 'practice', 'priorities']) assert.match(source, new RegExp(marker));
+  for (const endpoint of ['/api/student-intelligence', '/api/ai-study']) assert.match(source, new RegExp(endpoint.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')));
+  assert.match(source, /Your student context|student context/);
+  assert.doesNotMatch(source, /course_momentum|support_recommendations/);
 });
 
 test('student space does not expose raw student records', () => {
@@ -30,5 +30,5 @@ test('student space uses rounded sans typography and accessible responsive behav
   assert.doesNotMatch(source, /Iowan Old Style|Palatino Linotype|Book Antiqua|Georgia,serif/i);
   assert.match(source, /aria-label/);
   assert.match(source, /prefers-reduced-motion/);
-  assert.match(source, /@media\(max-width:(900|620)px\)/);
+  assert.match(source, /@media\\(max-width:(900|620)px\\)/);
 });
