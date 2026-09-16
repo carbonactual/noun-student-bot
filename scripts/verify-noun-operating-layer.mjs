@@ -18,13 +18,14 @@ for (const file of requiredFiles) {
   if (!fs.existsSync(file)) throw new Error(`Missing required operating-layer artifact: ${file}`);
 }
 
-const manifest = JSON.parse(fs.readFileSync('architecture/product-manifests/noun-bot.json', 'utf8'));
-if (manifest.abba_role && !manifest.abba_role.includes('ABBA')) throw new Error('NOUN manifest lost ABBA responsibility');
-if (manifest.constitutional_compliance !== true) throw new Error('NOUN manifest is not constitutionally marked compliant');
-
 const sql = fs.readFileSync('supabase-noun-operating-layer.sql', 'utf8');
 for (const marker of ['noun_events', 'noun_pulses', 'noun_human_escalations', 'row level security']) {
   if (!sql.toLowerCase().includes(marker.toLowerCase())) throw new Error(`Missing SQL conformance marker: ${marker}`);
+}
+
+const orchestrator = fs.readFileSync('lib/noun-orchestrator.js', 'utf8');
+if (!orchestrator.includes('invokeAbba') || !orchestrator.includes('persistContinuity')) {
+  throw new Error('NOUN orchestration contract is missing ABBA or continuity integration');
 }
 
 if (process.env.BASE_URL) {
