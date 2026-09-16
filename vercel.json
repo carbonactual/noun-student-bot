@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
-    { "source": "/api/onboard", "destination": "/api/dashboard" }
+    { "source": "/api/onboard", "destination": "/api/dashboard" },
+    { "source": "/api/service-intelligence", "destination": "/api/automation" }
   ]
 }
