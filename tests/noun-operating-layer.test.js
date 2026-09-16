@@ -1,5 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
 
 const { buildNounStudentContext } = require('../lib/student-context-kernel');
 const { createEvent, replayKey, classifyOutcome } = require('../lib/event-continuity');
@@ -72,4 +73,11 @@ test('pulse follows outcome and canonical asset/liability comparison', () => {
   assert.equal(pulse.status, 'asset');
   assert.equal(assetLiability(10, 10), 'liability');
   assert.equal(assetLiability(12, 5), 'liability');
+});
+
+test('operating-layer verifier stays scoped to artifacts owned by this repository', () => {
+  const source = fs.readFileSync('scripts/verify-noun-operating-layer.mjs', 'utf8');
+  assert.doesNotMatch(source, /architecture\/product-manifests\/noun-bot\.json/);
+  assert.match(source, /supabase-noun-operating-layer\.sql/);
+  assert.match(source, /lib\/noun-orchestrator\.js/);
 });
