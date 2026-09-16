@@ -44,7 +44,7 @@ test('evidence contract distinguishes authoritative and stale evidence', () => {
   assert.equal(official.verification_state, 'verified');
   assert.equal(evidenceDecision([official]).decision, 'answer');
 
-  const staleOnly = normalizeEvidence({ title: 'Old notice', url: 'https://example.test/old', authority_tier: 4, retrieved_at: '2025-01-01T08:00:00Z' });
+  const staleOnly = normalizeEvidence({ title: 'Old notice', url: 'https://example.test/old', authority_tier: 4, retrieved_at: '2026-07-16T08:00:00Z' });
   assert.equal(staleOnly.freshness_state, 'stale');
   assert.equal(evidenceDecision([staleOnly]).decision, 'escalate');
 });
