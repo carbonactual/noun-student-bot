@@ -28,7 +28,7 @@ jobs:
           set -euo pipefail
           test -n "$SECRET"
           curl --fail-with-body --silent --show-error --max-time 120 \
-            -X POST "$BASE_URL/api/service-intelligence" \
+            -X POST "$BASE_URL/api/automation" \
             -H 'content-type: application/json' \
             -H "x-intelligence-secret: $SECRET" \
             --data '{"trigger":"github-actions","mode":"scheduled","action":"expire"}'

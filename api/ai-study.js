@@ -1,4 +1,4 @@
-const { db, tenantId } = require('../lib/knowledge');
+const { db, tenantId, searchKnowledge, buildGrounding } = require('../lib/knowledge');
 const { normalizeMode } = require('../lib/learning-continuity');
 const { orchestrateNounRequest } = require('../lib/noun-orchestrator');
 
@@ -42,11 +42,35 @@ async function persistStudyQuestion(tid, phone, course, mode, question, answer, 
   return data.id;
 }
 
+async function knowledgeQuery(req, res) {
+  const q = String(req.body?.query || '').trim();
+  if (!q) return res.status(400).json({ error: 'query required' });
+  const result = await searchKnowledge(q, { limit: 10 });
+  return res.status(200).json({
+    ok: true,
+    query: q,
+    confidence: result.confidence,
+    grounding: buildGrounding(result),
+    facts: result.facts.map(x => ({
+      kind: x.kind,
+      title: x.title || x.claim,
+      authority_tier: x.authority_tier || x.source_tier,
+      confidence: x.confidence || null,
+      url: x.source_url || null,
+      verification_status: x.verification_status || x.status || null
+    }))
+  });
+}
+
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
   if (SECRET && req.headers['x-webhook-secret'] !== SECRET) return res.status(401).json({ error: 'Unauthorized' });
 
   try {
+    if (req.body?.query !== undefined && req.body?.question === undefined) {
+      return await knowledgeQuery(req, res);
+    }
+
     const phone = String(req.body?.phone || '').replace(/\D/g, '');
     const question = safe(req.body?.question);
     const mode = normalizeMode(req.body?.mode);
