@@ -1,11 +1,27 @@
 const { createClient } = require('@supabase/supabase-js');
+const { ingest, expireStale, recordDemand } = require('../lib/service-intelligence');
 const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth:{persistSession:false} });
 const SECRET = process.env.WEBHOOK_SECRET;
+const CRON_SECRET = process.env.INTELLIGENCE_CRON_SECRET;
 const DAY = 24*60*60*1000;
 let tenantIdPromise;
 async function tenantId(){
   if(!tenantIdPromise) tenantIdPromise=db.from('tenants').select('id').eq('slug',process.env.DEFAULT_TENANT_SLUG||'noun').eq('status','active').single().then(({data,error})=>{if(error||!data)throw error||new Error('Active tenant missing');return data.id;});
   return tenantIdPromise;
+}
+
+function intelligenceAuthorized(req){
+  return (SECRET&&req.headers['x-webhook-secret']===SECRET)||(CRON_SECRET&&req.headers['x-intelligence-secret']===CRON_SECRET);
+}
+
+async function serviceDiscovery(req,res){
+  if(SECRET&&!intelligenceAuthorized(req))return res.status(401).json({error:'Unauthorized'});
+  const tid=await tenantId();
+  const q=String(req.query?.q||'').slice(0,160).toLowerCase();
+  const {data,error}=await db.from('student_services').select('*').eq('tenant_id',tid).limit(100);
+  if(error)throw error;
+  const services=(data||[]).filter(x=>!q||q.split(/\s+/).filter(Boolean).every(t=>JSON.stringify(x).toLowerCase().includes(t))).slice(0,30);
+  return res.status(200).json({ok:true,services,handoff:'Human support remains the route for consequential or official matters.'});
 }
 
 async function enqueueOnce(tid, phone, message_text, kind, source_id){
@@ -48,9 +64,11 @@ async function queueDeadlineNotifications(){
 }
 
 module.exports=async(req,res)=>{
-  if(req.method!=='POST')return res.status(405).json({error:'POST only'});
-  if(SECRET&&req.headers['x-webhook-secret']!==SECRET)return res.status(401).json({error:'Unauthorized'});
   try{
+    if(req.method==='GET')return await serviceDiscovery(req,res);
+    if(req.method!=='POST')return res.status(405).json({error:'POST only'});
+    if(SECRET&&req.headers['x-webhook-secret']!==SECRET&&!req.headers['x-intelligence-secret'])return res.status(401).json({error:'Unauthorized'});
+
     const tid=await tenantId(),action=req.body?.action;
     if(action==='deadline-dispatch')return res.status(200).json({queued:await queueDeadlineNotifications()});
     if(action==='campaign-dispatch'){
@@ -66,6 +84,19 @@ module.exports=async(req,res)=>{
         if(result.created){await db.from('campaign_messages').update({status:'processing',attempts:m.attempts+1}).eq('tenant_id',tid).eq('id',m.id);queued++;}
       }
       return res.status(200).json({queued,messages:(data||[]).slice(0,50).map(m=>({id:m.id,to:m.phone,text:m.rendered_message}))});
+    }
+
+    if(action==='ingest'){
+      if(!intelligenceAuthorized(req))return res.status(401).json({error:'Unauthorized'});
+      return res.status(200).json({ok:true,result:await ingest(req.body.items||[])});
+    }
+    if(action==='expire'){
+      if(!intelligenceAuthorized(req))return res.status(401).json({error:'Unauthorized'});
+      return res.status(200).json({ok:true,expired:await expireStale()});
+    }
+    if(action==='demand'){
+      if(!intelligenceAuthorized(req))return res.status(401).json({error:'Unauthorized'});
+      return res.status(200).json({ok:true,recorded:await recordDemand(req.body)});
     }
     return res.status(400).json({error:'Unknown action'});
   }catch(e){console.error(e);return res.status(500).json({error:'Automation failed'});}
