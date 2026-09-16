@@ -11,7 +11,7 @@ async function tenantId(){
 }
 
 function intelligenceAuthorized(req){
-  return (SECRET&&req.headers['x-webhook-secret']===SECRET)||(CRON_SECRET&&req.headers['x-intelligence-secret']===CRON_SECRET);
+  return Boolean((SECRET&&req.headers['x-webhook-secret']===SECRET)||(CRON_SECRET&&req.headers['x-intelligence-secret']===CRON_SECRET));
 }
 
 async function serviceDiscovery(req,res){
@@ -67,9 +67,16 @@ module.exports=async(req,res)=>{
   try{
     if(req.method==='GET')return await serviceDiscovery(req,res);
     if(req.method!=='POST')return res.status(405).json({error:'POST only'});
-    if(SECRET&&req.headers['x-webhook-secret']!==SECRET&&!req.headers['x-intelligence-secret'])return res.status(401).json({error:'Unauthorized'});
 
-    const tid=await tenantId(),action=req.body?.action;
+    const action=req.body?.action;
+    const serviceActions=new Set(['ingest','expire','demand']);
+    if(serviceActions.has(action)){
+      if(!intelligenceAuthorized(req))return res.status(401).json({error:'Unauthorized'});
+    }else if(SECRET&&req.headers['x-webhook-secret']!==SECRET){
+      return res.status(401).json({error:'Unauthorized'});
+    }
+
+    const tid=await tenantId();
     if(action==='deadline-dispatch')return res.status(200).json({queued:await queueDeadlineNotifications()});
     if(action==='campaign-dispatch'){
       const now=new Date().toISOString();
@@ -85,19 +92,9 @@ module.exports=async(req,res)=>{
       }
       return res.status(200).json({queued,messages:(data||[]).slice(0,50).map(m=>({id:m.id,to:m.phone,text:m.rendered_message}))});
     }
-
-    if(action==='ingest'){
-      if(!intelligenceAuthorized(req))return res.status(401).json({error:'Unauthorized'});
-      return res.status(200).json({ok:true,result:await ingest(req.body.items||[])});
-    }
-    if(action==='expire'){
-      if(!intelligenceAuthorized(req))return res.status(401).json({error:'Unauthorized'});
-      return res.status(200).json({ok:true,expired:await expireStale()});
-    }
-    if(action==='demand'){
-      if(!intelligenceAuthorized(req))return res.status(401).json({error:'Unauthorized'});
-      return res.status(200).json({ok:true,recorded:await recordDemand(req.body)});
-    }
+    if(action==='ingest')return res.status(200).json({ok:true,result:await ingest(req.body.items||[])});
+    if(action==='expire')return res.status(200).json({ok:true,expired:await expireStale()});
+    if(action==='demand')return res.status(200).json({ok:true,recorded:await recordDemand(req.body)});
     return res.status(400).json({error:'Unknown action'});
   }catch(e){console.error(e);return res.status(500).json({error:'Automation failed'});}
 };
