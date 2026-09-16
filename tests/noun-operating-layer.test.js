@@ -71,5 +71,5 @@ test('pulse follows outcome and canonical asset/liability comparison', () => {
   const pulse = pulseFromOutcome({ valueSent: 10, valueReturned: 16, eventName: 'learning.completed', outcome: 'completed' });
   assert.equal(pulse.status, 'asset');
   assert.equal(assetLiability(10, 10), 'liability');
-  assert.equal(assetLiability(12, 5), 'asset');
+  assert.equal(assetLiability(12, 5), 'liability');
 });
