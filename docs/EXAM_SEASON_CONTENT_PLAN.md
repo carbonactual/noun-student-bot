@@ -7,10 +7,11 @@ Every post carries one CTA: WhatsApp (wa.me/2347046481828) or the student space
 (https://noun-student-bot-dashboard.vercel.app). Branding: ABBA · Institute GPT.
 Formula: 70% educational + 20% entertaining + 10% promotional.
 
-POSITIONING MANDATE (owner ruling, Sept 17): every post HAMMERS "intelligently
-tailored to you" — the differentiator nobody can copy. Not generic study tips:
-YOUR course codes, YOUR deadlines, YOUR weak topics, YOUR exam. Every post says
-or shows what "tailored to you" means concretely before any CTA.
+POSITIONING (owner correction, Sept 17): NOT every post hammers "intelligently
+tailored to you." Instead, posts SHOW it — demonstrate the tailoring with
+specifics (your course codes, your deadlines, your weak topics, your exact exam)
+where it fits naturally. Lead/launch posts carry the full tailored pitch; other
+posts just demonstrate it in passing or skip it. Show, don't repeat.
 
 ## Week 1 — Urgency + orientation
 1. DONE (Sept 17): Exam season launch post (post 122178299408976529).
@@ -28,7 +29,7 @@ Free to start: TMA alerts + 1 trial mock exam — tailored to your courses.
 
 #NOUN #TMA #ExamSeason #InstituteGPT"
 
-Every later post in this plan must open on "tailored to you" the same way before its CTA.
+Later posts: show the tailoring naturally where it fits — do not open every post the same way.
 
 📲 ABBA · Institute GPT on WhatsApp: https://wa.me/2347046481828 (send "TMA")
 🌍 Your student space: https://noun-student-bot-dashboard.vercel.app
