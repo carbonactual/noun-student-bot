@@ -30,3 +30,18 @@ student where they are and serves the matching lane.
 ## Offer framing for content
 Lead with the stage the student is in, not the product. Right now every post says
 "TMA season" + "mock exams" together — they are the same 6 weeks of student anxiety.
+
+## OFFER STRUCTURE (locked Sept 17, owner-approved)
+
+FREE (the arrival hook):
+- TMA deadline alerts per course (the #1 reason a student arrives NOW)
+- Basic topic help + 1 trial mock exam
+- Study groups, problem desk
+
+PAID (the upgrade reason before exams):
+- TMA coaching: topic coaching before each TMA attempt, practice sets, walkthroughs
+- Full mock exam season + weak-topic revision plans
+- Reg services bundle: course reg / exam reg / signing / exam-card help
+- Human support priority
+
+Positioning line: "Arrive for the alerts. Stay for the coaching."
