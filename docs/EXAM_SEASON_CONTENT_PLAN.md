@@ -15,6 +15,11 @@ posts just demonstrate it in passing or skip it. Show, don't repeat.
 
 ## Week 1 — Urgency + orientation
 1. DONE (Sept 17): Exam season launch post (post 122178299408976529).
+1b. DONE (Sept 17): NOUN BOT intro post, final owner copy (post 122178302270976529):
+"NOUN students deserve more than a chatbot... Your academic journey. One connected
+intelligence layer." Full v3 copy = the live post. PRESERVED for later reuse (the
+longer v2 feature-list copy): hold for the Oct 2 or Oct 5 slot if that week needs
+a brand moment, else archive.
 2. Mon Sept 21 — FINAL COPY (publish as-is):
 "Everyone gets the same TMAs. But YOUR deadlines, YOUR weak topics, YOUR exam — those are only yours.
 
