@@ -18,6 +18,14 @@ and then waits:
 - Is there a problem with my registration?
 - Am I still on track for graduation?
 
+NOUN's challenge is not access — it is visibility. Programmes designed for
+4 years run on completion windows of up to 8. The question is: how much of the
+extra time is actual learning, and how much is preventable delay?
+
+NOUN already has admissions, registration, payments, learning platforms,
+examinations, results and study centres. What is missing is the connection
+between them.
+
 Today, the institution knows pieces of the story and the student knows pieces of
 the story — but nobody sees the whole story in real time. The cost of that
 information delay is measured in repeated semesters, late graduation, and
@@ -31,11 +39,15 @@ systematically reduced.
 
 ## What we have built
 
-NOUN BOT — a live academic intelligence layer for the NOUN student journey,
-built by Institute GPT and powered by ABBA (our AI orchestration engine).
+NOUN BOT — a Student Progress Intelligence Layer for the NOUN journey, built by
+Institute GPT and powered by ABBA (our AI orchestration engine).
 
-It is not another portal or dashboard. It continuously answers, for each student:
-Am I on track? If not, why not? What exactly needs to happen next?
+It is not another portal. Not another form. It is the connective tissue between
+the systems NOUN already runs — a live progression record from Admission ->
+Registration -> Courses -> Assignments -> Exams -> Results -> Graduation
+Requirements — with automatic alerts whenever something threatens a graduation
+timeline. For each student it continuously answers: What have I completed? What
+is outstanding? What is blocking me? Who is responsible? What must happen next?
 
 Capabilities live today:
 1. Academic guidance grounded in actual NOUN course structure (e.g. DSC 301)
