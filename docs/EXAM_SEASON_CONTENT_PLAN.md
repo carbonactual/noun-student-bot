@@ -1,4 +1,6 @@
-# Institute GPT — Exam Season Content Plan (Sept 17 – Oct 17, 2026)
+# Institute GPT — TMA + Mock Exam Season Content Plan (Sept 17 – Oct 17, 2026)
+
+Current student stage: TMA season + mock exam season in parallel; exam reg + exam cards next. See SEMESTER_RAMP_SERVICES.md for the 5-stage service map.
 
 Cadence: 3 posts/week (Mon/Wed/Fri evening, 7-8 PM WAT — peak student scroll time).
 Every post carries one CTA: WhatsApp (wa.me/2347046481828) or the student space
@@ -7,8 +9,8 @@ Formula: 70% educational + 20% entertaining + 10% promotional.
 
 ## Week 1 — Urgency + orientation
 1. DONE (Sept 17): Exam season launch post (post 122178299408976529).
-2. Mon Sept 21 — "The 7-day exam sprint": how to use mock exams to find weak topics fast. Educational. CTA: WhatsApp for a trial mock exam (free tier includes 1).
-3. Wed Sept 23 — "Your exam card, without the queue": registration/exam-card help + document services. Educational. CTA: WhatsApp.
+2. Mon Sept 21 — "TMA season is here": TMAs carry real marks — don't lose them to deadlines. ABBA sends TMA deadline alerts per course + coaches the topics before you attempt. CTA: WhatsApp "TMA".
+3. Wed Sept 23 — "From course reg to exam card": course registration, exam registration, signing, exam cards — step-by-step help for every admin step left this semester. CTA: WhatsApp.
 
 ## Week 2 — Proof + support
 4. Mon Sept 28 — Study-group spotlight: how ABBA matches you to study groups. Educational + community.
