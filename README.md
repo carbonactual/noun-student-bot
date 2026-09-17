@@ -121,3 +121,13 @@ NOUN Student Bot is an education branch under InstituteGPT and Carbon Actual. It
 - `docs/superpowers/plans/2026-09-05-noun-student-ecosystem-v4.md` — implementation plan.
 
 The canonical production implementation remains under `api/` and `dashboard/`; Supabase is the system of record and Vercel is the student/operator delivery surface.
+
+## Voice & Video
+
+Per the ecosystem VOICE & VIDEO SURFACE LAW (hapi-world/canon/VOICE_VIDEO_SURFACE_LAW.md), NOUN BOT's surfaces:
+- **Speakable:** students ask questions by WhatsApp voice note - exam prep, TMA guidance, course help.
+- **Speaks:** study summaries and exam countdown alerts as voice notes; patient persona (Institute GPT voice).
+- **Video:** mock-exam walkthrough videos, course explainer clips, and study-group session recordings.
+- **Live:** live exam-prep classes (monetization surface per the 70/20/10 formula).
+
+Status: voice intake live on WhatsApp; video generation staged with the ABBA media engine.
