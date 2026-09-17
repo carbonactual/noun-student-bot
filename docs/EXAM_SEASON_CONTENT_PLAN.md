@@ -15,6 +15,7 @@ posts just demonstrate it in passing or skip it. Show, don't repeat.
 
 ## Week 1 — Urgency + orientation
 1. DONE (Sept 17): Exam season launch post (post 122178299408976529).
+1c. DONE (Sept 17): MEET NOUN BOT photo post — mascot ad graphic 1254x1254 (post 122178302882976529). Creative saved at assets/promo/noun-bot-ad-mascot.png; use as Meta campaign creative when the payment method lands.
 1b. DONE (Sept 17): NOUN BOT intro post, final owner copy (post 122178302270976529):
 "NOUN students deserve more than a chatbot... Your academic journey. One connected
 intelligence layer." Full v3 copy = the live post. PRESERVED for later reuse (the
