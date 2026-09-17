@@ -19,7 +19,13 @@ Owner-sourced ad graphics, audited and organized Sept 17, 2026.
    Full menu view + student testimonial line ("Thank you! This is exactly what
    I needed."). Best for retargeting / trust-building stage of funnel.
 
-5. MASCOT (LIVE) — assets/promo/noun-bot-ad-mascot.png
+5. MENU-DEMO — assets/promo/noun-bot-ad-menu.jpg
+   Full option menu (Explain a topic / Prepare for exam / Next steps / Find
+   opportunities / Talk to a human). The "Talk to a human (tutor/mentor)" option
+   proves human escalation exists. Good early-funnel awareness / cold-audience
+   organic post — no course-specific claim, so safe as a wide top-of-funnel post.
+
+6. MASCOT (LIVE) — assets/promo/noun-bot-ad-mascot.png
    Already published as organic photo post 122178302882976529 (Sept 17).
    Reserved as backup ad creative.
 
