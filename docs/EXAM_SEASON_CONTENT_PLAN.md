@@ -9,7 +9,19 @@ Formula: 70% educational + 20% entertaining + 10% promotional.
 
 ## Week 1 — Urgency + orientation
 1. DONE (Sept 17): Exam season launch post (post 122178299408976529).
-2. Mon Sept 21 — "TMA season is here": TMAs carry real marks — don't lose them to deadlines. ABBA sends TMA deadline alerts per course + coaches the topics before you attempt. CTA: WhatsApp "TMA".
+2. Mon Sept 21 — FINAL COPY (publish as-is):
+"📝 TMA season is here — and TMA marks count.
+
+Don't lose marks to missed deadlines. ABBA sends you TMA deadline alerts for YOUR courses, coaches the topics before you attempt, and runs mock exams for the same courses — so you walk into exams already sharp.
+
+Free to start: TMA alerts + 1 trial mock exam.
+
+Arrive for the alerts. Stay for the coaching.
+
+📲 ABBA · Institute GPT on WhatsApp: https://wa.me/2347046481828 (send "TMA")
+🌍 Your student space: https://noun-student-bot-dashboard.vercel.app
+
+#NOUN #TMA #ExamSeason #InstituteGPT" 
 3. Wed Sept 23 — "From course reg to exam card": course registration, exam registration, signing, exam cards — step-by-step help for every admin step left this semester. CTA: WhatsApp.
 
 ## Week 2 — Proof + support
