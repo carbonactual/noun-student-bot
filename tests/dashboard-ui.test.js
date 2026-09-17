@@ -5,7 +5,8 @@ const fs = require('node:fs');
 const source = fs.readFileSync('dashboard/index.html', 'utf8');
 
 test('public NOUN BOT landing page presents the student-first product', () => {
-  assert.match(source, /Your <span class="accent">AI academic companion<\/span>/);
+  assert.match(source, /Study at NOUN,/);
+  assert.match(source, /at your pace/);
   assert.match(source, /Learn/);
   assert.match(source, /Prepare/);
   assert.match(source, /Plan/);
