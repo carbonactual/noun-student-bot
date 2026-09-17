@@ -33,6 +33,6 @@ partnership committee — in person in Abuja or virtually at your convenience.
 Warm regards,
 
 Institute GPT
-Email: carbonactuall@gmail.com
+Email: institutegpt@gmail.com
 WhatsApp: +234 704 648 1828
 https://noun-student-bot-dashboard.vercel.app
