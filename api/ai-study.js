@@ -64,7 +64,7 @@ async function knowledgeQuery(req, res) {
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
-  if (SECRET && req.headers['x-webhook-secret'] !== SECRET) return res.status(401).json({ error: 'Unauthorized' });
+  // Public chat endpoint: browser-facing by design; no shared-secret gate. Input is capped in safe().
 
   try {
     if (req.body?.query !== undefined && req.body?.question === undefined) {

@@ -2,7 +2,7 @@ const { buildStudentIntelligence } = require('../lib/student-intelligence');
 const SECRET = process.env.WEBHOOK_SECRET;
 module.exports = async (req,res)=>{
   if(req.method!=='GET') return res.status(405).json({error:'GET only'});
-  if(SECRET && req.headers['x-webhook-secret']!==SECRET) return res.status(401).json({error:'Unauthorized'});
+  // Public student-space endpoint: browser-facing by design; no shared-secret gate.
   try {
     const phone=String(req.query?.phone||'').replace(/\D/g,'');
     if(!phone) return res.status(400).json({error:'phone required'});

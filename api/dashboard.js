@@ -12,7 +12,7 @@ function normalizePhone(value) {
   if (digits.startsWith('0')) return `234${digits.slice(1)}`;
   return digits;
 }
-const secretOk = req => !process.env.WEBHOOK_SECRET || req.headers['x-webhook-secret'] === process.env.WEBHOOK_SECRET;
+// Public site backend: onboarding + student context are browser-facing by design; no shared-secret gate.
 
 async function onboard(req, res, tenant) {
   const body = req.body || {};
@@ -77,7 +77,6 @@ async function supportCase(req, res) {
 
 module.exports = async function handler(req, res) {
   try {
-    if (!secretOk(req)) return res.status(401).json({ error: 'Unauthorized' });
     const route = String(req.query?.route || '').toLowerCase();
     const tenant = await tenantId();
     if (route === 'student-context') return studentContext(req, res, tenant);
