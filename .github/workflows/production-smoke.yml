@@ -60,7 +60,8 @@ jobs:
           set -euo pipefail
           dashboard="$(curl --fail-with-body --silent --show-error --max-time 20 "$BASE_URL/dashboard/")"
           student="$(curl --fail-with-body --silent --show-error --max-time 20 "$BASE_URL/student/")"
-          grep -q "Your AI academic companion" <<<"$dashboard"
+          grep -q "Study at NOUN" <<<"$dashboard"
+          grep -q "at your pace" <<<"$dashboard"
           grep -q "Create my student space" <<<"$dashboard"
           grep -q "Academic pulse" <<<"$student"
           grep -q "Ask ABBA" <<<"$student"
