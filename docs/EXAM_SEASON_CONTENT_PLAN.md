@@ -7,16 +7,28 @@ Every post carries one CTA: WhatsApp (wa.me/2347046481828) or the student space
 (https://noun-student-bot-dashboard.vercel.app). Branding: ABBA · Institute GPT.
 Formula: 70% educational + 20% entertaining + 10% promotional.
 
+POSITIONING MANDATE (owner ruling, Sept 17): every post HAMMERS "intelligently
+tailored to you" — the differentiator nobody can copy. Not generic study tips:
+YOUR course codes, YOUR deadlines, YOUR weak topics, YOUR exam. Every post says
+or shows what "tailored to you" means concretely before any CTA.
+
 ## Week 1 — Urgency + orientation
 1. DONE (Sept 17): Exam season launch post (post 122178299408976529).
 2. Mon Sept 21 — FINAL COPY (publish as-is):
-"📝 TMA season is here — and TMA marks count.
+"Everyone gets the same TMAs. But YOUR deadlines, YOUR weak topics, YOUR exam — those are only yours.
 
-Don't lose marks to missed deadlines. ABBA sends you TMA deadline alerts for YOUR courses, coaches the topics before you attempt, and runs mock exams for the same courses — so you walk into exams already sharp.
+That's why ABBA is intelligently tailored to you: tell it your course codes once, and it tracks YOUR TMA deadlines, coaches the topics YOU struggle with before you attempt, and mocks the exact exams YOU will write.
 
-Free to start: TMA alerts + 1 trial mock exam.
+Not general study tips. Yours. Tailored.
 
-Arrive for the alerts. Stay for the coaching.
+Free to start: TMA alerts + 1 trial mock exam — tailored to your courses.
+
+📲 ABBA · Institute GPT on WhatsApp: https://wa.me/2347046481828 (send "TMA" + your course codes)
+🌍 Your student space: https://noun-student-bot-dashboard.vercel.app
+
+#NOUN #TMA #ExamSeason #InstituteGPT"
+
+Every later post in this plan must open on "tailored to you" the same way before its CTA.
 
 📲 ABBA · Institute GPT on WhatsApp: https://wa.me/2347046481828 (send "TMA")
 🌍 Your student space: https://noun-student-bot-dashboard.vercel.app
