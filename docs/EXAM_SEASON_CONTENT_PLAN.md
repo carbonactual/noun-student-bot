@@ -15,6 +15,9 @@ posts just demonstrate it in passing or skip it. Show, don't repeat.
 
 ## Week 1 — Urgency + orientation
 1. DONE (Sept 17): Exam season launch post (post 122178299408976529).
+1e. DONE (Sept 17): Same manifesto published to INSTAGRAM (@institutegpt, media
+18630842986014706) with HERO creative + hashtags. IG publishing flow confirmed
+working: graph.instagram.com + INSTAGRAM_ACCESS_TOKEN, container->publish.
 1d. DONE (Sept 17): "Hidden tax of time" manifesto post (post 122178303728976529),
 paired with HERO creative. Owner-authored positioning piece — full framework
 saved at docs/POSITIONING_HIDDEN_TAX_OF_TIME.md as third standing pillar
