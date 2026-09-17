@@ -92,6 +92,6 @@ the largest single-aisle distance-learning population in West Africa.
 ## Contact
 
 Institute GPT
-Email: carbonactuall@gmail.com
+Email: institutegpt@gmail.com
 WhatsApp: +234 704 648 1828
 Web: https://noun-student-bot-dashboard.vercel.app
