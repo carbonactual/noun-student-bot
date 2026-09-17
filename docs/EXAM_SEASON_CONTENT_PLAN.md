@@ -15,6 +15,10 @@ posts just demonstrate it in passing or skip it. Show, don't repeat.
 
 ## Week 1 — Urgency + orientation
 1. DONE (Sept 17): Exam season launch post (post 122178299408976529).
+1f. DONE (Sept 17): "Visibility" institutional essay (4-to-8-year window /
+Student Progress Intelligence Layer) published FB+IG with TAILORED creative.
+Framework is also the strengthened backbone of the DAL pitch package
+(docs/institutional/STUDENT_PROGRESS_INTELLIGENCE_LAYER.md).
 1e. DONE (Sept 17): Same manifesto published to INSTAGRAM (@institutegpt, media
 18630842986014706) with HERO creative + hashtags. IG publishing flow confirmed
 working: graph.instagram.com + INSTAGRAM_ACCESS_TOKEN, container->publish.
