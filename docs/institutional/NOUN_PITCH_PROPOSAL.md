@@ -42,8 +42,9 @@ systematically reduced.
 NOUN BOT — a Student Progress Intelligence Layer for the NOUN journey, built by
 Institute GPT and powered by ABBA (our AI orchestration engine).
 
-It is not another portal. Not another form. It is the connective tissue between
-the systems NOUN already runs — a live progression record from Admission ->
+It is not another portal. NOUN doesn't need another portal. It needs a NERVOUS
+SYSTEM for student progression — the connective tissue between the systems
+NOUN already runs — a live progression record from Admission ->
 Registration -> Courses -> Assignments -> Exams -> Results -> Graduation
 Requirements — with automatic alerts whenever something threatens a graduation
 timeline. For each student it continuously answers: What have I completed? What
@@ -57,6 +58,11 @@ Capabilities live today:
 5. Opportunity discovery: scholarships, internships, research openings
 
 ## Why this matters to NOUN specifically
+
+University administration today runs on: record -> wait -> discover. A Student
+Progress Intelligence Layer converts it to: detect -> intervene -> resolve ->
+progress — detecting each student's problem while there is still time to fix
+it, not at final year when the semesters are already lost.
 
 NOUN removed the barrier of geography. Information delay is the new barrier.
 NOUN BOT converts the university's fragmented status data into a live timeline
