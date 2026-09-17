@@ -19,6 +19,14 @@ posts just demonstrate it in passing or skip it. Show, don't repeat.
 FB post 122178305528976529 + IG media 18122230525850911, both with TAILORED
 creative (owner released Gate 5 hold). Visibility essay (1f) stays held as
 future rotation to avoid same-day duplication.
+1h. DONE (Sept 17): VIRAL PUSH — IG 3-card carousel (2 generated quote cards +
+tailored creative; media 18120724537928156) + FB amplification post with quote
+card (post 122178306398976529), share/tag CTAs.
+1i. DONE (Sept 17): VC CELEBRATION POST ("Gen-Z mindset in an academic gown")
+— FB post 122178306518976529 + IG media 18108511087969050, generated academic
+gown image. First "lubing" piece for the blessing-request strategy (VC dossier
+at docs/institutional/VC_UDUMA_DOSSIER.md). ALL NOUN LETTERS HELD — no send
+until owner order, target ~weekend after more warm-up content.
 1f. HELD (Sept 17): "Visibility" institutional essay (4-to-8-year window /
 Student Progress Intelligence Layer) drafted and committed
 (docs/institutional/STUDENT_PROGRESS_INTELLIGENCE_LAYER.md) but NOT published
