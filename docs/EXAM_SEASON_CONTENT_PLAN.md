@@ -15,9 +15,10 @@ posts just demonstrate it in passing or skip it. Show, don't repeat.
 
 ## Week 1 — Urgency + orientation
 1. DONE (Sept 17): Exam season launch post (post 122178299408976529).
-1g. HELD (Sept 17): "Nervous system for student progression" essay committed
-(docs/institutional/NERVOUS_SYSTEM_FOR_PROGRESSION.md) — strongest articulation
-yet; folded into pitch proposal. Not published (Gate 5).
+1g. DONE (Sept 17): "Nervous system for student progression" essay PUBLISHED —
+FB post 122178305528976529 + IG media 18122230525850911, both with TAILORED
+creative (owner released Gate 5 hold). Visibility essay (1f) stays held as
+future rotation to avoid same-day duplication.
 1f. HELD (Sept 17): "Visibility" institutional essay (4-to-8-year window /
 Student Progress Intelligence Layer) drafted and committed
 (docs/institutional/STUDENT_PROGRESS_INTELLIGENCE_LAYER.md) but NOT published
