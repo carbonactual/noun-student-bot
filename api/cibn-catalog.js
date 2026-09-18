@@ -1,4 +1,4 @@
-const { COURSE_MAP, SELECTION_RULES, SESSION_RULE, OFFICIAL_EXAM_FEES, PROGRAMME_DIRECTORY } = require('../lib/cibn-catalog');
+const { COURSE_MAP, SELECTION_RULES, SESSION_RULE, OFFICIAL_EXAM_FEES, PROGRAMME_DIRECTORY, validateSelection } = require('../lib/cibn-catalog');
 
 const DEFAULT_ALLOWED = [
   'https://mcp-bot-eight.vercel.app',
@@ -19,7 +19,7 @@ function configureCors(req, res) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
   res.setHeader('Vary', 'Origin');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=300');
   res.setHeader('Content-Type', 'application/json');
@@ -28,7 +28,28 @@ function configureCors(req, res) {
 module.exports = (req, res) => {
   configureCors(req, res);
   if (req.method === 'OPTIONS') return res.status(204).end();
-  if (req.method !== 'GET') return res.status(405).json({ error: 'GET only' });
+  if (req.method === 'POST') {
+    let body = req.body;
+    if (typeof body === 'string') {
+      try { body = JSON.parse(body || '{}'); } catch { return res.status(400).json({ error: 'invalid_json' }); }
+    }
+    body = body && typeof body === 'object' ? body : {};
+    const codes = Array.isArray(body.codes)
+      ? body.codes.map(x => String(x).trim().toUpperCase()).filter(Boolean).slice(0, 50)
+      : String(body.codes || '').toUpperCase().split(/[\\s,;]+/).filter(Boolean).slice(0, 50);
+    if (!codes.length) return res.status(400).json({ error: 'codes_required' });
+    const result = validateSelection(codes, {
+      program: String(body.program || ''),
+      level: String(body.level || '')
+    });
+    return res.status(200).json({
+      ok: true,
+      mode: 'selection-validation',
+      ...result
+    });
+  }
+
+  if (req.method !== 'GET') return res.status(405).json({ error: 'GET or POST only' });
 
   return res.status(200).json({
     ok: true,
