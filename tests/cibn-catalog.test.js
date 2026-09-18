@@ -21,7 +21,8 @@ test('CIBN session clashes are duration-aware, not timestamp-only', () => {
   assert.equal(catalog.conflicts(['MF301','MF302','MF403']).length, 0);
   assert.ok(catalog.sameSession(['MF301','MF302']).some(x => x.withinThreeHourCap));
   assert.ok(catalog.sameSession(['MF401','MF403']).some(x => x.withinThreeHourCap));
-  assert.equal(catalog.sameSession(['MF301','MF302','MF403']).length, 0);
+  assert.equal(catalog.sameSession(['MF301','MF302','MF403']).length, 1);
+  assert.equal(catalog.conflicts(['701','702','801']).length, 1);
 });
 
 test('chartered banker elective limit is enforced', () => {
