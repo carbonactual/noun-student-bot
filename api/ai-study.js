@@ -64,6 +64,13 @@ async function knowledgeQuery(req, res) {
 }
 
 module.exports = async (req, res) => {
+  // CORS preflight for the CIBN landing (cross-origin chat) — must precede the method gate.
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', process.env.CIBN_CHAT_ORIGIN || 'https://mcp-bot-eight.vercel.app');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    return res.status(204).end();
+  }
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
   // CIBN BOT shares this deployment (Hobby plan caps function count) — branch by product flag.
   if (req.body && (req.body.product === 'cibn' || req.body.cibn === true)) return cibnChat(req, res);
