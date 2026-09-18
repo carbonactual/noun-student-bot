@@ -2,80 +2,287 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#04110d">
-<meta name="description" content="Study at NOUN, at your pace. Intelligently tailored to you. NOUN BOT — the study companion for National Open University of Nigeria students, from Institute GPT.">
-<title>NOUN BOT — Study at NOUN, at your pace. Tailored to you.</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b7d5f">
+<meta name="description" content="NOUN BOT — your AI academic companion for the National Open University of Nigeria. Learn, prepare, plan, find opportunities and get help with ABBA underneath it all.">
+<title>NOUN BOT — Your AI Academic Companion</title>
 <style>
 :root{
-  --bg:#040a08;--bg2:#071410;
-  --glass:rgba(255,255,255,.045);
-  --line:rgba(120,255,214,.14);--line2:rgba(120,255,214,.3);
-  --mint:#14e6a6;--teal:#0fb5d6;
-  --ink:#eafff6;--muted:#8fa8a0;--dim:#5d716a;
-  --font:"Space Grotesk",system-ui,sans-serif;
+  --green:#0b7d5f;
+  --green-deep:#075640;
+  --green-soft:#e9f7f1;
+  --green-pale:#f7fcfa;
+  --ink:#12362c;
+  --muted:#688078;
+  --soft:#8fa29c;
+  --line:#d9ebe3;
+  --card:#ffffff;
+  --shadow:0 22px 70px rgba(5,76,54,.11);
+  --font:ui-rounded,"SF Pro Rounded","Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.55;overflow-x:hidden;-webkit-font-smoothing:antialiased}
-.aura{position:fixed;inset:0;z-index:-2;overflow:hidden;background:
-  radial-gradient(1200px 800px at 85% -10%,rgba(15,181,214,.14),transparent 60%),
-  radial-gradient(1000px 700px at -10% 110%,rgba(124,108,255,.12),transparent 60%),
-  radial-gradient(900px 600px at 50% 120%,rgba(20,230,166,.10),transparent 60%),
-  linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%)}
-.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;animation:drift 26s ease-in-out infinite}
-.orb.a{width:520px;height:520px;background:rgba(20,230,166,.16);top:-160px;right:-120px}
-.orb.b{width:460px;height:460px;background:rgba(124,108,255,.14);bottom:-180px;left:-140px;animation-delay:-9s}
-@keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-60px,40px) scale(1.08)}66%{transform:translate(40px,-30px) scale(.94)}}
-.gridlines{position:fixed;inset:0;z-index:-1;pointer-events:none;
-  background-image:linear-gradient(rgba(120,255,214,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(120,255,214,.03) 1px,transparent 1px);
-  background-size:56px 56px;mask-image:radial-gradient(900px 600px at 50% 0%,#000 0%,transparent 100%)}
-.wrap{min-height:100vh;display:grid;place-items:center;padding:36px 20px}
-.card{width:min(880px,100%);background:var(--glass);border:1px solid var(--line);border-radius:30px;padding:56px;
-  backdrop-filter:blur(14px);box-shadow:0 24px 70px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.05);position:relative;overflow:hidden}
-.card:before{content:"";position:absolute;width:360px;height:360px;border-radius:50%;right:-130px;top:-150px;
-  background:radial-gradient(circle,rgba(20,230,166,.16),transparent 70%)}
-.mark{width:54px;height:54px;border-radius:17px;display:grid;place-items:center;font-weight:700;font-size:23px;
-  background:linear-gradient(135deg,rgba(20,230,166,.25),rgba(15,181,214,.18));border:1px solid var(--line2);color:var(--mint);
-  box-shadow:0 0 26px rgba(20,230,166,.28);animation:pulse 3.5s ease-in-out infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 24px rgba(20,230,166,.24)}50%{box-shadow:0 0 42px rgba(20,230,166,.42)}}
-.eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--mint);font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;margin-top:30px;
-  border:1px solid var(--line);border-radius:999px;padding:7px 14px;background:var(--glass)}
-.eyebrow i{width:6px;height:6px;border-radius:50%;background:var(--mint);box-shadow:0 0 10px var(--mint);animation:blink 2.2s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
-.h{font-size:clamp(42px,7.5vw,74px);line-height:.98;letter-spacing:-.05em;margin:18px 0;font-weight:700;
-  background:linear-gradient(92deg,#eafff6 30%,#9ff5d8 55%,#7ad8ff 80%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.p{color:var(--muted);font-size:17px;line-height:1.65;max-width:660px}
-.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px}
-.a{display:inline-block;padding:15px 21px;border-radius:13px;font-weight:600;text-decoration:none;font-size:13.5px;transition:all .3s}
-.primary{color:#03120c;background:linear-gradient(135deg,#14e6a6,#0fb5d6);box-shadow:0 8px 26px rgba(20,230,166,.28)}
-.primary:hover{transform:translateY(-2px);box-shadow:0 12px 34px rgba(20,230,166,.4)}
-.secondary{background:var(--glass);border:1px solid var(--line);color:var(--ink)}
-.secondary:hover{border-color:var(--line2);transform:translateY(-2px)}
-.meta{margin-top:36px;color:var(--dim);font-size:11px}
-.rv{opacity:0;transform:translateY(22px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
-.rv.in{opacity:1;transform:none}
-.d1{transition-delay:.12s}.d2{transition-delay:.24s}.d3{transition-delay:.36s}
-@media(max-width:620px){.card{padding:34px}}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+html{scroll-behavior:smooth;background:#f7fbf9}
+body{margin:0;color:var(--ink);font-family:var(--font);line-height:1.5;background:linear-gradient(180deg,#fff 0%,#f7fbf9 100%);-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+button{font:inherit}
+button:focus-visible,a:focus-visible{outline:3px solid rgba(11,125,95,.28);outline-offset:3px}
+img{max-width:100%;display:block}
+.wrap{width:min(1180px,calc(100% - 36px));margin:auto}
+.nav{height:76px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:-.04em}
+.mark{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;color:#fff;background:var(--green);box-shadow:0 12px 26px rgba(11,125,95,.2);font-size:14px}
+.navlinks{display:flex;align-items:center;gap:24px;color:#5f756d;font-size:13px}
+.navlinks a:hover{color:var(--green)}
+.navcta{padding:11px 17px;border-radius:999px;background:var(--green);color:#fff;font-weight:850;box-shadow:0 10px 24px rgba(11,125,95,.18)}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;color:var(--green);font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+.eyebrow:before{content:"";width:7px;height:7px;border-radius:50%;background:#37b58e;box-shadow:0 0 0 6px #e7f6f0}
+.hero{position:relative;overflow:hidden;padding:76px 0 82px}
+.hero:before{content:"";position:absolute;width:680px;height:680px;right:-270px;top:-250px;border-radius:50%;background:radial-gradient(circle,#e6f8f0 0,rgba(230,248,240,0) 67%);pointer-events:none}
+.hero-grid{display:grid;grid-template-columns:1.04fr .96fr;gap:62px;align-items:center;position:relative}
+.hero h1{font-size:clamp(46px,6vw,78px);line-height:.98;letter-spacing:-.065em;margin:20px 0 20px;max-width:720px}
+.hero h1 .accent{color:var(--green)}
+.lead{max-width:650px;font-size:18px;color:var(--muted)}
+.actions{display:flex;flex-wrap:wrap;gap:11px;margin-top:28px}
+.primary,.secondary{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 19px;border-radius:14px;font-weight:850;font-size:13px;transition:transform .24s,box-shadow .24s,border-color .24s}
+.primary{background:var(--green);color:#fff;box-shadow:0 14px 30px rgba(11,125,95,.2)}
+.secondary{border:1px solid var(--line);background:#fff;color:var(--green)}
+.primary:hover,.secondary:hover{transform:translateY(-2px)}
+.trust{display:flex;flex-wrap:wrap;gap:12px 18px;margin-top:24px;color:#7a8f88;font-size:11px}
+.trust span{display:flex;align-items:center;gap:7px}
+.trust i{width:17px;height:17px;border-radius:50%;display:grid;place-items:center;background:var(--green-soft);color:var(--green);font-style:normal;font-size:10px;font-weight:900}
+.visual{position:relative;min-height:560px}
+.poster{position:absolute;inset:14px 0 auto auto;width:min(510px,100%);aspect-ratio:1/1;border-radius:34px;overflow:hidden;border:1px solid var(--line);background:#dff3ea;box-shadow:var(--shadow);transform:rotate(.5deg);animation:float 8s ease-in-out infinite}
+.poster:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 48%,rgba(3,33,24,.2) 100%)}
+.poster img{width:100%;height:100%;object-fit:cover}
+.phone{position:absolute;right:28px;bottom:18px;width:min(250px,53%);padding:10px;border-radius:28px;background:#0f2b22;border:1px solid rgba(255,255,255,.18);box-shadow:0 24px 70px rgba(0,0,0,.23);transform:rotate(-5deg);z-index:3}
+.phone-inner{overflow:hidden;border-radius:21px;background:#fff}
+.phone-head{display:flex;align-items:center;gap:9px;padding:12px 13px;border-bottom:1px solid #e7eee9}
+.phone-dot{width:28px;height:28px;border-radius:10px;background:var(--green-soft);display:grid;place-items:center;color:var(--green);font-weight:900}
+.phone-head strong{font-size:11px}
+.phone-head span{display:block;color:#84958f;font-size:8px}
+.chat{padding:14px;display:grid;gap:8px}
+.b{max-width:88%;padding:10px 11px;border-radius:13px;font-size:10px;line-height:1.45}
+.b.ai{background:#f1f8f5;border:1px solid #dfeee7}
+.b.you{justify-self:end;background:var(--green);color:#fff;border-bottom-right-radius:4px}
+.floating{position:absolute;left:0;bottom:52px;padding:14px 16px;border-radius:18px;background:#fff;border:1px solid var(--line);box-shadow:0 16px 42px rgba(5,76,54,.1);z-index:4;max-width:260px}
+.floating b{display:block;font-size:12px}
+.floating span{display:block;margin-top:4px;font-size:10px;color:var(--muted)}
+.floating .mini{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.mini em{font-style:normal;font-size:9px;padding:5px 8px;background:var(--green-soft);color:var(--green);border-radius:999px}
+.section{padding:88px 0;content-visibility:auto;contain-intrinsic-size:650px}
+.section.soft{background:#f1f8f4}
+.section-head{max-width:740px;margin-bottom:34px}
+.kicker{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--green);font-weight:900}
+.section h2{font-size:clamp(34px,4.6vw,58px);line-height:1.02;letter-spacing:-.055em;margin:10px 0 13px}
+.section p{color:var(--muted);font-size:16px}
+.journey{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.journey-card{position:relative;padding:24px;min-height:185px;background:#fff;border:1px solid var(--line);border-radius:24px;transition:transform .3s,box-shadow .3s,border-color .3s}
+.journey-card:hover{transform:translateY(-6px);box-shadow:0 18px 46px rgba(5,76,54,.09);border-color:#c2dfd3}
+.icon{width:40px;height:40px;border-radius:13px;background:var(--green-soft);color:var(--green);display:grid;place-items:center;font-weight:900}
+.journey-card h3{margin:18px 0 6px;font-size:17px}
+.journey-card p{margin:0;font-size:12px}
+.abba{display:grid;grid-template-columns:.82fr 1.18fr;gap:48px;align-items:center}
+.abba-copy h2{max-width:550px}
+.abba-card{background:#fff;border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);overflow:hidden}
+.abba-top{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.abba-top strong{font-size:15px}
+.abba-top span{font-size:10px;color:#6f837c}
+.online{display:flex;align-items:center;gap:6px;color:var(--green);font-size:10px;font-weight:800}
+.online i{width:6px;height:6px;border-radius:50%;background:#35b58c;box-shadow:0 0 8px #35b58c}
+.dialog{padding:20px;display:grid;gap:12px;background:linear-gradient(180deg,#fff,#f7fbf9)}
+.row{display:flex;gap:10px;align-items:flex-end}
+.avatar{width:32px;height:32px;border-radius:11px;display:grid;place-items:center;background:var(--green-soft);color:var(--green);font-size:11px;font-weight:900;flex:none}
+.msg{padding:12px 14px;border-radius:16px;font-size:13px;max-width:78%;line-height:1.5}
+.msg.ai{background:#fff;border:1px solid var(--line)}
+.msg.you{margin-left:auto;background:var(--green);color:#fff;border-bottom-right-radius:5px}
+.askbar{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line);background:#fff}
+.askbar a{flex:1;min-height:42px;border:1px solid var(--line);border-radius:12px;padding:0 13px;display:flex;align-items:center;color:#8a9a94;font-size:12px}
+.askbar .send{flex:0 0 auto;background:var(--green);color:#fff;border-color:var(--green);font-weight:850}
+.band{background:linear-gradient(135deg,var(--green-deep),#0b7659);color:#fff;border-radius:32px;padding:46px;display:grid;grid-template-columns:1fr auto;gap:35px;align-items:center;overflow:hidden;position:relative}
+.band:after{content:"";position:absolute;width:310px;height:310px;right:-100px;top:-145px;border:1px solid rgba(255,255,255,.14);border-radius:50%}
+.band h2{font-size:clamp(31px,4.4vw,52px);margin:0 0 10px;letter-spacing:-.05em;line-height:1.02}
+.band p{margin:0;color:#d9efe8;max-width:700px}
+.band a{position:relative;z-index:2;background:#fff;color:var(--green);padding:13px 18px;border-radius:13px;font-size:13px;font-weight:900;white-space:nowrap}
+.footer{padding:34px 0 70px;text-align:center;color:#7c9089;font-size:10px}
+.mobile-dock{display:none}
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .7s cubic-bezier(.2,.75,.2,1),transform .7s cubic-bezier(.2,.75,.2,1)}
+.reveal.in{opacity:1;transform:none}
+.d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}
+@keyframes float{50%{transform:translateY(-10px) rotate(-.5deg)}}
+@media(max-width:900px){
+  .navlinks a:not(.navcta){display:none}
+  .hero-grid,.abba{grid-template-columns:1fr}
+  .visual{min-height:530px}
+  .poster{left:50%;transform:translateX(-50%) rotate(.5deg);width:min(560px,100%)}
+  .phone{right:8%;bottom:10px}
+  .floating{left:4%;bottom:34px}
+  .journey{grid-template-columns:1fr 1fr}
+  .band{grid-template-columns:1fr}
+}
+@media(max-width:620px){
+  .wrap{width:calc(100% - 24px)}
+  .nav{height:64px}
+  .navcta{padding:9px 13px;font-size:11px}
+  .hero{padding:54px 0 70px}
+  .hero h1{font-size:50px}
+  .lead{font-size:16px}
+  .visual{min-height:430px;margin-top:6px}
+  .poster{width:100%;border-radius:26px;inset:0 auto auto;aspect-ratio:1/1}
+  .phone{width:190px;right:4%;bottom:0;border-radius:23px;padding:7px}
+  .phone-inner{border-radius:18px}
+  .floating{left:0;bottom:10px;max-width:210px;padding:11px 12px}
+  .journey{grid-template-columns:1fr}
+  .section{padding:72px 0}
+  .section h2{font-size:39px}
+  .band{padding:30px 22px;border-radius:24px}
+  .band a{justify-self:start}
+  .mobile-dock{display:grid;position:fixed;left:10px;right:10px;bottom:10px;z-index:50;grid-template-columns:repeat(5,1fr);gap:4px;padding:7px;border:1px solid rgba(11,125,95,.18);border-radius:18px;background:rgba(255,255,255,.94);backdrop-filter:blur(18px);box-shadow:0 16px 44px rgba(5,76,54,.16);padding-bottom:calc(7px + env(safe-area-inset-bottom))}
+  .dock{display:grid;place-items:center;gap:3px;min-height:46px;border-radius:13px;color:#6e837b;font-size:9px;font-weight:800}
+  .dock:hover,.dock.active{background:var(--green-soft);color:var(--green)}
+  .dock span{font-size:14px}
+  .footer{padding-bottom:105px}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*:before,*:after{animation:none!important;transition:none!important}
+  .reveal{opacity:1;transform:none}
+}
 </style>
 </head>
 <body>
-<div class="aura"><div class="orb a"></div><div class="orb b"></div></div>
-<div class="gridlines"></div>
-<main class="wrap"><section class="card">
-  <div class="mark rv">N</div>
-  <div class="eyebrow rv d1"><i></i>National Open University of Nigeria</div>
-  <h1 class="h rv d2">Study at NOUN,<br>at your pace.</h1>
-  <p class="p rv d3">Intelligently tailored to you: learn difficult topics, prepare for assessments, stay ahead of what matters, and reach human support when you need it.</p>
-  <div class="actions rv d3">
-    <a class="a primary" href="/student/">Enter student space</a>
-    <a class="a secondary" href="/dashboard/">Explore NOUN BOT</a>
-  </div>
-  <div class="meta rv d3">A product of Institute GPT · Powered by ABBA. NOUN BOT is a study and support service. Official NOUN sources take priority over secondary material.</div>
-</section></main>
-<script>document.querySelectorAll('.rv').forEach(el=>setTimeout(()=>el.classList.add('in'),90));</script>
+<div class="wrap">
+  <nav class="nav" aria-label="Primary">
+    <a class="brand" href="/"><span class="mark">N</span><span>NOUN BOT</span></a>
+    <div class="navlinks">
+      <a href="#experience">Experience</a>
+      <a href="#abba">ABBA</a>
+      <a class="navcta" href="/student/">Enter student space</a>
+    </div>
+  </nav>
+</div>
+
+<main>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="eyebrow reveal">Your AI Academic Companion</div>
+        <h1 class="reveal d1">NOUN students, your academic journey just got a <span class="accent">new companion.</span></h1>
+        <p class="lead reveal d2">Learn, prepare, plan, discover opportunities and get the right support in one connected student experience — with ABBA, your AI intelligence layer, underneath it all.</p>
+        <div class="actions reveal d3">
+          <a class="primary" href="/student/">Open my student space</a>
+          <a class="secondary" href="#abba">Meet ABBA</a>
+        </div>
+        <div class="trust reveal d3">
+          <span><i>✓</i> Built for the NOUN student journey</span>
+          <span><i>✓</i> Official NOUN sources prioritized</span>
+          <span><i>✓</i> Human support remains available</span>
+        </div>
+      </div>
+
+      <div class="visual reveal d2" aria-label="NOUN BOT experience preview">
+        <figure class="poster">
+          <img src="https://raw.githubusercontent.com/carbonactual/noun-student-bot/main/assets/promo/noun-bot-ad-tailored.jpg" alt="NOUN BOT student experience preview" fetchpriority="high">
+        </figure>
+        <div class="floating">
+          <b>Built around your journey</b>
+          <span>Not another disconnected portal. One place for what matters next.</span>
+          <div class="mini"><em>Learn</em><em>Prepare</em><em>Plan</em><em>ABBA</em></div>
+        </div>
+        <div class="phone" aria-hidden="true">
+          <div class="phone-inner">
+            <div class="phone-head">
+              <div class="phone-dot">A</div>
+              <div><strong>ABBA</strong><span>Your AI academic companion</span></div>
+            </div>
+            <div class="chat">
+              <div class="b ai">What are you working on today?</div>
+              <div class="b you">I need help with a difficult topic.</div>
+              <div class="b ai">Let's start from the beginning. I can teach it, make a plan, or turn it into practice.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="experience" class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">One connected student experience</div>
+        <h2>Everything you need around the work you are already doing.</h2>
+        <p>NOUN BOT is designed around the actual student journey rather than a collection of disconnected tools.</p>
+      </div>
+      <div class="journey">
+        <article class="journey-card reveal"><div class="icon">01</div><h3>Learn</h3><p>Understand difficult topics with explanations that adapt to your starting point.</p></article>
+        <article class="journey-card reveal d1"><div class="icon">02</div><h3>Prepare</h3><p>Revise, practise and test yourself with course-aware learning flows.</p></article>
+        <article class="journey-card reveal d2"><div class="icon">03</div><h3>Plan</h3><p>Turn deadlines, study sessions and next steps into a clearer academic rhythm.</p></article>
+        <article class="journey-card reveal"><div class="icon">04</div><h3>Find opportunities</h3><p>Discover scholarships, internships, research, training and useful opportunities.</p></article>
+        <article class="journey-card reveal d1"><div class="icon">05</div><h3>Get support</h3><p>Reach the right human or service path when something needs more than an explanation.</p></article>
+        <article class="journey-card reveal d2"><div class="icon">06</div><h3>Ask ABBA</h3><p>Start with the intelligence underneath the experience and work from your actual goal.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="abba" class="section soft">
+    <div class="wrap abba">
+      <div class="abba-copy">
+        <div class="kicker">The intelligence layer</div>
+        <h2>ABBA is underneath it all.</h2>
+        <p>Instead of making you learn how to operate a complicated AI system, NOUN BOT keeps the focus on your goal. ABBA reasons over student context, evidence and the task in front of you, then brings the next useful action into view.</p>
+        <div class="actions"><a class="primary" href="/student/">Ask ABBA</a><a class="secondary" href="/student/">Enter student space</a></div>
+      </div>
+      <div class="abba-card reveal d1">
+        <div class="abba-top">
+          <div><strong>ABBA</strong><div><span>NOUN student intelligence</span></div></div>
+          <div class="online"><i></i>Ready to help</div>
+        </div>
+        <div class="dialog">
+          <div class="row"><div class="avatar">A</div><div class="msg ai">Tell me what is blocking you. We can start with the topic, your course, your deadline, or what you need to do next.</div></div>
+          <div class="msg you">I understand the definition, but I can't explain the application.</div>
+          <div class="row"><div class="avatar">A</div><div class="msg ai">Good — then we do not need to start again. Let's connect the definition to one concrete example, then you try one and I will coach the gaps.</div></div>
+        </div>
+        <div class="askbar"><a href="/student/">Ask about a course, plan or problem…</a><a class="send" href="/student/">Open ABBA</a></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="band reveal">
+        <div>
+          <div class="kicker" style="color:#a9edda">The journey stays connected</div>
+          <h2>Learn. Prepare. Plan. Ask ABBA. Get help.</h2>
+          <p>NOUN BOT is a student-facing intelligence and coordination layer built around the NOUN journey, with official evidence first and human support available where it belongs.</p>
+        </div>
+        <a href="/student/">Enter student space →</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="wrap footer">
+  NOUN BOT · Your AI Academic Companion · Powered by ABBA · A product of Institute GPT
+</div>
+
+<nav class="mobile-dock" aria-label="Student quick navigation">
+  <a class="dock active" href="#experience"><span>⌂</span>Learn</a>
+  <a class="dock" href="#experience"><span>◇</span>Prepare</a>
+  <a class="dock" href="/student/"><span>◎</span>Plan</a>
+  <a class="dock" href="/student/"><span>✦</span>ABBA</a>
+  <a class="dock" href="/student/"><span>?</span>Get help</a>
+</nav>
+
+<script>
+(function(){
+  var items=document.querySelectorAll('.reveal');
+  if(!('IntersectionObserver' in window)){items.forEach(function(x){x.classList.add('in');});return;}
+  var observer=new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){entry.target.classList.add('in');observer.unobserve(entry.target);}
+    });
+  },{threshold:.12,rootMargin:'0px 0px -30px'});
+  items.forEach(function(x){observer.observe(x);});
+})();
+</script>
 </body>
 </html>
