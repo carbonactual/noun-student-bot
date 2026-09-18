@@ -1,6 +1,7 @@
 const { db, tenantId, searchKnowledge, buildGrounding } = require('../lib/knowledge');
 const { normalizeMode } = require('../lib/learning-continuity');
 const { orchestrateNounRequest } = require('../lib/noun-orchestrator');
+const { cibnChat } = require('../lib/cibn-chat');
 
 const SECRET = process.env.WEBHOOK_SECRET;
 
@@ -64,6 +65,8 @@ async function knowledgeQuery(req, res) {
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+  // CIBN BOT shares this deployment (Hobby plan caps function count) — branch by product flag.
+  if (req.body && (req.body.product === 'cibn' || req.body.cibn === true)) return cibnChat(req, res);
   // Public chat endpoint: browser-facing by design; no shared-secret gate. Input is capped in safe().
 
   try {
