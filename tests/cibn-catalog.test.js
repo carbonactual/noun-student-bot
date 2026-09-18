@@ -11,15 +11,16 @@ test('course catalog contains core programme maps', () => {
   assert.equal(catalog.course('CAB203').name, 'Risk, Control & Reconciliation');
 });
 
-test('known portal timetable clashes are detected', () => {
-  assert.ok(catalog.conflicts(['601','602']).some(x => x.courses.length === 2));
-  assert.ok(catalog.conflicts(['701','702']).some(x => x.courses.length === 2));
-  assert.ok(catalog.conflicts(['MF301','MF302']).some(x => x.courses.length === 2));
-  assert.ok(catalog.conflicts(['MF402','MF404']).some(x => x.courses.length === 2));
-  assert.ok(catalog.conflicts(['EP101','EP102']).length > 0);
-  assert.ok(catalog.conflicts(['EP103','EP203']).length > 0);
-  assert.ok(catalog.conflicts(['CAB201','CAB202']).length > 0);
-  assert.equal(catalog.conflicts(['CAB104','CAB203','CAB204']).length, 0);
+test('CIBN session clashes are duration-aware, not timestamp-only', () => {
+  assert.equal(catalog.conflicts(['601','602']).length, 0);
+  assert.equal(catalog.conflicts(['701','702']).length, 0);
+  assert.equal(catalog.conflicts(['MF301','MF302']).length, 0);
+  assert.equal(catalog.conflicts(['MF303','MF402']).length, 0);
+  assert.equal(catalog.conflicts(['EP101','EP102']).length, 0);
+  assert.equal(catalog.conflicts(['CAB201','CAB202']).length, 0);
+  assert.equal(catalog.conflicts(['MF301','MF302','MF403']).length, 1);
+  assert.ok(catalog.sameSession(['MF301','MF302']).some(x => x.withinThreeHourCap));
+  assert.equal(catalog.sameSession(['MF301','MF302','MF403']).length, 0);
 });
 
 test('chartered banker elective limit is enforced', () => {
