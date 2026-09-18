@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b7d5f">
+<title>NOUN BOT — Account</title>
+<style>
+:root{--g:#0b7d5f;--gd:#075640;--soft:#e9f7f1;--bg:#f7fbf9;--ink:#12362c;--muted:#6a8078;--line:#d7ebe3;--card:#fff;--shadow:0 24px 70px rgba(5,76,54,.12);--font:ui-rounded,"SF Pro Rounded","Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 10%,#e6f7ef,transparent 34%),var(--bg);color:var(--ink);font-family:var(--font);min-height:100vh}.wrap{width:min(1040px,calc(100% - 28px));margin:auto}.nav{height:72px;display:flex;justify-content:space-between;align-items:center}.brand{display:flex;gap:10px;align-items:center;font-weight:900;letter-spacing:-.04em}.mark{width:40px;height:40px;border-radius:14px;background:var(--g);color:#fff;display:grid;place-items:center;box-shadow:0 12px 28px rgba(11,125,95,.2)}.back{color:var(--muted);font-size:12px}.card{width:min(470px,100%);margin:60px auto;padding:30px;border-radius:28px;background:rgba(255,255,255,.96);border:1px solid var(--line);box-shadow:var(--shadow)}h1{font-size:38px;line-height:1;margin:0 0 10px;letter-spacing:-.05em}p{color:var(--muted);font-size:13px;margin:0 0 22px}.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:5px;background:#f2f7f5;border-radius:14px;margin-bottom:20px}.tab{border:0;background:transparent;color:var(--muted);padding:10px;border-radius:10px;font-weight:800;font-size:11px;cursor:pointer}.tab.active{background:#fff;color:var(--g);box-shadow:0 2px 10px rgba(5,76,54,.08)}form{display:grid;gap:12px}.field{display:grid;gap:6px}.field label{font-size:11px;font-weight:800;color:#61766e}.field input{width:100%;height:46px;border:1px solid var(--line);border-radius:13px;padding:0 13px;color:var(--ink);outline:none;background:#fff}.field input:focus{border-color:#7fbaa8;box-shadow:0 0 0 4px var(--soft)}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.extra{display:none}.extra.show{display:grid;gap:12px}.submit{height:48px;border:0;border-radius:14px;background:var(--g);color:#fff;font-weight:900;cursor:pointer;box-shadow:0 12px 26px rgba(11,125,95,.18)}.submit:disabled{opacity:.55}.note{font-size:10px;color:#8a9a94;text-align:center;margin-top:4px}.status{display:none;padding:11px 13px;border-radius:12px;background:#f0f8f4;color:var(--gd);font-size:11px}.status.show{display:block}.error{background:#fff2f0;color:#9b4437}.hide{display:none!important}.footer{text-align:center;color:#82948d;font-size:10px;padding:0 0 34px}@media(max-width:560px){.card{margin:38px auto 20px;padding:23px;border-radius:24px}.row{grid-template-columns:1fr}h1{font-size:34px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="nav"><a class="brand" href="/"><span class="mark">N</span>NOUN BOT</a><a class="back" href="/">Back to NOUN BOT</a></nav>
+<section class="card">
+<h1 id="title">Welcome back.</h1><p id="intro">Sign in to your student space. Your password is handled by secure authentication and is never stored in NOUN BOT.</p>
+<div class="tabs"><button class="tab active" data-mode="login">Sign in</button><button class="tab" data-mode="signup">Create account</button><button class="tab" data-mode="recover">Forgot password</button></div>
+<div id="status" class="status"></div>
+<form id="form">
+<div class="extra signup">
+<div class="field"><label>Full name</label><input name="full_name" autocomplete="name" placeholder="Your full name"></div>
+<div class="row"><div class="field"><label>Phone number</label><input name="phone" inputmode="tel" autocomplete="tel" placeholder="080…"></div><div class="field"><label>NOUN matric number</label><input name="matric_number" autocomplete="off" placeholder="Matric number"></div></div>
+<div class="field"><label>School email</label><input name="school_email" type="email" autocomplete="email" placeholder="yourname@nou.edu.ng"></div>
+</div>
+<div class="field"><label>Email</label><input name="email" type="email" autocomplete="email" placeholder="you@example.com"></div>
+<div class="extra signup"><div class="field"><label>Password</label><input name="password" type="password" minlength="8" autocomplete="new-password" placeholder="At least 8 characters"></div></div>
+<div class="extra login"><div class="field"><label>Password</label><input name="password_login" type="password" autocomplete="current-password" placeholder="Your password"></div></div>
+<div class="extra signup"><div class="field"><label>Confirm password</label><input name="password_confirm" type="password" minlength="8" autocomplete="new-password" placeholder="Repeat password"></div></div>
+<div class="extra recover"><div class="field"><label>Account email</label><input name="recover_email" type="email" autocomplete="email" placeholder="you@example.com"></div></div>
+<div id="resetBox" class="extra recover"><div class="field"><label>New password</label><input name="reset_password" type="password" minlength="8" autocomplete="new-password" placeholder="New password"></div><div class="field"><label>Confirm new password</label><input name="reset_confirm" type="password" minlength="8" autocomplete="new-password" placeholder="Repeat new password"></div></div>
+<button id="submit" class="submit" type="submit">Sign in</button><div id="hint" class="note">Use the same email you will use for your student account.</div>
+</form>
+</section>
+<div class="footer">NOUN BOT · Powered by ABBA · Institute GPT</div>
+</div>
+<script>
+(function(){
+const API='/api/dashboard', form=document.getElementById('form'), status=document.getElementById('status'), submit=document.getElementById('submit'), title=document.getElementById('title'), intro=document.getElementById('intro'), hint=document.getElementById('hint');
+let mode='login';
+const tabs=document.querySelectorAll('.tab');
+const inputs=()=>Object.fromEntries(new FormData(form).entries());
+function setStatus(msg,err=false){status.textContent=msg;status.className='status show'+(err?' error':'');}
+function fieldsBy(cls,show){document.querySelectorAll('.'+cls).forEach(x=>x.classList.toggle('show',show));}
+function render(){fieldsBy('signup',mode==='signup');fieldsBy('login',mode==='login');fieldsBy('recover',mode==='recover');document.getElementById('resetBox').classList.toggle('show',mode==='reset');title.textContent=mode==='signup'?'Create your NOUN BOT account':mode==='recover'?'Reset your password':mode==='reset'?'Choose a new password':'Welcome back.';intro.textContent=mode==='signup'?'A simple account keeps your NOUN journey, identity and progress together.':mode==='recover'?'We will send a secure recovery link to your email.':mode==='reset'?'Set a new password for your account.':'Sign in to your student space. Your password is handled by secure authentication and is never stored in NOUN BOT.';submit.textContent=mode==='signup'?'Create account':mode==='recover'?'Send recovery link':mode==='reset'?'Update password':'Sign in';hint.textContent=mode==='signup'?'Use your real NOUN identity details so your student space can stay connected.':mode==='recover'?'For account security, we use the same response whether or not an account exists.':'Your student data stays tied to your authenticated account.';form.querySelector('[name="email"]').closest('.field').classList.toggle('hide',mode==='reset');}
+tabs.forEach(t=>t.addEventListener('click',()=>{mode=t.dataset.mode;tabs.forEach(x=>x.classList.toggle('active',x===t));setStatus('');render();}));
+function saveSession(s){if(s&&s.access_token){sessionStorage.setItem('noun_access_token',s.access_token);if(s.refresh_token)sessionStorage.setItem('noun_refresh_token',s.refresh_token);}}
+async function post(route,body,auth){const r=await fetch(API+'?route='+route,{method:'POST',headers:{'Content-Type':'application/json',...(auth?{Authorization:'Bearer '+auth}:{} )},body:JSON.stringify({product:'noun',...body})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Request failed');return d;}
+function recoveryToken(){const hash=new URLSearchParams(location.hash.slice(1));return hash.get('access_token')||'';}
+form.addEventListener('submit',async e=>{
+e.preventDefault();setStatus('');submit.disabled=true;
+try{
+const v=inputs();
+if(mode==='signup'){
+ if(v.password!==v.password_confirm)throw new Error('Passwords do not match.');
+ const d=await post('auth-signup',{full_name:v.full_name,email:v.email,phone:v.phone,password:v.password,matric_number:v.matric_number,school_email:v.school_email});saveSession(d.session);setStatus('Account created. Opening your student space…');setTimeout(()=>location.href='/student/',500);
+}else if(mode==='login'){
+ const d=await post('auth-login',{email:v.email,password:v.password_login});saveSession(d.session);setStatus('Signed in. Opening your student space…');setTimeout(()=>location.href='/student/',400);
+}else if(mode==='recover'){
+ await post('auth-recover',{email:v.recover_email});setStatus('Check your email for a secure recovery link.');
+}else{
+ const token=recoveryToken();if(!token)throw new Error('This recovery link has expired or is incomplete.');
+ if(v.reset_password!==v.reset_confirm)throw new Error('Passwords do not match.');
+ await post('auth-reset',{access_token:token,password:v.reset_password},token);setStatus('Password updated. You can sign in now.');mode='login';tabs.forEach(x=>x.classList.toggle('active',x.dataset.mode==='login'));history.replaceState(null,'',location.pathname);render();
+}
+}catch(err){setStatus(err.message||'Something went wrong.',true)}finally{submit.disabled=false}
+});
+if(recoveryToken()){mode='reset';tabs.forEach(x=>x.classList.remove('active'));render();setStatus('Choose a new password below.')}
+else render();
+})();
+</script>
+</body>
+</html>
