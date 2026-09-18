@@ -103,7 +103,7 @@ module.exports = async (req, res) => {
       context: { learningMode: mode, sessionId }
     });
 
-    const knowledgeConfidence = result.evidence?.length ? 'verified' : 'unknown';
+    const evidenceConfidences = (result.evidence || []).map(x => Number(x.confidence ?? x.score)).filter(Number.isFinite);\n    const evidenceScore = evidenceConfidences.length ? Math.max(...evidenceConfidences) : null;\n    const knowledgeConfidence = evidenceScore != null ? Math.max(0, Math.min(1, evidenceScore)) : (result.evidence?.length ? 0.8 : 0.2);
     let questionId = null;
     if (result.status === 'complete' && result.answer) {
       try {
