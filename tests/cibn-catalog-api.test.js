@@ -38,3 +38,30 @@ test('catalog endpoint does not emit permissive CORS for unknown origin', () => 
   assert.equal(res.statusCode, 200);
   assert.equal(res.headers['Access-Control-Allow-Origin'], undefined);
 });
+
+test('catalog endpoint validates programme-specific course selections', () => {
+  const req = {
+    method: 'POST',
+    headers: { origin: 'https://mcp-bot-eight.vercel.app' },
+    body: { program: 'ACIB', level: 'Chartered Banker', codes: ['805','806'] }
+  };
+  const res = responseMock();
+  handler(req, res);
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.mode, 'selection-validation');
+  assert.ok(res.body.warnings.some(x => /select only one/i.test(x)));
+  assert.equal(res.body.errors.length, 0);
+});
+
+test('catalog endpoint exposes session-cap conflicts without inventing numeric limits', () => {
+  const req = {
+    method: 'POST',
+    headers: { origin: 'https://mcp-bot-eight.vercel.app' },
+    body: { program: 'E-Payments', codes: ['701','702','801'] }
+  };
+  const res = responseMock();
+  handler(req, res);
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.sameDisplayedSession.length > 0, true);
+  assert.equal(res.body.errors.length, 0);
+});
