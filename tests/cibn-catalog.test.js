@@ -25,8 +25,9 @@ test('CIBN session clashes are duration-aware, not timestamp-only', () => {
 });
 
 test('chartered banker elective limit is enforced', () => {
-  const result = catalog.validateSelection(['805','806','807','808'], {program:'ACIB Chartered Banker'});
+  const result = catalog.validateSelection(['805','806','807','808'], {program:'ACIB', level:'Chartered Banker'});
   assert.ok(result.errors.some(x => /maximum of three/i.test(x)));
+  assert.ok(result.warnings.some(x => /select only one/i.test(x)));
 });
 
 test('publication catalogue has 75 entries and preserves observed price bands', () => {
