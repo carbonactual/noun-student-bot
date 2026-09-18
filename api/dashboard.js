@@ -3,6 +3,7 @@ const { buildOnboardingState, normalizeStudentContext } = require('../lib/studen
 const { buildStudentIntelligence } = require('../lib/student-intelligence');
 const { buildExamReadiness } = require('../lib/exam-readiness');
 const { buildSupportCase } = require('../lib/support-escalation');
+const { bearer, createUser, signIn, getUser, refreshSession, recover, updatePassword, logout } = require('../lib/auth');
 
 function clean(value, max = 500) { return String(value || '').trim().slice(0, max); }
 function normalizePhone(value) {
@@ -13,6 +14,170 @@ function normalizePhone(value) {
   return digits;
 }
 // Public site backend: onboarding + student context are browser-facing by design; no shared-secret gate.
+
+function productFrom(body, req) {
+  const raw=String(body?.product || req.query?.product || 'noun').toLowerCase();
+  return raw==='cibn' ? 'cibn' : 'noun';
+}
+function normalizeName(v){ return clean(v,120).replace(/\\s+/g,' ').trim(); }
+function authPublic(origin){
+  const allowed=[
+    'https://noun.carbonactual.com',
+    'https://noun-student-bot-dashboard.vercel.app',
+    'https://mcp-bot-eight.vercel.app',
+    'https://mcp-bot.vercel.app'
+  ];
+  return origin && allowed.includes(origin) ? origin : allowed[0];
+}
+function authRedirect(product){
+  return product==='cibn'
+    ? 'https://mcp-bot-eight.vercel.app/auth/?mode=reset'
+    : 'https://noun.carbonactual.com/auth/?mode=reset';
+}
+async function safeAppAccount(tid, user, fields){
+  try {
+    const row={
+      auth_user_id:user.id, product:fields.product, full_name:fields.full_name,
+      email:fields.email, phone:fields.phone,
+      matric_number:fields.matric_number||null, school_email:fields.school_email||null,
+      updated_at:new Date().toISOString()
+    };
+    const result=await db.from('app_accounts').upsert(row,{onConflict:'auth_user_id,product'}).select('*').single();
+    if(result.error) throw result.error;
+    return result.data;
+  } catch (_) {
+    return null;
+  }
+}
+async function authRoute(req,res,tenant){
+  const body=req.body||{};
+  const product=productFrom(body,req);
+  try {
+    if(req.method==='OPTIONS'){
+      res.setHeader('Access-Control-Allow-Origin',authPublic(req.headers?.origin));
+      res.setHeader('Vary','Origin');
+      res.setHeader('Access-Control-Allow-Methods','POST, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');
+      return res.status(204).end();
+    }
+    res.setHeader('Access-Control-Allow-Origin',authPublic(req.headers?.origin));
+    res.setHeader('Vary','Origin');
+    res.setHeader('Access-Control-Allow-Credentials','false');
+
+    const route=String(req.query?.route||'');
+    if(route==='auth-signup'){
+      const full_name=normalizeName(body.full_name);
+      const email=clean(body.email,180).toLowerCase();
+      const phone=normalizePhone(body.phone);
+      const password=String(body.password||'');
+      const matric_number=clean(body.matric_number,80).toUpperCase();
+      const school_email=clean(body.school_email,180).toLowerCase();
+      if(!full_name||!email||!phone||password.length<8) return res.status(400).json({ok:false,error:'Full name, email, phone and an 8+ character password are required.'});
+      if(product==='noun' && (!matric_number||!school_email)) return res.status(400).json({ok:false,error:'NOUN signup also requires matric number and school email.'});
+      const metadata={product,full_name,phone};
+      if(product==='noun') Object.assign(metadata,{matric_number,school_email});
+      let created;
+      try {
+        created=await createUser({email,password,phone:'+'+phone,metadata});
+      } catch(error){
+        if(error.status===422||error.status===400) return res.status(409).json({ok:false,error:'That email or phone is already registered, or could not be accepted.'});
+        throw error;
+      }
+      const user=created.user||created;
+      if(product==='noun'){
+        try{
+          const existing=await db.from('students').select('phone,auth_user_id').eq('tenant_id',tenant).eq('phone',phone).maybeSingle();
+          if(existing.data && existing.data.auth_user_id && existing.data.auth_user_id!==user.id){
+            return res.status(409).json({ok:false,error:'That phone number is already linked to another NOUN account.'});
+          }
+          const payload={
+            tenant_id:tenant,phone,full_name,email,school_email,matric_number,
+            updated_at:new Date().toISOString(), onboarding_source:'account',
+            whatsapp_opt_in:true,last_seen_at:new Date().toISOString(),auth_user_id:user.id
+          };
+          const saved=existing.data
+            ? await db.from('students').update(payload).eq('tenant_id',tenant).eq('phone',phone)
+            : await db.from('students').insert(payload);
+          if(saved.error) throw saved.error;
+        }catch(profileError){ console.error('noun account profile:',profileError.message); }
+      }
+      await safeAppAccount(tenant,user,{product,full_name,email,phone,matric_number,school_email});
+      const session=await signIn(email,password);
+      return res.status(201).json({ok:true,product,user:{id:user.id,full_name,email,phone,matric_number,school_email},session:{
+        access_token:session.access_token,refresh_token:session.refresh_token,expires_in:session.expires_in,expires_at:session.expires_at
+      }});
+    }
+
+    if(route==='auth-login'){
+      const email=clean(body.email,180).toLowerCase();
+      const password=String(body.password||'');
+      if(!email||!password) return res.status(400).json({ok:false,error:'Email and password are required.'});
+      const session=await signIn(email,password);
+      const user=await getUser(session.access_token);
+      const metadata=user.user_metadata||{};
+      const userProduct=metadata.product||product;
+      if(product && userProduct && userProduct!==product) return res.status(403).json({ok:false,error:'This account belongs to another service.'});
+      await safeAppAccount(tenant,user,{product,full_name:normalizeName(metadata.full_name||metadata.name||user.email),email:user.email||email,phone:normalizePhone(metadata.phone),matric_number:metadata.matric_number,school_email:metadata.school_email});
+      return res.status(200).json({ok:true,product,user:{id:user.id,full_name:metadata.full_name||metadata.name||'',email:user.email||email,phone:normalizePhone(metadata.phone),matric_number:metadata.matric_number||'',school_email:metadata.school_email||''},session:{
+        access_token:session.access_token,refresh_token:session.refresh_token,expires_in:session.expires_in,expires_at:session.expires_at
+      }});
+    }
+
+    if(route==='auth-recover'){
+      const email=clean(body.email,180).toLowerCase();
+      if(!email) return res.status(400).json({ok:false,error:'Email is required.'});
+      await recover(email,authRedirect(product));
+      return res.status(200).json({ok:true,message:'If an account matches that email, a recovery link is on its way.'});
+    }
+
+    if(route==='auth-refresh'){
+      const refreshToken=String(body.refresh_token||'');
+      if(!refreshToken) return res.status(400).json({ok:false,error:'Refresh token required.'});
+      const session=await refreshSession(refreshToken);
+      return res.status(200).json({ok:true,session:{
+        access_token:session.access_token,refresh_token:session.refresh_token,expires_in:session.expires_in,expires_at:session.expires_at
+      }});
+    }
+
+    if(route==='auth-reset'){
+      const accessToken=bearer(req)||String(body.access_token||'');
+      const password=String(body.password||'');
+      if(!accessToken||password.length<8) return res.status(400).json({ok:false,error:'A valid recovery session and an 8+ character password are required.'});
+      await updatePassword(accessToken,password);
+      return res.status(200).json({ok:true,message:'Password updated successfully. You can sign in now.'});
+    }
+
+    if(route==='auth-me'){
+      const accessToken=bearer(req)||String(body.access_token||'');
+      const user=await getUser(accessToken);
+      const metadata=user.user_metadata||{};
+      const selected=productFrom({product:metadata.product||product},req);
+      let student=null;
+      if(selected==='noun' && metadata.phone){
+        try{
+          const lookup=await db.from('students').select('*').eq('tenant_id',tenant).eq('phone',normalizePhone(metadata.phone)).maybeSingle();
+          student=lookup.data||null;
+        }catch(_){}
+      }
+      return res.status(200).json({ok:true,product:selected,user:{
+        id:user.id,full_name:metadata.full_name||metadata.name||'',email:user.email||'',
+        phone:normalizePhone(metadata.phone),matric_number:metadata.matric_number||'',school_email:metadata.school_email||''
+      },student});
+    }
+
+    if(route==='auth-logout'){
+      const accessToken=bearer(req)||String(body.access_token||'');
+      if(accessToken){try{await logout(accessToken);}catch(_){}}
+      return res.status(200).json({ok:true});
+    }
+
+    return res.status(404).json({ok:false,error:'Unknown auth route'});
+  } catch(error){
+    console.error('auth:',error.message);
+    const status=error.status===401?401:error.status===422?422:503;
+    return res.status(status).json({ok:false,error:'Authentication service is unavailable or the details could not be accepted.'});
+  }
+}
 
 async function onboard(req, res, tenant) {
   const body = req.body || {};
@@ -82,6 +247,7 @@ module.exports = async function handler(req, res) {
     if (route === 'student-context') return studentContext(req, res, tenant);
     if (route === 'exam-readiness') return examReadiness(req, res);
     if (route === 'support-case') return supportCase(req, res);
+    if (route.startsWith('auth-')) return authRoute(req, res, tenant);
     if (req.method === 'POST') return onboard(req, res, tenant);
     if (req.method !== 'GET') return res.status(405).json({ error: 'GET or POST only' });
     const today = new Date().toISOString().slice(0, 10);
