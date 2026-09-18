@@ -338,7 +338,8 @@ function renderProfile(d){
   document.getElementById('contextPill').textContent=(s.study_level||'Student')+' space';
   document.getElementById('greeting').textContent=(new Date().getHours()<12?'Good morning':new Date().getHours()<17?'Good afternoon':'Good evening')+', '+(s.full_name||'student').split(' ')[0]+'.';
   const facts=document.getElementById('facts');facts.innerHTML='';
-  for(const [label,val] of [['Study level',s.study_level||'NOUN'],['Courses',(s.courses||[]).length+' in your profile'],['Upcoming events',(d.events||[]).length+' tracked']]){
+  const stageLabels={ask_level:'Getting started',active:'Active student',onboarding:'Getting started',registered:'Registered',completed:'Completed'};
+  for(const [label,val] of [['Stage',stageLabels[s.stage]||s.stage||'Getting started'],['Study level',s.study_level||'NOUN'],['Next',priorities?.[0]?.title||'Ask ABBA']]){
     const el=document.createElement('div');el.className='fact';
     const sm=document.createElement('small');sm.textContent=label;
     const st=document.createElement('strong');st.textContent=val;
@@ -347,13 +348,13 @@ function renderProfile(d){
   const list=document.getElementById('priorities');list.innerHTML='';
   const priorities=d.priorities||[];
   if(!priorities.length){list.innerHTML='<div class="empty">Nothing urgent right now. Ask ABBA what you should focus on.</div>'}
-  else priorities.slice(0,4).forEach(x=>{
+  else priorities.slice(0,3).forEach(x=>{
     const el=document.createElement('div');el.className='task';
     const strong=document.createElement('strong');strong.textContent=String(x.title||x.name||'Priority');
     const span=document.createElement('span');span.textContent=String(x.description||x.detail||'Recommended next step');
     el.append(strong,span);list.appendChild(el);
   });
-  document.getElementById('attentionText').textContent=(priorities.length||0)+' priorities, '+((d.events||[]).length||0)+' upcoming events and '+((d.practice||[]).length||0)+' matched practice items are ready from your current context.';
+  document.getElementById('attentionText').textContent=(stageLabels[s.stage]||s.stage||'Getting started')+' · '+((priorities.length||0))+' useful next steps are ready from your current context.';
   document.getElementById('nextLoader').style.display='none';
   document.getElementById('nextTitle').style.display='block';
   document.getElementById('nextText').style.display='block';
