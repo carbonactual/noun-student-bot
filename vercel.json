@@ -1,8 +1,22 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
-    { "source": "/api/onboard", "destination": "/api/dashboard" },
-    { "source": "/api/service-intelligence", "destination": "/api/automation" },
-    { "source": "/api/knowledge-query", "destination": "/api/ai-study" }
-  ]
+    {
+      "source": "/api/onboard",
+      "destination": "/api/dashboard"
+    },
+    {
+      "source": "/api/service-intelligence",
+      "destination": "/api/automation"
+    },
+    {
+      "source": "/api/knowledge-query",
+      "destination": "/api/ai-study"
+    }
+  ],
+  "functions": {
+    "api/*.js": {
+      "maxDuration": 60
+    }
+  }
 }
