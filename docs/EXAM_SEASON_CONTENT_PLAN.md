@@ -46,7 +46,7 @@ stakeholder messaging).
 intelligence layer." Full v3 copy = the live post. PRESERVED for later reuse (the
 longer v2 feature-list copy): hold for the Oct 2 or Oct 5 slot if that week needs
 a brand moment, else archive.
-2. Mon Sept 21 — FINAL COPY (publish as-is):
+2. DONE (Sept 18, published 2 days early): FB post 742021198994780_122178561896976529. FINAL COPY published as-is. Original copy preserved below:
 "Everyone gets the same TMAs. But YOUR deadlines, YOUR weak topics, YOUR exam — those are only yours.
 
 That's why ABBA is intelligently tailored to you: tell it your course codes once, and it tracks YOUR TMA deadlines, coaches the topics YOU struggle with before you attempt, and mocks the exact exams YOU will write.
