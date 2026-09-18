@@ -2,6 +2,7 @@ const { db, tenantId, searchKnowledge, buildGrounding } = require('../lib/knowle
 const { normalizeMode } = require('../lib/learning-continuity');
 const { orchestrateNounRequest } = require('../lib/noun-orchestrator');
 const { cibnChat } = require('../lib/cibn-chat');
+const { bearer, getUser } = require('../lib/auth');
 
 const SECRET = process.env.WEBHOOK_SECRET;
 
@@ -81,7 +82,11 @@ module.exports = async (req, res) => {
       return await knowledgeQuery(req, res);
     }
 
-    const phone = String(req.body?.phone || '').replace(/\D/g, '');
+    const token = bearer(req);
+    if (!token) return res.status(401).json({ error: 'Sign in required' });
+    const user = await getUser(token);
+    const phone = String(user.user_metadata?.phone || '').replace(/\D/g, '');
+    if (!phone) return res.status(400).json({ error: 'Account phone is missing' });
     const question = safe(req.body?.question);
     const mode = normalizeMode(req.body?.mode);
     const course = safe(req.body?.course, 80);
