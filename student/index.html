@@ -288,6 +288,7 @@ a{text-decoration:none;color:inherit}
 </div>
 
 <script>
+let accessToken=sessionStorage.getItem('noun_access_token')||'';
 let phone=new URLSearchParams(location.search).get('phone')||'';
 let mode='tutor';
 const messages=document.getElementById('messages'),q=document.getElementById('question'),send=document.getElementById('send');
@@ -361,7 +362,7 @@ function renderProfile(d){
 }
 async function loadProfile(p){
   try{
-    const r=await fetch('/api/student-intelligence?phone='+encodeURIComponent(p));
+    const r=await fetch('/api/student-intelligence?phone='+encodeURIComponent(p),{headers:{Authorization:'Bearer '+accessToken}});
     const d=await r.json();
     if(!r.ok||!d.ok)throw new Error(d.error||'Unavailable');
     if(!d.student){document.getElementById('facts').innerHTML='<div class="empty">No student profile was found for this number. Join again from the dashboard.</div>';return}
@@ -378,10 +379,10 @@ document.getElementById('phoneSave').addEventListener('click',()=>{const v=docum
 
 async function ask(){
   const text=q.value.trim();if(!text)return;
-  if(!phone){document.getElementById('needPhone').classList.add('show');document.getElementById('phoneInput').focus();return}
+  if(!accessToken){location.href='/auth/?next=/student/';return}
   add(text,'me');q.value='';send.disabled=true;typing(true);
   try{
-    const r=await fetch('/api/ai-study',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone,question:text,mode})});
+    const r=await fetch('/api/ai-study',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+accessToken},body:JSON.stringify({phone,question:text,mode})});
     const d=await r.json();
     typing(false);
     if(!r.ok||!d.answer)throw new Error(d.error||'Unavailable');
@@ -396,8 +397,26 @@ async function ask(){
 }
 send.addEventListener('click',ask);
 q.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ask()}});
-if(phone)loadProfile(phone);
-else{document.getElementById('facts').innerHTML='<div class="empty">Join from the dashboard, or connect your WhatsApp number in the chat to load your student context.</div>';document.getElementById('nextLoader').style.display='none';document.getElementById('nextTitle').style.display='block';document.getElementById('nextText').style.display='block'}
+async function loadAccount(){
+  if(!accessToken){location.href='/auth/?next=/student/';return}
+  try{
+    const r=await fetch('/api/dashboard?route=auth-me',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+accessToken},body:JSON.stringify({product:'noun'})});
+    const d=await r.json();
+    if(!r.ok||!d.ok)throw new Error(d.error||'Sign in required');
+    phone=d.user?.phone||d.student?.phone||'';
+    if(!phone)throw new Error('Account phone is missing');
+    const u=new URL(location);u.searchParams.delete('phone');history.replaceState(null,'',u.pathname+u.search);
+    if(d.student && d.student.full_name){
+      document.getElementById('profileName').textContent=d.student.full_name;
+      document.getElementById('profileProgramme').textContent=d.student.programme_title||d.student.level||'Your NOUN journey';
+    } else if(d.user.full_name){
+      document.getElementById('profileName').textContent=d.user.full_name;
+      document.getElementById('profileProgramme').textContent='Your NOUN student account';
+    }
+    await loadProfile(phone);
+  }catch(e){document.getElementById('facts').innerHTML='<div class="empty">Please sign in again to load your private student space.</div>';}
+}
+loadAccount();
 </script>
 </body>
 </html>
