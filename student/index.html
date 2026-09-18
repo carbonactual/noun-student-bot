@@ -338,6 +338,7 @@ function renderProfile(d){
   document.getElementById('contextPill').textContent=(s.study_level||'Student')+' space';
   document.getElementById('greeting').textContent=(new Date().getHours()<12?'Good morning':new Date().getHours()<17?'Good afternoon':'Good evening')+', '+(s.full_name||'student').split(' ')[0]+'.';
   const facts=document.getElementById('facts');facts.innerHTML='';
+  const priorities=d.priorities||[];
   const stageLabels={ask_level:'Getting started',active:'Active student',onboarding:'Getting started',registered:'Registered',completed:'Completed'};
   for(const [label,val] of [['Stage',stageLabels[s.stage]||s.stage||'Getting started'],['Study level',s.study_level||'NOUN'],['Next',priorities?.[0]?.title||'Ask ABBA']]){
     const el=document.createElement('div');el.className='fact';
@@ -346,7 +347,6 @@ function renderProfile(d){
     el.append(sm,st);facts.appendChild(el);
   }
   const list=document.getElementById('priorities');list.innerHTML='';
-  const priorities=d.priorities||[];
   if(!priorities.length){list.innerHTML='<div class="empty">Nothing urgent right now. Ask ABBA what you should focus on.</div>'}
   else priorities.slice(0,3).forEach(x=>{
     const el=document.createElement('div');el.className='task';
