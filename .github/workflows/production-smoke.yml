@@ -66,3 +66,13 @@ jobs:
           grep -q "Academic pulse" <<<"$student"
           grep -q "Ask ABBA" <<<"$student"
           grep -q "We do not display your details publicly" <<<"$dashboard"
+
+      - name: Verify canonical CIBN catalog
+        shell: bash
+        run: |
+          set -euo pipefail
+          catalog="$(curl --fail-with-body --silent --show-error --max-time 20 "$BASE_URL/api/cibn-catalog")"
+          grep -q '"catalog_version":"2026-10-official-timetable"' <<<"$catalog"
+          grep -q '"MF403"' <<<"$catalog"
+          grep -q '"2026-10-07"' <<<"$catalog"
+          grep -q '"MF404"' <<<"$catalog"
