@@ -18,5 +18,5 @@ test('ABBA runtime posts the canonical request envelope', async () => {
 });
 
 test('ABBA runtime fails closed when no runtime is configured', async () => {
-  await assert.rejects(() => invokeAbba({ requestId: 'r2', utterance: 'hello' }, { runtimeUrl: '' }), /ABBA runtime unavailable/);
+  await assert.rejects(() => invokeAbba({ requestId: 'r2', utterance: 'hello' }, { runtimeUrl: '' }), /Gemini engine unavailable: no GEMINI_API_KEY/);
 });
