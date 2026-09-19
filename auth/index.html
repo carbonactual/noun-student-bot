@@ -3,103 +3,272 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b7d5f">
+<meta name="theme-color" content="#071b14">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="NOUN BOT">
 <link rel="manifest" href="/manifest.webmanifest">
-<title>NOUN BOT — Account</title>
+<title>NOUN BOT — Create your student space</title>
 <style>
-:root{--g:#0b7d5f;--gd:#075640;--soft:#e9f7f1;--bg:#f7fbf9;--ink:#12362c;--muted:#6a8078;--line:#d7ebe3;--card:#fff;--shadow:0 24px 70px rgba(5,76,54,.12);--font:ui-rounded,"SF Pro Rounded","Avenir Next","Segoe UI",system-ui,-apple-system,sans-serif}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 10%,#e6f7ef,transparent 34%),var(--bg);color:var(--ink);font-family:var(--font);min-height:100vh}.wrap{width:min(1040px,calc(100% - 28px));margin:auto}.nav{height:72px;display:flex;justify-content:space-between;align-items:center}.brand{display:flex;gap:10px;align-items:center;font-weight:900;letter-spacing:-.04em}.mark{width:40px;height:40px;border-radius:14px;background:var(--g);color:#fff;display:grid;place-items:center;box-shadow:0 12px 28px rgba(11,125,95,.2)}.back{color:var(--muted);font-size:12px}.card{width:min(470px,100%);margin:60px auto;padding:30px;border-radius:28px;background:rgba(255,255,255,.96);border:1px solid var(--line);box-shadow:var(--shadow)}h1{font-size:38px;line-height:1;margin:0 0 10px;letter-spacing:-.05em}p{color:var(--muted);font-size:13px;margin:0 0 22px}.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:5px;background:#f2f7f5;border-radius:14px;margin-bottom:20px}.tab{border:0;background:transparent;color:var(--muted);padding:10px;border-radius:10px;font-weight:800;font-size:11px;cursor:pointer}.tab.active{background:#fff;color:var(--g);box-shadow:0 2px 10px rgba(5,76,54,.08)}form{display:grid;gap:12px}.field{display:grid;gap:6px}.field label{font-size:11px;font-weight:800;color:#61766e}.field input{width:100%;height:46px;border:1px solid var(--line);border-radius:13px;padding:0 13px;color:var(--ink);outline:none;background:#fff}.field input:focus{border-color:#7fbaa8;box-shadow:0 0 0 4px var(--soft)}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.extra{display:none}.extra.show{display:grid;gap:12px}.submit{height:48px;border:0;border-radius:14px;background:var(--g);color:#fff;font-weight:900;cursor:pointer;box-shadow:0 12px 26px rgba(11,125,95,.18)}.submit:disabled{opacity:.55}.note{font-size:10px;color:#8a9a94;text-align:center;margin-top:4px}.status{display:none;padding:11px 13px;border-radius:12px;background:#f0f8f4;color:var(--gd);font-size:11px}.status.show{display:block}.error{background:#fff2f0;color:#9b4437}.hide{display:none!important}.footer{text-align:center;color:#82948d;font-size:10px;padding:0 0 34px}@media(max-width:560px){.card{margin:38px auto 20px;padding:23px;border-radius:24px}.row{grid-template-columns:1fr}h1{font-size:34px}}
+:root{
+  --bg:#07120f;--paper:#f7fbf8;--card:#ffffff;--ink:#102b22;--muted:#6c8179;
+  --green:#0a8664;--green2:#19b481;--line:#d9e9e2;--soft:#edf8f3;
+  --dark:#0b2119;--font:ui-rounded,"SF Pro Rounded","Avenir Next",Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --display:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;--ease:cubic-bezier(.2,.78,.2,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);font-family:var(--font)}
+body{color:var(--ink);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button,input{font:inherit}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid rgba(25,180,129,.22);outline-offset:3px}
+.shell{min-height:100vh;display:grid;grid-template-columns:1.02fr .98fr}
+.visual{position:relative;overflow:hidden;background:linear-gradient(145deg,#06140e,#0b281c)}
+.visual:before{content:"";position:absolute;inset:0;background:radial-gradient(600px 500px at 85% 12%,rgba(25,180,129,.22),transparent 65%),radial-gradient(650px 520px at 5% 95%,rgba(34,184,228,.15),transparent 65%)}
+.visual-inner{position:relative;z-index:2;height:100%;min-height:100vh;padding:34px 38px;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:10px;color:#eaf9f2;font-family:var(--display);font-weight:700;letter-spacing:-.04em}
+.mark{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,#45e0a3,#22b8e4);color:#04150e;font-weight:900;box-shadow:0 12px 34px rgba(69,224,163,.22)}
+.scene{position:relative;flex:1;display:flex;align-items:center;justify-content:center;padding:44px 0}
+.scene-main{width:min(560px,88%);aspect-ratio:1/1;border-radius:34px;overflow:hidden;border:1px solid rgba(255,255,255,.13);box-shadow:0 36px 100px rgba(0,0,0,.35);transform:rotate(-1.5deg);animation:float 9s ease-in-out infinite}
+.scene-main img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 1s var(--ease)}
+.scene:hover .scene-main img{transform:scale(1.04)}
+.orbit{position:absolute;width:190px;border-radius:21px;overflow:hidden;border:1px solid rgba(255,255,255,.13);background:#0e251b;box-shadow:0 22px 50px rgba(0,0,0,.32)}
+.orbit img{width:100%;height:125px;object-fit:cover;display:block}.orbit span{display:block;padding:9px 10px;color:#c7dbd3;font-size:9px}
+.orbit.a{right:0;top:16%;transform:rotate(5deg);animation:float2 8s ease-in-out -2s infinite}
+.orbit.b{left:-10px;bottom:14%;transform:rotate(-5deg);animation:float3 10s ease-in-out -3s infinite}
+.scene-note{max-width:520px;color:#bad0c6;font-size:11px;line-height:1.6;margin:0 auto;text-align:center}
+.scene-note strong{color:#e9f8f1}
+@keyframes float{50%{transform:translateY(-10px) rotate(0deg)}}@keyframes float2{50%{transform:translateY(9px) rotate(3deg)}}@keyframes float3{50%{transform:translateY(-8px) rotate(-3deg)}}
+
+.panel{background:var(--paper);display:flex;align-items:center}
+.card{width:min(560px,calc(100% - 46px));margin:0 auto;padding:36px 0 40px}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:26px}
+.back{font-size:11px;color:var(--muted)}
+.mode-switch{display:flex;gap:5px;padding:4px;border-radius:12px;background:#eef5f1}
+.mode{border:0;background:transparent;color:#71857d;padding:9px 12px;border-radius:9px;font-size:10px;font-weight:850;cursor:pointer}
+.mode.active{background:#fff;color:var(--green);box-shadow:0 2px 10px rgba(16,43,34,.08)}
+h1{font-family:var(--display);font-size:46px;line-height:.97;letter-spacing:-.065em;margin:0 0 10px}
+.intro{font-size:13px;color:var(--muted);max-width:500px;margin:0 0 25px}
+.progress{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:24px}
+.pstep{position:relative;height:5px;border-radius:99px;background:#e6eee9;overflow:hidden}
+.pstep span{position:absolute;inset:0;background:linear-gradient(90deg,var(--green),#1bb7a0);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease)}
+.pstep.active span{transform:scaleX(1)}
+.step-label{font-size:10px;color:#87978f;margin-top:-15px;margin-bottom:22px}
+.form{display:grid;gap:14px}
+.step{display:grid;gap:13px;animation:stepIn .45s var(--ease)}
+.step[hidden]{display:none}
+@keyframes stepIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.field{display:grid;gap:6px}.field label{font-size:10px;font-weight:850;color:#61766d}
+.field input{width:100%;height:50px;padding:0 14px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--ink);outline:none;transition:border-color .22s,box-shadow .22s,transform .22s}
+.field input::placeholder{color:#9aaba4}.field input:focus{border-color:#79c2a8;box-shadow:0 0 0 4px var(--soft);transform:translateY(-1px)}
+.help{display:flex;justify-content:space-between;gap:12px;color:#84948d;font-size:9px;margin-top:-5px}
+.why{padding:12px 13px;border:1px solid var(--line);border-radius:14px;background:#fbfdfc;color:#7b8d86;font-size:9.5px;line-height:1.5}
+.why b{color:var(--green)}
+.password-meter{height:5px;border-radius:99px;background:#e8efec;overflow:hidden}.password-meter span{display:block;height:100%;width:0;background:linear-gradient(90deg,#c67c55,#d5b44c,#26ae82);transition:width .28s ease}
+.password-label{font-size:9px;color:#889a92;margin-top:-6px}
+.actions{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:5px}
+.btn{min-height:48px;padding:0 17px;border-radius:14px;border:1px solid var(--line);background:#fff;color:#6f827a;font-size:11px;font-weight:850;cursor:pointer;transition:transform .25s var(--ease),border-color .25s ease}
+.btn:hover{transform:translateY(-2px);border-color:#b7d5c8}
+.btn.primary{border-color:transparent;background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;box-shadow:0 14px 30px rgba(10,134,100,.18)}
+.btn.primary:disabled{opacity:.55;cursor:wait;transform:none}
+.linkbtn{border:0;background:transparent;color:var(--green);font-size:10px;font-weight:850;cursor:pointer;padding:5px 0}
+.status{display:none;padding:12px 13px;border-radius:12px;background:var(--soft);color:#176c52;font-size:10.5px;line-height:1.45}.status.show{display:block}
+.status.error{background:#fff1ef;color:#a24539}
+.foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:19px;color:#93a29c;font-size:9px}
+@media(max-width:900px){
+  .shell{grid-template-columns:1fr}.visual{display:none}.card{padding:26px 0 34px}
+}
+@media(max-width:560px){
+  .card{width:calc(100% - 28px);padding:20px 0 28px}
+  .topline{margin-bottom:24px}.mode-switch{margin-left:auto}
+  h1{font-size:39px}.intro{font-size:12px}
+  .row{grid-template-columns:1fr}.progress{gap:6px}
+  .actions{display:grid;grid-template-columns:1fr}.btn{width:100%}.linkbtn{justify-self:center}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{animation:none!important;transition:none!important}
+  .step{animation:none}
+}
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-<div class="wrap">
-<nav class="nav"><a class="brand" href="/"><span class="mark">N</span>NOUN BOT</a><a class="back" href="/">Back to NOUN BOT</a></nav>
-<section class="card">
-<h1 id="title">Welcome back.</h1><p id="intro">Sign in to your student space. Your password is handled by secure authentication and is never stored in NOUN BOT.</p>
-<div class="tabs"><button class="tab active" data-mode="login">Sign in</button><button class="tab" data-mode="signup">Create account</button><button class="tab" data-mode="recover">Forgot password</button></div>
-<div id="status" class="status"></div>
-<form id="form">
-<div class="extra signup">
-<div class="field"><label>Full name</label><input name="full_name" autocomplete="name" placeholder="Your full name"></div>
-<div class="row"><div class="field"><label>Phone number</label><input name="phone" inputmode="tel" autocomplete="tel" placeholder="080…"></div><div class="field"><label>NOUN matric number</label><input name="matric_number" autocomplete="off" placeholder="Matric number"></div></div>
-<div class="field"><label>School email</label><input name="school_email" type="email" autocomplete="email" placeholder="yourname@nou.edu.ng"></div>
+<div class="shell">
+  <aside class="visual" aria-hidden="true">
+    <div class="visual-inner">
+      <a class="brand" href="/"><span class="mark">N</span><span>NOUN BOT</span></a>
+      <div class="scene">
+        <div class="scene-main"><img src="/assets/promo/noun-bot-ad-hero.jpg" alt="" width="1250" height="1250"></div>
+        <div class="orbit a"><img src="/assets/promo/noun-bot-ad-social-proof.jpg" alt="" width="1250" height="1250"><span>One student journey, not another maze.</span></div>
+        <div class="orbit b"><img src="/assets/promo/noun-bot-ad-menu.jpg" alt="" width="1250" height="1250"><span>Learn · prepare · plan · get help</span></div>
+      </div>
+      <p class="scene-note"><strong>Your context comes with you.</strong><br>Create the account once. Then use the student space for your own learning, preparation, plans and support.</p>
+    </div>
+  </aside>
+
+  <main class="panel">
+    <section class="card" aria-labelledby="title">
+      <div class="topline">
+        <a class="back" href="javascript:history.back()">← Back</a>
+        <div class="mode-switch" role="tablist" aria-label="Account mode">
+          <button class="mode active" id="signupMode" role="tab" aria-selected="true" type="button">Create account</button>
+          <button class="mode" id="loginMode" role="tab" aria-selected="false" type="button">Sign in</button>
+        </div>
+      </div>
+
+      <h1 id="title">Create your student space.</h1>
+      <p class="intro" id="intro">Start with the few details needed to connect your NOUN identity. We'll ask for the rest only when we need it.</p>
+
+      <div class="progress" id="progress" aria-label="Signup progress"><div class="pstep active"><span></span></div><div class="pstep"><span></span></div></div>
+      <div class="step-label" id="stepLabel">Step 1 of 2 · Your account</div>
+
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+
+      <form class="form" id="form">
+        <section class="step" id="step1">
+          <div class="field"><label for="full_name">Full name</label><input id="full_name" name="full_name" autocomplete="name" placeholder="Your full name"></div>
+          <div class="row">
+            <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com"></div>
+            <div class="field"><label for="phone">WhatsApp number</label><input id="phone" name="phone" inputmode="tel" autocomplete="tel" placeholder="080…"></div>
+          </div>
+          <div class="why"><b>Why these first?</b> This is enough to begin your account without asking for your full NOUN identity profile immediately.</div>
+          <div class="actions"><span></span><button class="btn primary" type="button" id="next">Continue →</button></div>
+        </section>
+
+        <section class="step" id="step2" hidden>
+          <div class="field"><label for="matric_number">NOUN matric number</label><input id="matric_number" name="matric_number" autocomplete="off" placeholder="Your matric number"></div>
+          <div class="field"><label for="school_email">School email</label><input id="school_email" name="school_email" type="email" autocomplete="email" placeholder="yourname@nou.edu.ng"></div>
+          <div class="field"><label for="password">Password</label><input id="password" name="password" type="password" minlength="8" autocomplete="new-password" placeholder="At least 8 characters"><div class="password-meter"><span id="meter"></span></div><div class="password-label" id="passwordLabel">Use 8+ characters; a mix of letters and numbers is stronger.</div></div>
+          <div class="field"><label for="password_confirm">Confirm password</label><input id="password_confirm" name="password_confirm" type="password" minlength="8" autocomplete="new-password" placeholder="Repeat your password"></div>
+          <div class="why"><b>Why NOUN details?</b> They help keep your student context connected. They are not displayed publicly, and your password remains handled by secure authentication.</div>
+          <div class="actions"><button class="btn" type="button" id="backStep">← Back</button><button class="btn primary" id="submit" type="submit">Create account</button></div>
+        </section>
+
+        <section class="step" id="loginStep" hidden>
+          <div class="field"><label for="login_email">Email</label><input id="login_email" type="email" autocomplete="email" placeholder="you@example.com"></div>
+          <div class="field"><label for="login_password">Password</label><input id="login_password" type="password" autocomplete="current-password" placeholder="Your password"></div>
+          <div class="actions"><button class="linkbtn" type="button" id="recoverLink">Forgot password?</button><button class="btn primary" type="button" id="login">Sign in</button></div>
+        </section>
+
+        <section class="step" id="recoverStep" hidden>
+          <div class="field"><label for="recover_email">Account email</label><input id="recover_email" type="email" autocomplete="email" placeholder="you@example.com"></div>
+          <div class="why">We'll use the same response whether or not an account exists.</div>
+          <div class="actions"><button class="btn" type="button" id="recoverBack">← Back</button><button class="btn primary" type="button" id="recover">Send recovery link</button></div>
+        </section>
+
+        <section class="step" id="resetStep" hidden>
+          <div class="field"><label for="reset_password">New password</label><input id="reset_password" type="password" minlength="8" autocomplete="new-password" placeholder="New password"></div>
+          <div class="field"><label for="reset_confirm">Confirm new password</label><input id="reset_confirm" type="password" minlength="8" autocomplete="new-password" placeholder="Repeat new password"></div>
+          <div class="actions"><span></span><button class="btn primary" type="button" id="reset">Update password</button></div>
+        </section>
+      </form>
+
+      <div class="foot"><span>NOUN BOT · Powered by ABBA · Institute GPT</span><a href="/">Return to NOUN BOT</a></div>
+    </section>
+  </main>
 </div>
-<div class="field"><label>Email</label><input name="email" type="email" autocomplete="email" placeholder="you@example.com"></div>
-<div class="extra signup"><div class="field"><label>Password</label><input name="password" type="password" minlength="8" autocomplete="new-password" placeholder="At least 8 characters"></div></div>
-<div class="extra login"><div class="field"><label>Password</label><input name="password_login" type="password" autocomplete="current-password" placeholder="Your password"></div></div>
-<div class="extra signup"><div class="field"><label>Confirm password</label><input name="password_confirm" type="password" minlength="8" autocomplete="new-password" placeholder="Repeat password"></div></div>
-<div class="extra recover"><div class="field"><label>Account email</label><input name="recover_email" type="email" autocomplete="email" placeholder="you@example.com"></div></div>
-<div id="resetBox" class="extra recover"><div class="field"><label>New password</label><input name="reset_password" type="password" minlength="8" autocomplete="new-password" placeholder="New password"></div><div class="field"><label>Confirm new password</label><input name="reset_confirm" type="password" minlength="8" autocomplete="new-password" placeholder="Repeat new password"></div></div>
-<button id="submit" class="submit" type="submit">Sign in</button><div id="hint" class="note">Use the same email you will use for your student account.</div>
-</form>
-</section>
-<div class="footer">NOUN BOT · Powered by ABBA · Institute GPT</div>
-</div>
+
 <script>
 (function(){
-const API='/api/dashboard', form=document.getElementById('form'), status=document.getElementById('status'), submit=document.getElementById('submit'), title=document.getElementById('title'), intro=document.getElementById('intro'), hint=document.getElementById('hint');
-let mode='login';
-const tabs=document.querySelectorAll('.tab');
-const inputs=()=>Object.fromEntries(new FormData(form).entries());
-function setStatus(msg,err=false){status.textContent=msg;status.className='status show'+(err?' error':'');}
-function fieldsBy(cls,show){document.querySelectorAll('.'+cls).forEach(x=>x.classList.toggle('show',show));}
-function render(){fieldsBy('signup',mode==='signup');fieldsBy('login',mode==='login');fieldsBy('recover',mode==='recover');document.getElementById('resetBox').classList.toggle('show',mode==='reset');title.textContent=mode==='signup'?'Create your NOUN BOT account':mode==='recover'?'Reset your password':mode==='reset'?'Choose a new password':'Welcome back.';intro.textContent=mode==='signup'?'A simple account keeps your NOUN journey, identity and progress together.':mode==='recover'?'We will send a secure recovery link to your email.':mode==='reset'?'Set a new password for your account.':'Sign in to your student space. Your password is handled by secure authentication and is never stored in NOUN BOT.';submit.textContent=mode==='signup'?'Create account':mode==='recover'?'Send recovery link':mode==='reset'?'Update password':'Sign in';hint.textContent=mode==='signup'?'Use your real NOUN identity details so your student space can stay connected.':mode==='recover'?'For account security, we use the same response whether or not an account exists.':'Your student data stays tied to your authenticated account.';form.querySelector('[name="email"]').closest('.field').classList.toggle('hide',mode==='reset');}
-tabs.forEach(t=>t.addEventListener('click',()=>{mode=t.dataset.mode;tabs.forEach(x=>x.classList.toggle('active',x===t));setStatus('');render();}));
-function saveSession(s){if(s&&s.access_token){sessionStorage.setItem('noun_access_token',s.access_token);if(s.refresh_token)sessionStorage.setItem('noun_refresh_token',s.refresh_token);}}
-async function post(route,body,auth){const r=await fetch(API+'?route='+route,{method:'POST',headers:{'Content-Type':'application/json',...(auth?{Authorization:'Bearer '+auth}:{} )},body:JSON.stringify({product:'noun',...body})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Request failed');return d;}
-function recoveryToken(){const hash=new URLSearchParams(location.hash.slice(1));return hash.get('access_token')||'';}
-form.addEventListener('submit',async e=>{
-e.preventDefault();setStatus('');submit.disabled=true;
-try{
-const v=inputs();
-if(mode==='signup'){
- if(v.password!==v.password_confirm)throw new Error('Passwords do not match.');
- const d=await post('auth-signup',{full_name:v.full_name,email:v.email,phone:v.phone,password:v.password,matric_number:v.matric_number,school_email:v.school_email});saveSession(d.session);setStatus('Account created. Opening your student space…');setTimeout(()=>location.href='/student/',500);
-}else if(mode==='login'){
- const d=await post('auth-login',{email:v.email,password:v.password_login});saveSession(d.session);setStatus('Signed in. Opening your student space…');setTimeout(()=>location.href='/student/',400);
-}else if(mode==='recover'){
- await post('auth-recover',{email:v.recover_email});setStatus('Check your email for a secure recovery link.');
-}else{
- const token=recoveryToken();if(!token)throw new Error('This recovery link has expired or is incomplete.');
- if(v.reset_password!==v.reset_confirm)throw new Error('Passwords do not match.');
- await post('auth-reset',{access_token:token,password:v.reset_password},token);setStatus('Password updated. You can sign in now.');mode='login';tabs.forEach(x=>x.classList.toggle('active',x.dataset.mode==='login'));history.replaceState(null,'',location.pathname);render();
-}
-}catch(err){setStatus(err.message||'Something went wrong.',true)}finally{submit.disabled=false}
-});
-if(recoveryToken()){mode='reset';tabs.forEach(x=>x.classList.remove('active'));render();setStatus('Choose a new password below.')}
-else render();
+  const API='/api/dashboard';
+  const form=document.getElementById('form'), status=document.getElementById('status');
+  const title=document.getElementById('title'), intro=document.getElementById('intro');
+  const progress=document.getElementById('progress'), stepLabel=document.getElementById('stepLabel');
+  const steps=document.getElementById('progress').querySelectorAll('.pstep');
+  const signupMode=document.getElementById('signupMode'), loginMode=document.getElementById('loginMode');
+  let mode=new URLSearchParams(location.search).get('mode')==='signup'?'signup':'login';
+  let signupStep=1;
+
+  function setStatus(msg,err=false){status.textContent=msg;status.className='status show'+(err?' error':'');}
+  function clearStatus(){status.textContent='';status.className='status';}
+  function nextPath(){
+    const raw=new URLSearchParams(location.search).get('next')||'/student/';
+    return raw.startsWith('/') && !raw.startsWith('//') && !raw.includes(':') ? raw : '/student/';
+  }
+  function show(id){['step1','step2','loginStep','recoverStep','resetStep'].forEach(x=>{const el=document.getElementById(x);el.hidden=x!==id;});}
+  function modeTabs(which){
+    signupMode.classList.toggle('active',which==='signup'); loginMode.classList.toggle('active',which==='login');
+    signupMode.setAttribute('aria-selected',which==='signup'?'true':'false'); loginMode.setAttribute('aria-selected',which==='login'?'true':'false');
+  }
+  function render(){
+    clearStatus(); progress.hidden=true; stepLabel.hidden=true;
+    if(mode==='signup'){
+      modeTabs('signup'); progress.hidden=false; stepLabel.hidden=false;
+      if(signupStep===1){show('step1');title.textContent='Create your student space.';intro.textContent="Start with the few details needed to connect your NOUN identity. We'll ask for the rest only when we need it.";stepLabel.textContent='Step 1 of 2 · Your account';steps[0].classList.add('active');steps[1].classList.remove('active');}
+      else{show('step2');title.textContent='Connect your NOUN identity.';intro.textContent='Now add the NOUN details that keep your student context tied to the right account.';stepLabel.textContent='Step 2 of 2 · NOUN identity';steps[0].classList.add('active');steps[1].classList.add('active');}
+    }else if(mode==='login'){
+      modeTabs('login');show('loginStep');title.textContent='Welcome back.';intro.textContent='Sign in to continue your student journey with the context you have already built.';
+    }else if(mode==='recover'){
+      modeTabs('login');show('recoverStep');title.textContent='Reset your password.';intro.textContent='Enter your account email and we'll send a secure recovery link.';
+    }else{
+      modeTabs('login');show('resetStep');title.textContent='Choose a new password.';intro.textContent='Set a new password for your account.';
+    }
+  }
+  function values(){return Object.fromEntries(new FormData(form).entries());}
+  function required(ids){for(const id of ids){const el=document.getElementById(id);if(!el.value.trim()){el.focus();throw new Error('Please complete the highlighted details before continuing.');}}}
+  async function post(route,body,auth){
+    const r=await fetch(API+'?route='+route,{method:'POST',headers:{'Content-Type':'application/json',...(auth?{Authorization:'Bearer '+auth}:{} )},body:JSON.stringify({product:'noun',...body})});
+    const d=await r.json().catch(()=>({})); if(!r.ok)throw new Error(d.error||'Request failed'); return d;
+  }
+  function saveSession(s){if(s&&s.access_token){sessionStorage.setItem('noun_access_token',s.access_token);if(s.refresh_token)sessionStorage.setItem('noun_refresh_token',s.refresh_token);}}
+  function recoveryToken(){return new URLSearchParams(location.hash.slice(1)).get('access_token')||'';}
+
+  signupMode.addEventListener('click',()=>{mode='signup';signupStep=1;render();});
+  loginMode.addEventListener('click',()=>{mode='login';render();});
+  document.getElementById('next').addEventListener('click',()=>{try{required(['full_name','email','phone']);signupStep=2;render();}catch(e){setStatus(e.message,true)}});
+  document.getElementById('backStep').addEventListener('click',()=>{signupStep=1;render();});
+  document.getElementById('recoverLink').addEventListener('click',()=>{mode='recover';render();});
+  document.getElementById('recoverBack').addEventListener('click',()=>{mode='login';render();});
+  document.getElementById('login').addEventListener('click',async()=>{
+    try{
+      required(['login_email','login_password']);const v=values();const b=await post('auth-login',{email:v.login_email,password:v.login_password});
+      saveSession(b.session);setStatus('Signed in. Opening your student space…');setTimeout(()=>location.href=nextPath(),350);
+    }catch(e){setStatus(e.message||'Unable to sign in.',true)}
+  });
+  document.getElementById('recover').addEventListener('click',async()=>{
+    try{required(['recover_email']);const v=values();await post('auth-recover',{email:v.recover_email});setStatus('Check your email for a secure recovery link.');}
+    catch(e){setStatus(e.message||'Unable to start recovery.',true)}
+  });
+  document.getElementById('reset').addEventListener('click',async()=>{
+    try{
+      const token=recoveryToken();if(!token)throw new Error('This recovery link has expired or is incomplete.');
+      required(['reset_password','reset_confirm']);const v=values();if(v.reset_password!==v.reset_confirm)throw new Error('Passwords do not match.');
+      await post('auth-reset',{access_token:token,password:v.reset_password},token);setStatus('Password updated. You can sign in now.');
+      mode='login';history.replaceState(null,'',location.pathname);render();
+    }catch(e){setStatus(e.message||'Unable to reset password.',true)}
+  });
+
+  form.addEventListener('submit',async e=>{
+    e.preventDefault();
+    if(mode!=='signup'||signupStep!==2)return;
+    const submit=document.getElementById('submit');submit.disabled=true;submit.textContent='Creating…';
+    try{
+      required(['matric_number','school_email','password','password_confirm']);
+      const v=values();if(v.password!==v.password_confirm)throw new Error('Passwords do not match.');
+      const b=await post('auth-signup',{full_name:v.full_name,email:v.email,phone:v.phone,password:v.password,matric_number:v.matric_number,school_email:v.school_email});
+      saveSession(b.session);setStatus('Account created. Opening your student space…');setTimeout(()=>location.href=nextPath(),450);
+    }catch(e){setStatus(e.message||'Unable to create your account.',true)}
+    finally{submit.disabled=false;submit.textContent='Create account';}
+  });
+
+  const pw=document.getElementById('password'),meter=document.getElementById('meter'),passwordLabel=document.getElementById('passwordLabel');
+  pw.addEventListener('input',()=>{
+    const v=pw.value;let score=0;if(v.length>=8)score+=30;if(v.length>=12)score+=20;if(/[a-z]/.test(v)&&/[A-Z]/.test(v))score+=20;if(/\d/.test(v))score+=15;if(/[^A-Za-z0-9]/.test(v))score+=15;
+    meter.style.width=Math.min(score,100)+'%';passwordLabel.textContent=score<50?'Add length and a mix of characters.':score<80?'Good. A little more variety will strengthen it.':'Strong password pattern.';
+  });
+
+  if(recoveryToken()){mode='reset';render();setStatus('Choose a new password below.');}
+  else render();
 })();
 </script>
-
 <script>
 (function(){
   if('serviceWorker' in navigator) window.addEventListener('load',function(){
     navigator.serviceWorker.register('/sw.js').catch(function(error){console.warn('NOUN BOT PWA registration:',error);});
-  });
-  var deferred=null;
-  window.addEventListener('beforeinstallprompt',function(event){
-    event.preventDefault(); deferred=event;
-    var button=document.getElementById('nounInstallApp');
-    if(!button){
-      button=document.createElement('button'); button.id='nounInstallApp';
-      button.textContent='Install NOUN BOT';
-      button.setAttribute('type','button');
-      button.style.cssText='position:fixed;right:14px;bottom:14px;z-index:9999;padding:11px 14px;border:1px solid rgba(20,230,166,.35);border-radius:999px;background:#04110d;color:#eafff6;font:700 12px system-ui;box-shadow:0 12px 35px rgba(0,0,0,.3)';
-      document.body.appendChild(button);
-      button.addEventListener('click',async function(){
-        if(!deferred)return;
-        deferred.prompt();
-        try{await deferred.userChoice;}catch(e){}
-        deferred=null; button.remove();
-      });
-    }
-  });
-  window.addEventListener('appinstalled',function(){
-    var button=document.getElementById('nounInstallApp'); if(button)button.remove(); deferred=null;
   });
 })();
 </script>
