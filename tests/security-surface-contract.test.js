@@ -22,3 +22,16 @@ test('private dashboard paths require authenticated account identity', () => {
   assert.match(dashboard, /Tenant administrator access required/);
   assert.match(dashboard, /That student profile already exists\. Sign in to continue\./);
 });
+
+
+test('admin command center and webhook preference routes fail closed', () => {
+  const commandCenter = fs.readFileSync('api/command-center.js', 'utf8');
+  const preferences = fs.readFileSync('api/preferences.js', 'utf8');
+
+  assert.match(commandCenter, /Tenant administrator access required/);
+  assert.match(commandCenter, /created_at.*op: 'gte'/);
+  assert.match(commandCenter, /eq\('tenant_id', t\.id\)/);
+  assert.match(preferences, /!process\.env\.WEBHOOK_SECRET/);
+  assert.match(preferences, /eq\('tenant_id', tid\)/);
+  assert.doesNotMatch(preferences, /\.upsert\(\{phone/);
+});
