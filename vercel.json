@@ -2,6 +2,10 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
+      "source": "/api/health",
+      "destination": "/api/dashboard?health=1"
+    },
+    {
       "source": "/api/cibn-catalog",
       "destination": "/api/ai-study?cibn_catalog=1"
     },
