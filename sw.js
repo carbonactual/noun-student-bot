@@ -1,4 +1,4 @@
-const CACHE='noun-bot-shell-v1';
+const CACHE='noun-bot-shell-v2';
 const SHELL=['/','/index.html','/student/','/dashboard/','/auth/','/manifest.webmanifest','/offline.html','/icons/noun-bot-192.svg','/icons/noun-bot-512.svg'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));
