@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const handler = require('../api/cibn-catalog');
+const { cibnCatalogHandler: handler } = require('../lib/cibn-catalog-api');
 
 function responseMock() {
   return {
