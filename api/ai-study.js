@@ -3,6 +3,7 @@ const { normalizeMode } = require('../lib/learning-continuity');
 const { orchestrateNounRequest } = require('../lib/noun-orchestrator');
 const { cibnChat } = require('../lib/cibn-chat');
 const { bearer, getUser } = require('../lib/auth');
+const { cibnCatalogHandler } = require('../lib/cibn-catalog-api');
 
 const SECRET = process.env.WEBHOOK_SECRET;
 
@@ -65,6 +66,10 @@ async function knowledgeQuery(req, res) {
 }
 
 module.exports = async (req, res) => {
+  // Keep the public CIBN catalog route on the same serverless function to stay within
+  // Vercel Hobby's function-count limit. The rewrite supplies ?cibn_catalog=1.
+  if (req.query?.cibn_catalog === '1') return cibnCatalogHandler(req, res);
+
   // CORS preflight for the CIBN landing (cross-origin chat) — must precede the method gate.
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', process.env.CIBN_CHAT_ORIGIN || 'https://mcp-bot-eight.vercel.app');
