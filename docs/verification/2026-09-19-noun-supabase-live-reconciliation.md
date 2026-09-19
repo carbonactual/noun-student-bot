@@ -22,6 +22,15 @@ The live project records these NOUN-specific migrations:
 5. `noun_student_ecosystem_v4_canonical_20260919`
 6. `noun_services_signals_and_valuechain_composition_20260919`
 7. `noun_runtime_dependency_closure_20260919c`
+8. `carbon_actual_policy_hygiene_and_rls_optimization_20260919b`
+9. `carbon_actual_fk_index_and_consent_policy_hygiene_20260919`
+10. `carbon_actual_catalog_policy_dedup_20260919`
+11. `carbon_actual_remaining_fk_indexes_20260919`
+12. `carbon_actual_exact_duplicate_index_cleanup_20260919`
+13. `carbon_actual_tenant_membership_policy_split_20260919`
+14. `carbon_actual_shared_catalog_policy_split_20260919`
+15. `carbon_actual_student_data_rls_owner_admin_hardening_20260919`
+16. `carbon_actual_public_default_privilege_guard_20260919`
 
 Additional Carbon Actual database controls applied around the NOUN deployment include tenant policy hygiene, FK coverage, catalog policy deduplication, exact duplicate-index cleanup, and tenant-membership policy splitting.
 
@@ -90,3 +99,14 @@ Do not resolve them with an unapproved extension drop/recreate. Use the supporte
 ## Rebuild rule
 
 This record is an audit map, not a second source of truth. The executable database migrations and canonical Carbon Actual contracts remain authoritative for implementation semantics.
+
+
+## Latest application hardening
+
+- Service intelligence now writes tenant_id into student_services and intelligence_signals.
+- Student intelligence now uses the canonical insights.generated_at timestamp.
+- Command Center requires authenticated tenant-admin identity and has corrected range-count handling.
+- WhatsApp preferences are tenant-bound and fail closed without WEBHOOK_SECRET.
+- Internal automation/courseware/outbound/past-question routes fail closed without their configured secrets.
+- NOUN CI and Vercel production use Node 22; Supabase JS is pinned.
+- Latest verified production deployment: dpl_nrxReFK77q8bouXQwaKbziyxv5Vb (READY), commit 1d331b63db0e49c421658425d6a8f04e51b92984.
