@@ -15,7 +15,7 @@ function intelligenceAuthorized(req){
 }
 
 async function serviceDiscovery(req,res){
-  if(SECRET&&!intelligenceAuthorized(req))return res.status(401).json({error:'Unauthorized'});
+  if(!intelligenceAuthorized(req))return res.status(401).json({error:'Unauthorized'});
   const tid=await tenantId();
   const q=String(req.query?.q||'').slice(0,160).toLowerCase();
   const {data,error}=await db.from('student_services').select('*').eq('tenant_id',tid).limit(100);
@@ -72,7 +72,7 @@ module.exports=async(req,res)=>{
     const serviceActions=new Set(['ingest','expire','demand']);
     if(serviceActions.has(action)){
       if(!intelligenceAuthorized(req))return res.status(401).json({error:'Unauthorized'});
-    }else if(SECRET&&req.headers['x-webhook-secret']!==SECRET){
+    }else if(!SECRET || req.headers['x-webhook-secret']!==SECRET){
       return res.status(401).json({error:'Unauthorized'});
     }
 
