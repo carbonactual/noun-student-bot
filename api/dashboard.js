@@ -179,6 +179,15 @@ async function authRoute(req,res,tenant){
   }
 }
 
+function isSchemaDrift(error, column) {
+  const message = String(error?.message || '').toLowerCase();
+  return Boolean(
+    error?.code === 'PGRST204' ||
+    error?.code === '42703' ||
+    (column && message.includes(column.toLowerCase()) && message.includes('schema cache'))
+  );
+}
+
 async function onboard(req, res, tenant) {
   const body = req.body || {};
   const full_name = clean(body.full_name, 120), email = clean(body.email, 180).toLowerCase();
@@ -189,11 +198,28 @@ async function onboard(req, res, tenant) {
   const payload = { tenant_id: tenant, phone, full_name, email, study_level, programme_title, level: level || null, updated_at: now, onboarding_source: 'web', whatsapp_opt_in: true, last_seen_at: now };
   const { data: existing, error: lookupError } = await db.from('students').select('phone').eq('tenant_id', tenant).eq('phone', phone).maybeSingle();
   if (lookupError) throw lookupError;
-  const result = existing
-    ? await db.from('students').update(payload).eq('tenant_id', tenant).eq('phone', phone).select('phone,full_name,email,study_level,programme_title,level').single()
-    : await db.from('students').insert(payload).select('phone,full_name,email,study_level,programme_title,level').single();
+
+  let result = existing
+    ? await db.from('students').update(payload).eq('tenant_id', tenant).eq('phone', phone).select('*').single()
+    : await db.from('students').insert(payload).select('*').single();
+
+  if (result.error && isSchemaDrift(result.error, 'study_level')) {
+    const legacyPayload = { ...payload };
+    delete legacyPayload.study_level;
+    result = existing
+      ? await db.from('students').update(legacyPayload).eq('tenant_id', tenant).eq('phone', phone).select('*').single()
+      : await db.from('students').insert(legacyPayload).select('*').single();
+  }
   if (result.error) throw result.error;
-  await db.from('student_activity').insert({ tenant_id: tenant, phone, event_type: 'web_onboarding', topic: help_need || 'joined NOUN BOT', metadata: { source: 'web', help_need } });
+
+  await db.from('student_activity').insert({
+    tenant_id: tenant,
+    phone,
+    event_type: 'web_onboarding',
+    topic: help_need || 'joined NOUN BOT',
+    metadata: { source: 'web', help_need, schema_mode: result.data?.study_level ? 'canonical' : 'legacy' }
+  });
+
   return res.status(200).json({ ok: true, student: result.data, message: 'Your NOUN BOT profile is ready.' });
 }
 
@@ -206,7 +232,12 @@ async function studentContext(req, res, tenant) {
   if (req.method === 'POST') {
     const incoming = normalizeStudentContext(req.body || {}), patch = { ...incoming, updated_at: new Date().toISOString(), onboarding_source: 'noun-bot' };
     delete patch.full_name;
-    const updated = await db.from('students').update(patch).eq('tenant_id', tenant).eq('phone', phone).select('*').single();
+    let updated = await db.from('students').update(patch).eq('tenant_id', tenant).eq('phone', phone).select('*').single();
+    if (updated.error && isSchemaDrift(updated.error, 'study_level')) {
+      const legacyPatch = { ...patch };
+      delete legacyPatch.study_level;
+      updated = await db.from('students').update(legacyPatch).eq('tenant_id', tenant).eq('phone', phone).select('*').single();
+    }
     if (updated.error) throw updated.error;
     const context = normalizeStudentContext(updated.data);
     return res.status(200).json({ ok: true, context, onboarding: buildOnboardingState(context) });
