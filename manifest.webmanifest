@@ -1,19 +1,49 @@
 {
-  "$schema":"https://json.schemastore.org/web-manifest-combined.json",
-  "name":"NOUN BOT — ABBA student intelligence",
-  "short_name":"NOUN BOT",
-  "start_url":"/?source=pwa",
-  "scope":"/",
-  "display":"standalone",
-  "background_color":"#04110d",
-  "theme_color":"#14e6a6",
-  "description":"NOUN BOT connects student identity, learning, academic support, services, opportunities and ABBA intelligence.",
-  "icons":[
-    {"src":"/icons/noun-bot-192.svg","sizes":"192x192","type":"image/svg+xml","purpose":"any maskable"},
-    {"src":"/icons/noun-bot-512.svg","sizes":"512x512","type":"image/svg+xml","purpose":"any maskable"}
+  "$schema": "https://json.schemastore.org/web-manifest-combined.json",
+  "name": "NOUN BOT — ABBA student intelligence",
+  "short_name": "NOUN BOT",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#04110d",
+  "theme_color": "#14e6a6",
+  "description": "NOUN BOT connects student identity, learning, academic support, services, opportunities and ABBA intelligence.",
+  "icons": [
+    {
+      "src": "/icons/noun-bot-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/noun-bot-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
   ],
-  "shortcuts":[
-    {"name":"Student Space","url":"/student/","icons":[{"src":"/icons/noun-bot-192.svg","sizes":"192x192","type":"image/svg+xml"}]},
-    {"name":"Dashboard","url":"/dashboard/","icons":[{"src":"/icons/noun-bot-192.svg","sizes":"192x192","type":"image/svg+xml"}]}
+  "shortcuts": [
+    {
+      "name": "Student Space",
+      "url": "/student/",
+      "icons": [
+        {
+          "src": "/icons/noun-bot-192.svg",
+          "sizes": "192x192",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Operations Center",
+      "url": "/dashboard/",
+      "icons": [
+        {
+          "src": "/icons/noun-bot-192.svg",
+          "sizes": "192x192",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
   ]
 }
