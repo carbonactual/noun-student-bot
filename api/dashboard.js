@@ -242,6 +242,16 @@ async function supportCase(req, res) {
 
 module.exports = async function handler(req, res) {
   try {
+    if (req.query?.health === '1') {
+      res.setHeader('Content-Type','application/json');
+      return res.status(200).json({
+        ok: true,
+        status: 'ok',
+        name: 'ABBA Being Agent',
+        service: 'noun-student-bot',
+        timestamp: new Date().toISOString()
+      });
+    }
     const route = String(req.query?.route || '').toLowerCase();
     const tenant = await tenantId();
     if (route === 'student-context') return studentContext(req, res, tenant);
