@@ -3,7 +3,7 @@ const { orchestrateNounRequest } = require('../lib/noun-orchestrator');
 const SECRET = process.env.WEBHOOK_SECRET;
 
 function allowed(req) {
-  return !SECRET || req.headers?.['x-webhook-secret'] === SECRET;
+  return Boolean(SECRET && req.headers?.['x-webhook-secret'] === SECRET);
 }
 
 module.exports = async (req, res) => {
