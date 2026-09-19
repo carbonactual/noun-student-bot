@@ -3,7 +3,7 @@ const { nextRetry } = require('../lib/outbound');
 const db=createClient(process.env.SUPABASE_URL,process.env.SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false}});
 module.exports=async(req,res)=>{
   if(req.method!=='POST')return res.status(405).json({error:'POST only'});
-  if(process.env.WEBHOOK_SECRET && req.headers['x-webhook-secret']!==process.env.WEBHOOK_SECRET)return res.status(401).json({error:'Unauthorized'});
+  if(!process.env.WEBHOOK_SECRET || req.headers['x-webhook-secret']!==process.env.WEBHOOK_SECRET)return res.status(401).json({error:'Unauthorized'});
   try{
     const id=Number(req.body?.id); const status=req.body?.status==='sent'?'sent':'failed'; if(!id)return res.status(400).json({error:'id required'});
     const {data:q,error:loadError}=await db.from('outbound_queue').select('*').eq('id',id).maybeSingle();
