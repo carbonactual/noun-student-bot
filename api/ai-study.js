@@ -8,6 +8,13 @@ const { cibnCatalogHandler } = require('../lib/cibn-catalog-api');
 const SECRET = process.env.WEBHOOK_SECRET;
 
 function safe(value, limit = 3500) { return String(value || '').slice(0, limit); }
+function normalizeNumericConfidence(value, fallback = 0.2) {
+  const numeric = Number(value);
+  if (Number.isFinite(numeric)) return Math.max(0, Math.min(1, numeric));
+  const label = String(value || '').trim().toLowerCase();
+  const mapped = { official: 1, verified: 0.95, high: 0.9, medium: 0.65, low: 0.35, unverified: 0.1 }[label];
+  return mapped ?? fallback;
+}
 
 async function startLearningSession(tid, phone, course, mode) {
   const { data, error } = await db.from('student_learning_sessions').insert({
@@ -32,7 +39,7 @@ async function persistStudyQuestion(tid, phone, course, mode, question, answer, 
     mode,
     status: 'answered',
     answer_summary: safe(answer, 1200),
-    knowledge_confidence: confidence,
+    knowledge_confidence: normalizeNumericConfidence(confidence),
     answered_at: new Date().toISOString()
   }).select('id').single();
   if (error) throw error;
@@ -110,7 +117,10 @@ module.exports = async (req, res) => {
 
     const evidenceConfidences = (result.evidence || []).map(x => Number(x.confidence ?? x.score)).filter(Number.isFinite);
     const evidenceScore = evidenceConfidences.length ? Math.max(...evidenceConfidences) : null;
-    const knowledgeConfidence = evidenceScore != null ? Math.max(0, Math.min(1, evidenceScore)) : (result.evidence?.length ? 0.8 : 0.2);
+    const knowledgeConfidence = normalizeNumericConfidence(
+      evidenceScore,
+      result.evidence?.length ? 0.8 : 0.2
+    );
     let questionId = null;
     if (result.status === 'complete' && result.answer) {
       try {
