@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#04110d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NOUN BOT">
+<link rel="manifest" href="/manifest.webmanifest">
 <meta name="description" content="NOUN BOT student space — your personalized academic companion.">
 <title>NOUN BOT — Student Space</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -422,6 +427,35 @@ async function loadAccount(){
   }catch(e){document.getElementById('facts').innerHTML='<div class="empty">Please sign in again to load your private student space.</div>';}
 }
 loadAccount();
+</script>
+
+<script>
+(function(){
+  if('serviceWorker' in navigator) window.addEventListener('load',function(){
+    navigator.serviceWorker.register('/sw.js').catch(function(error){console.warn('NOUN BOT PWA registration:',error);});
+  });
+  var deferred=null;
+  window.addEventListener('beforeinstallprompt',function(event){
+    event.preventDefault(); deferred=event;
+    var button=document.getElementById('nounInstallApp');
+    if(!button){
+      button=document.createElement('button'); button.id='nounInstallApp';
+      button.textContent='Install NOUN BOT';
+      button.setAttribute('type','button');
+      button.style.cssText='position:fixed;right:14px;bottom:14px;z-index:9999;padding:11px 14px;border:1px solid rgba(20,230,166,.35);border-radius:999px;background:#04110d;color:#eafff6;font:700 12px system-ui;box-shadow:0 12px 35px rgba(0,0,0,.3)';
+      document.body.appendChild(button);
+      button.addEventListener('click',async function(){
+        if(!deferred)return;
+        deferred.prompt();
+        try{await deferred.userChoice;}catch(e){}
+        deferred=null; button.remove();
+      });
+    }
+  });
+  window.addEventListener('appinstalled',function(){
+    var button=document.getElementById('nounInstallApp'); if(button)button.remove(); deferred=null;
+  });
+})();
 </script>
 </body>
 </html>
