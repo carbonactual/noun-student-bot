@@ -188,6 +188,49 @@ function isSchemaDrift(error, column) {
   );
 }
 
+async function authenticatedActor(req) {
+  const accessToken = bearer(req);
+  if (!accessToken) return null;
+  const user = await getUser(accessToken);
+  const metadata = user.user_metadata || {};
+  return {
+    user,
+    phone: normalizePhone(metadata.phone),
+    product: metadata.product || null
+  };
+}
+
+async function requireActorForPhone(req, requestedPhone, { allowAdmin = false, tenant = null } = {}) {
+  const actor = await authenticatedActor(req);
+  if (!actor) {
+    const error = new Error('Sign in required');
+    error.status = 401;
+    throw error;
+  }
+  const requested = normalizePhone(requestedPhone);
+  if (requested && actor.phone && requested !== actor.phone) {
+    const error = new Error('Student account mismatch');
+    error.status = 403;
+    throw error;
+  }
+  if (allowAdmin && tenant) {
+    const { data: membership, error } = await db.from('tenant_memberships')
+      .select('role,status')
+      .eq('tenant_id', tenant)
+      .eq('subject_id', actor.user.id)
+      .eq('status', 'active')
+      .in('role', ['support','department_admin','faculty_admin','institution_admin','platform_operator'])
+      .maybeSingle();
+    if (error) throw error;
+    if (!membership) {
+      const error = new Error('Tenant administrator access required');
+      error.status = 403;
+      throw error;
+    }
+  }
+  return actor;
+}
+
 async function onboard(req, res, tenant) {
   const body = req.body || {};
   const full_name = clean(body.full_name, 120), email = clean(body.email, 180).toLowerCase();
@@ -196,8 +239,20 @@ async function onboard(req, res, tenant) {
   if (!full_name || !email || !phone || !programme_title) return res.status(400).json({ error: 'full_name, email, phone, programme_title and study_level are required' });
   const now = new Date().toISOString();
   const payload = { tenant_id: tenant, phone, full_name, email, study_level, programme_title, level: level || null, updated_at: now, onboarding_source: 'web', whatsapp_opt_in: true, last_seen_at: now };
-  const { data: existing, error: lookupError } = await db.from('students').select('phone').eq('tenant_id', tenant).eq('phone', phone).maybeSingle();
+  const actor = await authenticatedActor(req);
+  if (actor?.phone && actor.phone !== phone) {
+    return res.status(403).json({ error: 'Student account mismatch' });
+  }
+  const { data: existing, error: lookupError } = await db.from('students').select('phone,auth_user_id').eq('tenant_id', tenant).eq('phone', phone).maybeSingle();
   if (lookupError) throw lookupError;
+
+  if (existing && !actor) {
+    return res.status(409).json({ error: 'That student profile already exists. Sign in to continue.' });
+  }
+  if (existing?.auth_user_id && (!actor || existing.auth_user_id !== actor.user.id)) {
+    return res.status(409).json({ error: 'That phone number is already linked to another NOUN account.' });
+  }
+  if (actor?.user?.id) payload.auth_user_id = actor.user.id;
 
   let result = existing
     ? await db.from('students').update(payload).eq('tenant_id', tenant).eq('phone', phone).select('*').single()
@@ -224,8 +279,10 @@ async function onboard(req, res, tenant) {
 }
 
 async function studentContext(req, res, tenant) {
-  const phone = normalizePhone(req.query?.phone || req.body?.phone);
-  if (!phone) return res.status(400).json({ error: 'phone required' });
+  const requested = normalizePhone(req.query?.phone || req.body?.phone);
+  const actor = await requireActorForPhone(req, requested, { tenant });
+  const phone = actor.phone || requested;
+  if (!phone) return res.status(400).json({ error: 'Account phone is missing' });
   const { data: student, error } = await db.from('students').select('*').eq('tenant_id', tenant).eq('phone', phone).maybeSingle();
   if (error) throw error;
   if (!student) return res.status(404).json({ ok: false, error: 'Student profile not found' });
@@ -248,8 +305,9 @@ async function studentContext(req, res, tenant) {
 
 async function examReadiness(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'GET only' });
-  const phone = normalizePhone(req.query?.phone);
-  if (!phone) return res.status(400).json({ error: 'phone required' });
+  const actor = await requireActorForPhone(req, req.query?.phone, { tenant: await tenantId() });
+  const phone = actor.phone || normalizePhone(req.query?.phone);
+  if (!phone) return res.status(400).json({ error: 'Account phone is missing' });
   const tid = await tenantId();
   const intelligence = await buildStudentIntelligence(phone);
   const examResult = await db.from('exams').select('*').eq('tenant_id', tid).limit(500);
@@ -263,9 +321,10 @@ async function examReadiness(req, res) {
 
 async function supportCase(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
-  const c = buildSupportCase(req.body || {});
-  if (!c.student_phone || !c.description) return res.status(400).json({ error: 'phone and description required' });
   const tid = await tenantId();
+  const actor = await requireActorForPhone(req, req.body?.phone, { tenant: tid });
+  const c = buildSupportCase({ ...(req.body || {}), phone: actor.phone });
+  if (!c.student_phone || !c.description) return res.status(400).json({ error: 'phone and description required' });
   const result = await db.from('student_support_cases').insert({ tenant_id: tid, ...c }).select('id,student_phone,category,description,course_code,urgency,status,created_at').single();
   if (result.error) throw result.error;
   return res.status(201).json({ ok: true, case: result.data, message: 'Your request has been recorded for human follow-up.' });
@@ -291,6 +350,7 @@ module.exports = async function handler(req, res) {
     if (route.startsWith('auth-')) return authRoute(req, res, tenant);
     if (req.method === 'POST') return onboard(req, res, tenant);
     if (req.method !== 'GET') return res.status(405).json({ error: 'GET or POST only' });
+    await requireActorForPhone(req, null, { allowAdmin: true, tenant });
     const today = new Date().toISOString().slice(0, 10);
     const [{ count: students }, { count: active_students }, { count: checklists }, { count: open_help }, { count: upcoming_deadlines }, { count: study_questions }, { count: study_answered }, { count: study_fallback }, { count: human_help_requests }, levels, courses, deadlines, campaigns] = await Promise.all([
       db.from('students').select('*', { count: 'exact', head: true }).eq('tenant_id', tenant), db.from('students').select('*', { count: 'exact', head: true }).eq('tenant_id', tenant).eq('stage', 'active'),
