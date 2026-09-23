@@ -4,11 +4,12 @@ const fs = require('node:fs');
 
 const source = fs.readFileSync('api/whatsapp-webhook.js', 'utf8');
 
-test('WhatsApp AI uses tenant-scoped course grounding and the current Gemini model', () => {
-  assert.match(source, /getRelevantCourseContent/);
-  assert.match(source, /course_content/);
+test('WhatsApp study requests use the canonical ABBA orchestration path', () => {
+  assert.match(source, /orchestrateNounRequest/);
+  assert.match(source, /channel:'whatsapp'/);
+  assert.match(source, /requestedCapability:mode==='practice'\?'learning\.practice':'learning\.study'/);
+  assert.doesNotMatch(source, /generativelanguage.googleapis.com/);
   assert.doesNotMatch(source, /gemini-2\.0-flash/);
-  assert.match(source, /gemini-3\.6-flash/);
 });
 
 test('WhatsApp AI preserves safe fallback and human escalation', () => {
@@ -22,4 +23,13 @@ test('WhatsApp webhook remains idempotent and tenant-scoped', () => {
   assert.match(source, /event_id/);
   assert.match(source, /tenantId/);
   assert.match(source, /x-webhook-secret/);
+});
+
+test('WhatsApp onboarding accepts undergraduate and postgraduate study stages', () => {
+  assert.match(source, /certificate/);
+  assert.match(source, /undergraduate/);
+  assert.match(source, /pgd/);
+  assert.match(source, /masters/);
+  assert.match(source, /phd/);
+  assert.match(source, /\[1-8\]00/);
 });
