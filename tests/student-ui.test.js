@@ -3,53 +3,52 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
 const source = fs.readFileSync('student/index.html', 'utf8');
+const has = (value) => assert.ok(source.includes(value), 'missing marker: '+value);
 
 test('student space keeps the home simple and student-centered', () => {
-  for (const marker of ['Academic pulse', 'Your priorities', 'Your profile', 'Study Lab', 'Add notes / material', 'Study guide', '10-question practice', 'Flashcards', 'Explain simply', '25-minute plan', 'Quiz me', 'ABBA', 'Learn', 'Prepare', 'Plan', 'Get help', 'Ask ABBA']) {
-    assert.match(source, new RegExp(marker.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')));
-  }
-  for (const removed of ['Your courses', 'Deadlines & events', 'Past-question matches', 'Human support']) {
-    assert.doesNotMatch(source, new RegExp(removed.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')));
-  }
+  for (const marker of ['Academic pulse', 'Your priorities', 'Your profile', 'Study Lab', 'Add notes / material', 'Study guide', '10-question practice', 'Flashcards', 'Explain simply', '25-minute plan', 'Quiz me', 'ABBA', 'Learn', 'Prepare', 'Plan', 'Get help', 'Ask ABBA']) has(marker);
+  for (const removed of ['Your courses', 'Deadlines & events', 'Past-question matches', 'Human support']) assert.ok(!source.includes(removed), 'unexpected marker: '+removed);
 });
 
 test('student space keeps intelligence and AI underneath the simpler surface', () => {
-  for (const mode of ['tutor', 'tutorial', 'practice', 'revision']) assert.match(source, new RegExp(`data-mode="${mode}"`));
-  for (const endpoint of ['/api/student-intelligence', '/api/ai-study']) assert.match(source, new RegExp(endpoint.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')));
-  assert.match(source, /Your student context|student context/);
-  assert.match(source, /source_text/);
-  assert.match(source, /18000/);
-  assert.match(source, /application\\/pdf/);
-  assert.match(source, /image\\/png/);
-  assert.match(source, /audio\\/mpeg/);
-  assert.match(source, /data-motion-tilt/);
-  assert.match(source, /motion-progress/);
-  assert.match(source, /pointer-glow/);
-  assert.match(source, /startViewTransition/);
-  assert.match(source, /AbortController/);
-  assert.match(source, /45000/);
-  assert.match(source, /1500000/);
-  assert.doesNotMatch(source, /course_momentum|support_recommendations/);
+  for (const mode of ['tutor', 'tutorial', 'practice', 'revision']) has('data-mode="'+mode+'"');
+  for (const endpoint of ['/api/student-intelligence', '/api/ai-study']) has(endpoint);
+  has('Your student context');
+  has('source_text');
+  has('18000');
+  has('application/pdf');
+  has('image/png');
+  has('audio/mpeg');
+  has('data-motion-tilt');
+  has('motion-progress');
+  has('pointer-glow');
+  has('startViewTransition');
+  has('AbortController');
+  has('45000');
+  has('1500000');
+  assert.ok(!source.includes('course_momentum'));
+  assert.ok(!source.includes('support_recommendations'));
 });
 
 test('student space does not expose raw student records', () => {
-  assert.doesNotMatch(source, /password_hash|waec_result|neco_result/);
+  assert.ok(!/password_hash|waec_result|neco_result/.test(source));
 });
 
 test('student space keeps motion resilient and accessible', () => {
-  assert.match(source, /prefers-reduced-motion/);
-  assert.match(source, /window\\.matchMedia/);
-  assert.match(source, /IntersectionObserver/);
-  assert.match(source, /dragover/);
-  assert.match(source, /material-file/);
-  assert.match(source, /Remove /);
+  has('prefers-reduced-motion');
+  has('window.matchMedia');
+  has('IntersectionObserver');
+  has('dragover');
+  has('material-file');
+  has('Remove ');
 });
 
 test('student space uses rounded sans typography and accessible responsive behavior', () => {
-  assert.match(source, /ui-rounded/);
-  assert.match(source, /system-ui/);
-  assert.doesNotMatch(source, /Iowan Old Style|Palatino Linotype|Book Antiqua|Georgia,serif/i);
-  assert.match(source, /aria-label/);
-  assert.match(source, /prefers-reduced-motion/);
-  assert.match(source, /@media\(max-width:(900|620)px\)/);
+  has('ui-rounded');
+  has('system-ui');
+  assert.ok(!/Iowan Old Style|Palatino Linotype|Book Antiqua|Georgia,serif/i.test(source));
+  has('aria-label');
+  has('prefers-reduced-motion');
+  has('@media(max-width:900px)');
+  has('@media(max-width:620px)');
 });
