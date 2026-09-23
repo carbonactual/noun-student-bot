@@ -40,6 +40,24 @@ async function startLearningSession(tid, phone, course, mode) {
   return data.id;
 }
 
+async function getLearningHistory(tid, phone, course, mode) {
+  let query = db.from('student_study_questions')
+    .select('question,answer_summary,mode,course_code,created_at')
+    .eq('tenant_id', tid)
+    .eq('student_phone', phone)
+    .eq('mode', mode)
+    .order('created_at', { ascending: false })
+    .limit(6);
+  if (course) query = query.eq('course_code', course);
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data || []).reverse().map(row => ({
+    question: safe(row.question, 900),
+    answer: safe(row.answer_summary, 1100),
+    course_code: safe(row.course_code, 80) || null
+  }));
+}
+
 async function persistStudyQuestion(tid, phone, course, mode, question, answer, confidence, sessionId) {
   const { data, error } = await db.from('student_study_questions').insert({
     tenant_id: tid,
@@ -118,13 +136,19 @@ module.exports = async (req, res) => {
 
     const tid = await tenantId();
     const sessionId = await startLearningSession(tid, phone, course, mode);
+    let learningHistory = [];
+    try {
+      learningHistory = await getLearningHistory(tid, phone, course, mode);
+    } catch (historyError) {
+      console.error('learning history retrieval:', historyError);
+    }
     const result = await orchestrateNounRequest({
       phone,
       message: question,
       course,
       channel: req.body?.channel || 'web',
       requestedCapability: mode === 'practice' ? 'learning.practice' : 'learning.study',
-      context: { learningMode: mode, sessionId, learningMaterial: sourceText || null, learningMedia }
+      context: { learningMode: mode, sessionId, learningMaterial: sourceText || null, learningMedia, learningHistory }
     });
 
     const evidenceConfidences = (result.evidence || []).map(x => Number(x.confidence ?? x.score)).filter(Number.isFinite);
