@@ -100,6 +100,7 @@ module.exports = async (req, res) => {
     const phone = String(user.user_metadata?.phone || '').replace(/\D/g, '');
     if (!phone) return res.status(400).json({ error: 'Account phone is missing' });
     const question = safe(req.body?.question);
+    const sourceText = safe(req.body?.source_text, 18000);
     const mode = normalizeMode(req.body?.mode);
     const course = safe(req.body?.course, 80);
     if (!phone || !question) return res.status(400).json({ error: 'phone and question required' });
@@ -112,7 +113,7 @@ module.exports = async (req, res) => {
       course,
       channel: req.body?.channel || 'web',
       requestedCapability: mode === 'practice' ? 'learning.practice' : 'learning.study',
-      context: { learningMode: mode, sessionId }
+      context: { learningMode: mode, sessionId, learningMaterial: sourceText || null }
     });
 
     const evidenceConfidences = (result.evidence || []).map(x => Number(x.confidence ?? x.score)).filter(Number.isFinite);
