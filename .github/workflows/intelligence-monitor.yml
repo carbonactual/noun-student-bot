@@ -13,21 +13,64 @@ concurrency:
   group: noun-intelligence-automation
   cancel-in-progress: true
 
+env:
+  BASE_URL: https://noun.vercel.app
+
 jobs:
   intelligence:
     name: Refresh and maintain intelligence
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: Verify production health
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in {1..5}; do
+            if curl --fail-with-body --silent --show-error --max-time 30 \
+              --retry 3 --retry-all-errors --retry-delay 3 \
+              "$BASE_URL/api/health"; then
+              exit 0
+            fi
+            echo "Production health attempt $attempt failed."
+            sleep 5
+          done
+          echo "Production health check failed after retries."
+          exit 1
+
+      - name: Report automation configuration
+        shell: bash
+        env:
+          CRON_SECRET: ${{ secrets.INTELLIGENCE_CRON_SECRET }}
+          WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## NOUN automation configuration"
+            if [[ -n "$CRON_SECRET" ]]; then
+              echo "- INTELLIGENCE_CRON_SECRET: configured"
+            else
+              echo "- INTELLIGENCE_CRON_SECRET: **missing** — scheduled intelligence expiry will remain safely skipped"
+            fi
+            if [[ -n "$WEBHOOK_SECRET" ]]; then
+              echo "- WEBHOOK_SECRET: configured"
+            else
+              echo "- WEBHOOK_SECRET: **missing** — courseware/reminder automation will remain safely skipped"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Run service intelligence maintenance
         if: github.event.schedule == '*/15 * * * *' || github.event_name == 'workflow_dispatch'
         env:
           SECRET: ${{ secrets.INTELLIGENCE_CRON_SECRET }}
-          BASE_URL: https://noun-student-bot-dashboard.vercel.app
         run: |
           set -euo pipefail
-          test -n "$SECRET"
+          if [[ -z "$SECRET" ]]; then
+            echo "INTELLIGENCE_CRON_SECRET is not configured; maintenance step safely skipped."
+            exit 0
+          fi
           curl --fail-with-body --silent --show-error --max-time 120 \
+            --retry 4 --retry-all-errors --retry-delay 5 \
             -X POST "$BASE_URL/api/automation" \
             -H 'content-type: application/json' \
             -H "x-intelligence-secret: $SECRET" \
@@ -37,11 +80,14 @@ jobs:
         if: github.event.schedule == '17 * * * *' || github.event_name == 'workflow_dispatch'
         env:
           SECRET: ${{ secrets.WEBHOOK_SECRET }}
-          BASE_URL: https://noun-student-bot-dashboard.vercel.app
         run: |
           set -euo pipefail
-          test -n "$SECRET"
+          if [[ -z "$SECRET" ]]; then
+            echo "WEBHOOK_SECRET is not configured; courseware sync safely skipped."
+            exit 0
+          fi
           curl --fail-with-body --silent --show-error --max-time 240 \
+            --retry 4 --retry-all-errors --retry-delay 5 \
             -X POST "$BASE_URL/api/courseware-sync" \
             -H 'content-type: application/json' \
             -H "x-webhook-secret: $SECRET" \
@@ -51,11 +97,14 @@ jobs:
         if: github.event.schedule == '17 * * * *' || github.event_name == 'workflow_dispatch'
         env:
           SECRET: ${{ secrets.WEBHOOK_SECRET }}
-          BASE_URL: https://noun-student-bot-dashboard.vercel.app
         run: |
           set -euo pipefail
-          test -n "$SECRET"
+          if [[ -z "$SECRET" ]]; then
+            echo "WEBHOOK_SECRET is not configured; deadline dispatch safely skipped."
+            exit 0
+          fi
           curl --fail-with-body --silent --show-error --max-time 120 \
+            --retry 4 --retry-all-errors --retry-delay 5 \
             -X POST "$BASE_URL/api/automation" \
             -H 'content-type: application/json' \
             -H "x-webhook-secret: $SECRET" \
