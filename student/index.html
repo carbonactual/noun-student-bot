@@ -227,11 +227,9 @@ a{text-decoration:none;color:inherit}
   background:radial-gradient(circle,rgba(20,230,166,.095),rgba(15,181,214,.035) 34%,transparent 72%);
   transform:translate3d(-50%,-50%,0);will-change:transform;transition:opacity .35s ease}
 body.motion-active .pointer-glow{opacity:1}
+.motion-meta{display:inline-flex;align-items:center;gap:7px;color:var(--dim);font-size:9px}
+.motion-meta i{width:5px;height:5px;border-radius:50%;background:var(--mint);box-shadow:0 0 10px var(--mint)}
 [data-motion-tilt]{transform-style:preserve-3d;will-change:transform;transition:transform .55s cubic-bezier(.2,.78,.2,1),box-shadow .45s cubic-bezier(.2,.78,.2,1)}
-[data-motion-tilt]::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;
-  background:radial-gradient(240px 180px at var(--mx,50%) var(--my,50%),rgba(255,255,255,.11),transparent 62%);
-  transition:opacity .35s ease;z-index:1}
-[data-motion-tilt]:hover::before{opacity:1}
 .card[data-motion-tilt]:hover{box-shadow:0 30px 82px rgba(0,0,0,.43),inset 0 1px 0 rgba(255,255,255,.07)}
 .ripple{position:absolute;border-radius:50%;pointer-events:none;width:10px;height:10px;background:rgba(255,255,255,.42);
   transform:translate(-50%,-50%) scale(0);animation:rippleOut .55s ease-out forwards;mix-blend-mode:screen}
@@ -345,8 +343,8 @@ button,.action,.mode,.material-action,.quick-prompts button,.send{position:relat
 
     <section class="card study-lab rv d5" aria-label="Study Lab" data-motion-tilt>
       <div class="study-head">
-        <div><div class="card-kicker">Study Lab</div><h3>Turn material into a study session.</h3></div>
-        <p>Bring your own notes or text, then ask ABBA to explain, structure, test or review it. Your material stays in the current session.</p>
+        <div><div class="card-kicker">Study Lab</div><h3>Turn material into a study session.</h3><div class="motion-meta" aria-hidden="true"><i></i>Interactive workspace</div></div>
+        <p>Bring notes, documents, images or compact audio, then ask ABBA to explain, structure, test or review it. Your material stays in the current session.</p>
       </div>
       <div class="study-tools">
         <div class="material-box">
@@ -554,8 +552,10 @@ async function ask(){
   const text=q.value.trim();if(!text)return;
   if(!accessToken){location.href='/auth/?next=/student/';return}
   add(text,'me');q.value='';q.style.height='auto';send.disabled=true;send.textContent='Thinking…';send.classList.add('is-busy');window.__nounSetStatus&&window.__nounSetStatus('working','Working');typing(true);
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),45000);
   try{
-    const r=await fetch('/api/ai-study',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+accessToken},body:JSON.stringify({phone,question:text,mode,source_text:studyMaterial||undefined,source_name:studyMaterialName||undefined,media:studyMedia||undefined})});
+    const r=await fetch('/api/ai-study',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+accessToken},body:JSON.stringify({phone,question:text,mode,source_text:studyMaterial||undefined,source_name:studyMaterialName||undefined,media:studyMedia||undefined}),signal:controller.signal});
     const d=await r.json();
     typing(false);
     if(!r.ok||!d.answer)throw new Error(d.error||'Unavailable');
@@ -566,7 +566,7 @@ async function ask(){
       messages.appendChild(s);messages.scrollTop=messages.scrollHeight;
     }
   }catch(e){typing(false);window.__nounSetStatus&&window.__nounSetStatus('error','Needs attention');add('I could not complete that right now. You can continue with a human on WhatsApp.', 'bot', true)}
-  finally{send.disabled=false;send.textContent='Ask';send.classList.remove('is-busy');window.__nounSetStatus&&window.__nounSetStatus('ready','Ready')}
+  finally{clearTimeout(timeout);send.disabled=false;send.textContent='Ask';send.classList.remove('is-busy');window.__nounSetStatus&&window.__nounSetStatus('ready','Ready')}
 }
 send.addEventListener('click',ask);
 q.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ask()}});
