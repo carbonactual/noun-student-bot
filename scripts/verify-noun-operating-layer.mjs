@@ -29,7 +29,11 @@ if (!orchestrator.includes('invokeAbba') || !orchestrator.includes('persistConti
 }
 
 if (process.env.BASE_URL) {
-  const url = `${process.env.BASE_URL.replace(/\/$/, '')}/api/health`;
+  const root = `${process.env.BASE_URL.replace(/\/$/, '')}/`;
+  const page = await fetch(root, { headers: { Accept: 'text/html' } });
+  if (!page.ok) throw new Error(`Production surface returned HTTP ${page.status}`);
+  const healthBase = (process.env.HEALTH_BASE_URL || process.env.BASE_URL).replace(/\/$/, '');
+  const url = `${healthBase}/api/health`;
   const response = await fetch(url, { headers: { Accept: 'application/json' } });
   if (!response.ok) throw new Error(`Production health returned HTTP ${response.status}`);
   const body = await response.json();
