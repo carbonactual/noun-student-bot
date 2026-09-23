@@ -274,8 +274,8 @@ a{text-decoration:none;color:inherit}
       <div class="study-tools">
         <div class="material-box">
           <strong>Bring study material</strong>
-          <span>TXT, Markdown or CSV notes are supported in this first ingestion lane. Large documents are bounded before they reach the AI.</span>
-          <label class="material-action"><span>＋ Add notes / material</span><input id="materialInput" type="file" accept=".txt,.md,.csv,text/plain,text/markdown,text/csv"></label>
+          <span>TXT, Markdown, CSV, PDF, image and compact audio material can enter the current session. Large inputs are bounded before they reach the AI.</span>
+          <label class="material-action"><span>＋ Add notes / material</span><input id="materialInput" type="file" accept=".txt,.md,.csv,text/plain,text/markdown,text/csv,.pdf,application/pdf,image/png,image/jpeg,image/webp,audio/mpeg,audio/wav,audio/ogg"></label>
           <div id="materialStatus" class="material-status" aria-live="polite"></div>
         </div>
         <div class="quick-prompts" aria-label="Study Lab actions">
@@ -348,6 +348,7 @@ let phone=new URLSearchParams(location.search).get('phone')||'';
 let mode='tutor';
 let studyMaterial='';
 let studyMaterialName='';
+let studyMedia=null;
 const messages=document.getElementById('messages'),q=document.getElementById('question'),send=document.getElementById('send');
 const WA='https://wa.me/2347046481828';
 
@@ -369,14 +370,27 @@ if(materialInput){
     if(!file)return;
     if(file.size>2000000){materialStatus.textContent='That file is larger than the 2 MB ingestion limit. Paste the relevant section instead.';materialInput.value='';return;}
     try{
-      const raw=await file.text();
-      if(!raw.trim())throw new Error('The selected file is empty.');
-      studyMaterial=raw.slice(0,18000);
-      studyMaterialName=file.name;
-      materialStatus.textContent='Attached '+file.name+' · '+studyMaterial.length.toLocaleString()+' characters available to this session.';
+      if(/^text\/(plain|markdown|csv)$/.test(file.type) || /\.(txt|md|csv)$/i.test(file.name)){
+        const raw=await file.text();
+        if(!raw.trim())throw new Error('The selected file is empty.');
+        studyMaterial=raw.slice(0,18000);
+        studyMedia=null;
+        studyMaterialName=file.name;
+        materialStatus.textContent='Attached '+file.name+' · '+studyMaterial.length.toLocaleString()+' characters available to this session.';
+      }else{
+        const buffer=await file.arrayBuffer();
+        let binary='';
+        const view=new Uint8Array(buffer);
+        const step=0x8000;
+        for(let i=0;i<view.length;i+=step)binary+=String.fromCharCode.apply(null,view.subarray(i,i+step));
+        studyMedia={name:file.name,mime_type:file.type,data:btoa(binary)};
+        studyMaterial='';
+        studyMaterialName=file.name;
+        materialStatus.textContent='Attached '+file.name+' · ABBA can inspect this '+(file.type||'media')+' in the current session.';
+      }
     }catch(error){
-      studyMaterial='';studyMaterialName='';
-      materialStatus.textContent='That file could not be read as text. Paste the useful section into the question box instead.';
+      studyMaterial='';studyMedia=null;studyMaterialName='';
+      materialStatus.textContent='That file could not be prepared. Try a smaller text file or paste the relevant section into the question box.';
     }
   });
 }
@@ -464,7 +478,7 @@ async function ask(){
   if(!accessToken){location.href='/auth/?next=/student/';return}
   add(text,'me');q.value='';send.disabled=true;typing(true);
   try{
-    const r=await fetch('/api/ai-study',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+accessToken},body:JSON.stringify({phone,question:text,mode,source_text:studyMaterial||undefined,source_name:studyMaterialName||undefined})});
+    const r=await fetch('/api/ai-study',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+accessToken},body:JSON.stringify({phone,question:text,mode,source_text:studyMaterial||undefined,source_name:studyMaterialName||undefined,media:studyMedia||undefined})});
     const d=await r.json();
     typing(false);
     if(!r.ok||!d.answer)throw new Error(d.error||'Unavailable');
