@@ -368,7 +368,7 @@ if(materialInput){
   materialInput.addEventListener('change',async()=>{
     const file=materialInput.files&&materialInput.files[0];
     if(!file)return;
-    if(file.size>2000000){materialStatus.textContent='That file is larger than the 2 MB ingestion limit. Paste the relevant section instead.';materialInput.value='';return;}
+    if(file.size>2000000){studyMaterial='';studyMedia=null;studyMaterialName='';materialStatus.textContent='That file is larger than the 2 MB ingestion limit. Paste the relevant section instead.';materialInput.value='';return;}
     try{
       if(/^text\/(plain|markdown|csv)$/.test(file.type) || /\.(txt|md|csv)$/i.test(file.name)){
         const raw=await file.text();
