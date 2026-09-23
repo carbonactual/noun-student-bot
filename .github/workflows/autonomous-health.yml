@@ -1,0 +1,101 @@
+name: NOUN BOT Autonomous Health
+
+on:
+  schedule:
+    - cron: '7,37 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: noun-bot-autonomous-health
+  cancel-in-progress: true
+
+env:
+  BASE_URL: https://noun.vercel.app
+
+jobs:
+  check:
+    name: Test and probe production
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Validate JavaScript
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            node --check "$file"
+          done < <(find api lib scripts tests -type f -name '*.js' -print)
+
+      - name: Run full test suite
+        run: npm test
+
+      - name: Probe production health and core pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in / /auth/ /student/ /dashboard/; do
+            echo "Probing $BASE_URL$path"
+            curl --fail-with-body --silent --show-error --max-time 30 --retry 4 --retry-all-errors --retry-delay 3 "$BASE_URL$path" >/tmp/noun-page.html
+          done
+          curl --fail-with-body --silent --show-error --max-time 30 --retry 4 --retry-all-errors --retry-delay 3 "$BASE_URL/api/health" >/tmp/noun-health.json
+          grep -q 'ABBA Being Agent' /tmp/noun-health.json
+
+      - name: Verify product contracts in production
+        shell: bash
+        run: |
+          set -euo pipefail
+          home="$(curl --fail-with-body --silent --show-error --max-time 30 --retry 3 --retry-all-errors --retry-delay 2 "$BASE_URL/")"
+          auth="$(curl --fail-with-body --silent --show-error --max-time 30 --retry 3 --retry-all-errors --retry-delay 2 "$BASE_URL/auth/")"
+          student="$(curl --fail-with-body --silent --show-error --max-time 30 --retry 3 --retry-all-errors --retry-delay 2 "$BASE_URL/student/")"
+          dashboard="$(curl --fail-with-body --silent --show-error --max-time 30 --retry 3 --retry-all-errors --retry-delay 2 "$BASE_URL/dashboard/")"
+          grep -q 'Study at NOUN' <<<"$home"
+          grep -q 'Create your student space' <<<"$auth"
+          grep -q 'Academic pulse' <<<"$student"
+          grep -q 'Ask ABBA' <<<"$student"
+          grep -q 'Protected command center' <<<"$dashboard"
+
+      - name: Write health summary
+        if: always()
+        run: |
+          {
+            echo '## NOUN BOT autonomous health'
+            echo '- Repository tests: executed'
+            echo '- Production probes: executed against noun.vercel.app'
+            echo '- Timestamp: '"$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  alert:
+    name: Open a recovery issue on failure
+    needs: check
+    if: ${{ always() && needs.check.result == 'failure' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create or reuse recovery issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          title='NOUN BOT autonomous health failure'
+          existing="$(gh issue list --repo "$REPO" --state open --search "in:title $title" --json number --jq '.[0].number // empty')"
+          if [[ -n "$existing" ]]; then
+            echo "Existing recovery issue #$existing remains open."
+            exit 0
+          fi
+          gh issue create --repo "$REPO" --title "$title" --body $'Autonomous health monitoring detected a failed repository test or production probe.\n\nRun: https://github.com/'"$REPO"'/actions/runs/'"${{ github.run_id }}"$'\n\nThis issue is intentionally diagnostic: no destructive or irreversible repair is performed automatically.'
