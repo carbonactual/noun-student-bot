@@ -3,6 +3,7 @@ name: NOUN BOT Production Smoke
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -13,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  BASE_URL: https://noun-student-bot-dashboard.vercel.app
+  BASE_URL: https://noun.vercel.app
 
 jobs:
   smoke:
@@ -40,7 +41,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for path in / /dashboard/ /student/; do
+          for path in / /auth/ /student/ /dashboard/; do
             echo "Checking $BASE_URL$path"
             for attempt in {1..5}; do
               if curl --fail-with-body --silent --show-error --max-time 20 "$BASE_URL$path" >/dev/null; then
@@ -58,14 +59,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          dashboard="$(curl --fail-with-body --silent --show-error --max-time 20 "$BASE_URL/dashboard/")"
+          home="$(curl --fail-with-body --silent --show-error --max-time 20 "$BASE_URL/")"
+          auth="$(curl --fail-with-body --silent --show-error --max-time 20 "$BASE_URL/auth/")"
           student="$(curl --fail-with-body --silent --show-error --max-time 20 "$BASE_URL/student/")"
-          grep -q "Study at NOUN" <<<"$dashboard"
-          grep -q "at your pace" <<<"$dashboard"
-          grep -q "Create my student space" <<<"$dashboard"
+          dashboard="$(curl --fail-with-body --silent --show-error --max-time 20 "$BASE_URL/dashboard/")"
+          grep -q "Study at NOUN" <<<"$home"
+          grep -q "Create your student space" <<<"$auth"
           grep -q "Academic pulse" <<<"$student"
           grep -q "Ask ABBA" <<<"$student"
-          grep -q "We do not display your details publicly" <<<"$dashboard"
+          grep -q "Protected command center" <<<"$dashboard"
 
       - name: Verify canonical CIBN catalog
         shell: bash
