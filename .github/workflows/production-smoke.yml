@@ -68,6 +68,8 @@ jobs:
           grep -q "Create your student space" <<<"$auth"
           grep -q "Academic pulse" <<<"$student"
           grep -q "Ask ABBA" <<<"$student"
+          grep -q "data-motion-tilt" <<<"$student"
+          grep -q "startViewTransition" <<<"$student"
           grep -q "Protected command center" <<<"$dashboard"
 
       - name: Check public alias reconciliation
