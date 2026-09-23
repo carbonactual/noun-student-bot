@@ -36,6 +36,6 @@ jobs:
       - name: Verify production surface and health
         if: github.event_name != 'pull_request'
         env:
-          BASE_URL: https://noun.vercel.app
+          BASE_URL: https://noun-student-bot-dashboard.vercel.app
           HEALTH_BASE_URL: https://noun-student-bot-dashboard.vercel.app
         run: node scripts/verify-noun-operating-layer.mjs
