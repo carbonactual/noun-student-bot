@@ -19,6 +19,9 @@ test('student space keeps intelligence and AI underneath the simpler surface', (
   assert.match(source, /Your student context|student context/);
   assert.match(source, /source_text/);
   assert.match(source, /18000/);
+  assert.match(source, /application\\/pdf/);
+  assert.match(source, /image\\/png/);
+  assert.match(source, /audio\\/mpeg/);
   assert.doesNotMatch(source, /course_momentum|support_recommendations/);
 });
 
