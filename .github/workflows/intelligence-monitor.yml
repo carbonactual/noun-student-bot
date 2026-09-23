@@ -15,6 +15,7 @@ concurrency:
 
 env:
   BASE_URL: https://noun.vercel.app
+  HEALTH_BASE_URL: https://noun-student-bot-dashboard.vercel.app
 
 jobs:
   intelligence:
@@ -29,7 +30,7 @@ jobs:
           for attempt in {1..5}; do
             if curl --fail-with-body --silent --show-error --max-time 30 \
               --retry 3 --retry-all-errors --retry-delay 3 \
-              "$BASE_URL/api/health"; then
+              "$HEALTH_BASE_URL/api/health"; then
               exit 0
             fi
             echo "Production health attempt $attempt failed."
