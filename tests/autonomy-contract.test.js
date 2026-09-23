@@ -6,7 +6,8 @@ test('autonomous health workflow covers push, scheduled probes and recovery issu
   const source = fs.readFileSync('.github/workflows/autonomous-health.yml', 'utf8');
   assert.match(source, /push:/);
   assert.match(source, /schedule:/);
-  assert.match(source, /BASE_URL: https:\/\/noun\.vercel\.app/);
+  assert.match(source, /BASE_URL: https:\/\/noun-student-bot-dashboard\.vercel\.app/);
+  assert.match(source, /PUBLIC_ALIAS_URL: https:\/\/noun\.vercel\.app/);
   assert.match(source, /HEALTH_BASE_URL: https:\/\/noun-student-bot-dashboard\.vercel\.app/);
   assert.match(source, /npm test/);
   assert.match(source, /issues: write/);
