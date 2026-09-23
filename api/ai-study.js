@@ -8,6 +8,16 @@ const { cibnCatalogHandler } = require('../lib/cibn-catalog-api');
 const SECRET = process.env.WEBHOOK_SECRET;
 
 function safe(value, limit = 3500) { return String(value || '').slice(0, limit); }
+const ALLOWED_MEDIA_MIME = new Set(['application/pdf','image/png','image/jpeg','image/webp','audio/mpeg','audio/wav','audio/ogg']);
+function normalizeLearningMedia(body){
+  const raw = body?.media;
+  if (!raw || typeof raw !== 'object') return null;
+  const mime = safe(raw.mime_type || raw.mimeType, 100).toLowerCase();
+  const data = String(raw.data || '').replace(/\s+/g,'');
+  if (!ALLOWED_MEDIA_MIME.has(mime) || !data) return null;
+  if (data.length > 2200000) return null;
+  return { mimeType: mime, data, name: safe(raw.name, 180) || null };
+}
 function normalizeNumericConfidence(value, fallback = 0.2) {
   const numeric = Number(value);
   if (Number.isFinite(numeric)) return Math.max(0, Math.min(1, numeric));
@@ -101,6 +111,7 @@ module.exports = async (req, res) => {
     if (!phone) return res.status(400).json({ error: 'Account phone is missing' });
     const question = safe(req.body?.question);
     const sourceText = safe(req.body?.source_text, 18000);
+    const learningMedia = normalizeLearningMedia(req.body);
     const mode = normalizeMode(req.body?.mode);
     const course = safe(req.body?.course, 80);
     if (!phone || !question) return res.status(400).json({ error: 'phone and question required' });
@@ -113,7 +124,7 @@ module.exports = async (req, res) => {
       course,
       channel: req.body?.channel || 'web',
       requestedCapability: mode === 'practice' ? 'learning.practice' : 'learning.study',
-      context: { learningMode: mode, sessionId, learningMaterial: sourceText || null }
+      context: { learningMode: mode, sessionId, learningMaterial: sourceText || null, learningMedia }
     });
 
     const evidenceConfidences = (result.evidence || []).map(x => Number(x.confidence ?? x.score)).filter(Number.isFinite);
