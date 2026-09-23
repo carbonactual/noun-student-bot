@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const source = fs.readFileSync('student/index.html', 'utf8');
 
 test('student space keeps the home simple and student-centered', () => {
-  for (const marker of ['Academic pulse', 'Your priorities', 'Your profile', 'ABBA', 'Learn', 'Prepare', 'Plan', 'Get help', 'Ask ABBA']) {
+  for (const marker of ['Academic pulse', 'Your priorities', 'Your profile', 'Study Lab', 'Add notes / material', 'Study guide', '10-question practice', 'Flashcards', 'Explain simply', '25-minute plan', 'Quiz me', 'ABBA', 'Learn', 'Prepare', 'Plan', 'Get help', 'Ask ABBA']) {
     assert.match(source, new RegExp(marker.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')));
   }
   for (const removed of ['Your courses', 'Deadlines & events', 'Past-question matches', 'Human support']) {
@@ -17,6 +17,8 @@ test('student space keeps intelligence and AI underneath the simpler surface', (
   for (const mode of ['tutor', 'tutorial', 'practice', 'revision']) assert.match(source, new RegExp(`data-mode="${mode}"`));
   for (const endpoint of ['/api/student-intelligence', '/api/ai-study']) assert.match(source, new RegExp(endpoint.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')));
   assert.match(source, /Your student context|student context/);
+  assert.match(source, /source_text/);
+  assert.match(source, /18000/);
   assert.doesNotMatch(source, /course_momentum|support_recommendations/);
 });
 
