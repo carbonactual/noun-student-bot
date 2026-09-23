@@ -33,3 +33,15 @@ test('WhatsApp onboarding accepts undergraduate and postgraduate study stages', 
   assert.match(source, /phd/);
   assert.match(source, /\[1-8\]00/);
 });
+
+test('AI study route and ABBA runtime expose a bounded multimodal input contract', () => {
+  const route = fs.readFileSync('api/ai-study.js', 'utf8');
+  const runtime = fs.readFileSync('lib/abba-runtime.js', 'utf8');
+  assert.match(route, /ALLOWED_MEDIA_MIME/);
+  assert.match(route, /application\/pdf/);
+  assert.match(route, /image\/png/);
+  assert.match(route, /audio\/mpeg/);
+  assert.match(route, /2200000/);
+  assert.match(runtime, /inlineData/);
+  assert.match(runtime, /learningMedia/);
+});
