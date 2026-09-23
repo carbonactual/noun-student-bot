@@ -14,7 +14,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  BASE_URL: https://noun.vercel.app
+  BASE_URL: https://noun-student-bot-dashboard.vercel.app
+  PUBLIC_ALIAS_URL: https://noun.vercel.app
 
 jobs:
   smoke:
@@ -68,6 +69,20 @@ jobs:
           grep -q "Academic pulse" <<<"$student"
           grep -q "Ask ABBA" <<<"$student"
           grep -q "Protected command center" <<<"$dashboard"
+
+      - name: Check public alias reconciliation
+        shell: bash
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          alias_status="$(curl --silent --show-error --max-time 20 --output /tmp/noun-alias.html --write-out '%{http_code}' "$PUBLIC_ALIAS_URL/" || true)"
+          echo "Public alias HTTP status: $alias_status"
+          if [[ "$alias_status" == "200" ]] && grep -q 'Study at NOUN' /tmp/noun-alias.html; then
+            echo 'Public alias is serving the current NOUN BOT surface.'
+          else
+            echo 'Public alias is reachable but is not serving the current NOUN BOT release. See recovery issue for reconciliation.'
+            exit 1
+          fi
 
       - name: Verify canonical CIBN catalog
         shell: bash
