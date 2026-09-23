@@ -215,6 +215,83 @@ a{text-decoration:none;color:inherit}
 .material-status{margin-top:9px;color:var(--mint);font-size:9px;min-height:14px}
 @media(max-width:900px){.study-tools{grid-template-columns:1fr}.study-head{display:block}}
 @media(max-width:620px){.study-lab{padding:17px}.quick-prompts{grid-template-columns:1fr}}
+
+/* ===== motion / interaction layer ===== */
+@view-transition{navigation:auto}
+::view-transition-old(root){animation:pageOut .22s ease both}
+::view-transition-new(root){animation:pageIn .48s cubic-bezier(.2,.78,.2,1) both}
+@keyframes pageOut{to{opacity:0;filter:blur(4px);transform:scale(.985)}}
+@keyframes pageIn{from{opacity:0;filter:blur(5px);transform:translateY(8px) scale(.992)}to{opacity:1;filter:none;transform:none}}
+.motion-progress{position:fixed;left:0;top:0;height:2px;width:0;z-index:9999;background:linear-gradient(90deg,var(--mint),var(--teal),var(--indigo));box-shadow:0 0 18px rgba(20,230,166,.65);transform-origin:left}
+.pointer-glow{position:fixed;width:280px;height:280px;border-radius:50%;pointer-events:none;z-index:0;opacity:0;
+  background:radial-gradient(circle,rgba(20,230,166,.095),rgba(15,181,214,.035) 34%,transparent 72%);
+  transform:translate3d(-50%,-50%,0);will-change:transform;transition:opacity .35s ease}
+body.motion-active .pointer-glow{opacity:1}
+[data-motion-tilt]{transform-style:preserve-3d;will-change:transform;transition:transform .55s cubic-bezier(.2,.78,.2,1),box-shadow .45s cubic-bezier(.2,.78,.2,1)}
+[data-motion-tilt]::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;
+  background:radial-gradient(240px 180px at var(--mx,50%) var(--my,50%),rgba(255,255,255,.11),transparent 62%);
+  transition:opacity .35s ease;z-index:1}
+[data-motion-tilt]:hover::before{opacity:1}
+.card[data-motion-tilt]:hover{box-shadow:0 30px 82px rgba(0,0,0,.43),inset 0 1px 0 rgba(255,255,255,.07)}
+.ripple{position:absolute;border-radius:50%;pointer-events:none;width:10px;height:10px;background:rgba(255,255,255,.42);
+  transform:translate(-50%,-50%) scale(0);animation:rippleOut .55s ease-out forwards;mix-blend-mode:screen}
+@keyframes rippleOut{to{transform:translate(-50%,-50%) scale(18);opacity:0}}
+button,.action,.mode,.material-action,.quick-prompts button,.send{position:relative;overflow:hidden}
+.send.is-busy{box-shadow:0 0 0 5px rgba(20,230,166,.08),0 14px 34px rgba(20,230,166,.35)}
+.send.is-busy::after{content:"";position:absolute;left:14px;right:14px;bottom:7px;height:2px;border-radius:99px;
+  background:linear-gradient(90deg,transparent,var(--ink),transparent);animation:busySweep 1s ease-in-out infinite}
+@keyframes busySweep{0%{transform:translateX(-100%);opacity:0}30%{opacity:1}100%{transform:translateX(100%);opacity:0}}
+.mode.active{position:relative}
+.mode.active::after{content:"";position:absolute;left:12px;right:12px;bottom:3px;height:2px;border-radius:99px;
+  background:linear-gradient(90deg,var(--mint),var(--teal));animation:modeLine .35s cubic-bezier(.2,.78,.2,1)}
+@keyframes modeLine{from{transform:scaleX(.2);opacity:0}to{transform:scaleX(1);opacity:1}}
+.material-box[data-drop-active]{border-color:rgba(20,230,166,.58);background:linear-gradient(145deg,rgba(20,230,166,.09),rgba(15,181,214,.04));
+  box-shadow:0 0 0 5px rgba(20,230,166,.06),0 18px 45px rgba(0,0,0,.28)}
+.material-status{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.material-file{display:inline-flex;align-items:center;gap:7px;max-width:100%;padding:6px 9px;border:1px solid rgba(20,230,166,.22);border-radius:999px;background:rgba(20,230,166,.05);color:#c9ffe9}
+.material-file b{max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px}
+.material-file button{border:0;background:transparent;color:var(--mint);padding:0;cursor:pointer;font-weight:800;font-size:13px;line-height:1}
+.material-hint{color:var(--dim);font-size:9px}
+.composer{position:sticky;bottom:0;background:linear-gradient(180deg,rgba(4,10,8,.72),rgba(4,10,8,.96) 28%);backdrop-filter:blur(12px)}
+.composer textarea{transition:min-height .2s ease,border-color .3s,box-shadow .3s,transform .2s ease}
+.composer textarea:focus{transform:translateY(-1px)}
+.chat{isolation:isolate}
+.chat::after{content:"";position:absolute;inset:auto 14% -30% 14%;height:130px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(20,230,166,.08),transparent 70%);filter:blur(20px);pointer-events:none}
+.pulse .attention,.pulse .mini,.profile,.priority,.study-lab,.chat{position:relative}
+.pulse .attention::after,.study-lab::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(115deg,transparent 0 42%,rgba(255,255,255,.035) 50%,transparent 58%);background-size:260% 100%;
+  animation:surfaceSheen 9s ease-in-out infinite}
+@keyframes surfaceSheen{0%,66%,100%{background-position:220% 0}78%{background-position:-20% 0}}
+.hero h1{position:relative}
+.hero h1::after{content:"";position:absolute;left:0;bottom:-7px;width:92px;height:1px;background:linear-gradient(90deg,var(--mint),transparent);opacity:.75}
+.visual-atlas .atlas-card{transform-style:preserve-3d}
+.visual-atlas .atlas-copy{transform:translateZ(20px);text-shadow:0 2px 14px rgba(0,0,0,.4)}
+.quick button .ico{transform:translateZ(0);transition:transform .35s cubic-bezier(.2,.78,.2,1)}
+.quick button:hover .ico{transform:translateY(-2px) scale(1.12) rotate(-4deg)}
+.task{position:relative}
+.task::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:2px;border-radius:99px;background:linear-gradient(var(--mint),transparent);opacity:.7}
+.status[data-state="working"]{color:#9ff5d8}
+.status[data-state="working"] i{animation:statusPulse .9s ease-in-out infinite}
+.status[data-state="error"]{color:#ffc4ba}
+.status[data-state="error"] i{background:#ff7d67;box-shadow:0 0 10px rgba(255,125,103,.75)}
+.status[data-state="ready"] i{animation:blink 2s infinite}
+@keyframes statusPulse{0%,100%{transform:scale(.75);opacity:.35}50%{transform:scale(1.25);opacity:1}}
+@media(max-width:900px){
+  .pointer-glow{display:none}
+  .composer{position:static;background:none;backdrop-filter:none}
+}
+@media(max-width:620px){
+  .motion-progress{height:3px}
+  .hero h1::after{width:62px}
+}
+@media(prefers-reduced-motion:reduce){
+  ::view-transition-old(root),::view-transition-new(root){animation:none}
+  .pointer-glow,.motion-progress{display:none}
+  [data-motion-tilt]{transform:none!important}
+  .pulse .attention::after,.study-lab::after{animation:none}
+}
+
 </style>
 <link rel="stylesheet" href="/assets/noun-system.css">
 </head>
@@ -233,7 +310,7 @@ a{text-decoration:none;color:inherit}
       <p id="subline" class="rv d2">Your space brings your learning, preparation, plans and support together — quietly working in the background while you study.</p>
 
       <div class="pulse">
-        <section class="card attention rv d3">
+        <section class="card attention rv d3" data-motion-tilt>
           <div class="card-kicker">Academic pulse</div>
           <h2>What needs your attention</h2>
           <p id="attentionText">Connect your student profile to see your current priorities, upcoming events, practice material and useful support.</p>
@@ -243,7 +320,7 @@ a{text-decoration:none;color:inherit}
             <button class="action" data-action="help">Get help</button>
           </div>
         </section>
-        <aside class="card mini rv d4">
+        <aside class="card mini rv d4" data-motion-tilt>
           <div class="card-kicker">A simple next step</div>
           <div id="nextLoader"><div class="ring"></div><p style="margin-top:6px">Reading your context…</p></div>
           <h3 id="nextTitle" style="display:none">Start with your profile</h3>
@@ -261,12 +338,12 @@ a{text-decoration:none;color:inherit}
     </section>
 
     <section class="visual-atlas" aria-label="NOUN BOT student environment">
-      <article class="atlas-card rv d1"><img src="/assets/promo/noun-bot-ad-tailored.jpg" alt="NOUN BOT tailored student experience" loading="lazy" width="1250" height="1250"><div class="atlas-copy"><div class="atlas-kicker">Your context</div><strong>Built around your journey.</strong><span>Less searching. More continuity.</span></div></article>
-      <article class="atlas-card rv d2"><img src="/assets/promo/noun-bot-ad-menu.jpg" alt="NOUN BOT student tools" loading="lazy" width="1250" height="1250"><div class="atlas-copy"><div class="atlas-kicker">Tools</div><strong>Keep the useful things close.</strong><span>Learn · prepare · plan · support.</span></div></article>
-      <article class="atlas-card rv d3"><img src="/assets/promo/noun-bot-ad-primary.jpg" alt="NOUN BOT student support experience" loading="lazy" width="1250" height="1250"><div class="atlas-copy"><div class="atlas-kicker">Support</div><strong>ABBA knows when to hand over.</strong><span>AI first. Human when needed.</span></div></article>
+      <article class="atlas-card rv d1" data-motion-tilt><img src="/assets/promo/noun-bot-ad-tailored.jpg" alt="NOUN BOT tailored student experience" loading="lazy" width="1250" height="1250"><div class="atlas-copy"><div class="atlas-kicker">Your context</div><strong>Built around your journey.</strong><span>Less searching. More continuity.</span></div></article>
+      <article class="atlas-card rv d2" data-motion-tilt><img src="/assets/promo/noun-bot-ad-menu.jpg" alt="NOUN BOT student tools" loading="lazy" width="1250" height="1250"><div class="atlas-copy"><div class="atlas-kicker">Tools</div><strong>Keep the useful things close.</strong><span>Learn · prepare · plan · support.</span></div></article>
+      <article class="atlas-card rv d3" data-motion-tilt><img src="/assets/promo/noun-bot-ad-primary.jpg" alt="NOUN BOT student support experience" loading="lazy" width="1250" height="1250"><div class="atlas-copy"><div class="atlas-kicker">Support</div><strong>ABBA knows when to hand over.</strong><span>AI first. Human when needed.</span></div></article>
     </section>
 
-    <section class="card study-lab rv d5" aria-label="Study Lab">
+    <section class="card study-lab rv d5" aria-label="Study Lab" data-motion-tilt>
       <div class="study-head">
         <div><div class="card-kicker">Study Lab</div><h3>Turn material into a study session.</h3></div>
         <p>Bring your own notes or text, then ask ABBA to explain, structure, test or review it. Your material stays in the current session.</p>
@@ -289,7 +366,7 @@ a{text-decoration:none;color:inherit}
       </div>
     </section>
     <section class="workspace">
-      <section class="card chat" id="abba">
+      <section class="card chat" id="abba" data-motion-tilt>
         <div class="chat-head">
           <div class="chat-brand">
             <div class="avatar">A</div>
@@ -314,7 +391,7 @@ a{text-decoration:none;color:inherit}
       </section>
 
       <aside class="side">
-        <section class="card profile">
+        <section class="card profile" data-motion-tilt>
           <div class="profile-head">
             <div id="profileBadge" class="profile-badge">N</div>
             <div><h3 id="profileName">Your profile</h3><p id="profileProgramme">Connect your NOUN context</p></div>
@@ -323,7 +400,7 @@ a{text-decoration:none;color:inherit}
             <div class="sk"></div><div class="sk" style="width:75%"></div><div class="sk" style="width:55%"></div>
           </div>
         </section>
-        <section class="card priority">
+        <section class="card priority" data-motion-tilt>
           <div class="card-kicker">Your priorities</div>
           <h3 style="margin-top:10px">Keep the important things close.</h3>
           <p>Generated from your student intelligence as your context grows.</p>
@@ -353,7 +430,7 @@ const messages=document.getElementById('messages'),q=document.getElementById('qu
 const WA='https://wa.me/2347046481828';
 
 /* staggered reveal on load */
-document.querySelectorAll('.rv').forEach(el=>setTimeout(()=>el.classList.add('in'),80));
+/* reveal is coordinated by the motion layer below */
 
 /* greeting by time of day */
 (function(){
@@ -368,7 +445,7 @@ if(materialInput){
   materialInput.addEventListener('change',async()=>{
     const file=materialInput.files&&materialInput.files[0];
     if(!file)return;
-    if(file.size>2000000){studyMaterial='';studyMedia=null;studyMaterialName='';materialStatus.textContent='That file is larger than the 2 MB ingestion limit. Paste the relevant section instead.';materialInput.value='';return;}
+    if(file.size>1500000){studyMaterial='';studyMedia=null;studyMaterialName='';materialStatus.innerHTML='<span class="material-hint">That file is larger than the 1.5 MB media limit. Use a smaller file or paste the relevant section instead.</span>';materialInput.value='';return;}
     try{
       if(/^text\/(plain|markdown|csv)$/.test(file.type) || /\.(txt|md|csv)$/i.test(file.name)){
         const raw=await file.text();
@@ -376,7 +453,7 @@ if(materialInput){
         studyMaterial=raw.slice(0,18000);
         studyMedia=null;
         studyMaterialName=file.name;
-        materialStatus.textContent='Attached '+file.name+' · '+studyMaterial.length.toLocaleString()+' characters available to this session.';
+        window.__nounMarkAttached(file.name,file.type,'text');
       }else{
         const buffer=await file.arrayBuffer();
         let binary='';
@@ -386,11 +463,11 @@ if(materialInput){
         studyMedia={name:file.name,mime_type:file.type,data:btoa(binary)};
         studyMaterial='';
         studyMaterialName=file.name;
-        materialStatus.textContent='Attached '+file.name+' · ABBA can inspect this '+(file.type||'media')+' in the current session.';
+        window.__nounMarkAttached(file.name,file.type,file.type&&file.type.indexOf('audio/')===0?'audio':'media');
       }
     }catch(error){
       studyMaterial='';studyMedia=null;studyMaterialName='';
-      materialStatus.textContent='That file could not be prepared. Try a smaller text file or paste the relevant section into the question box.';
+      materialStatus.innerHTML='<span class="material-hint">That file could not be prepared. Try a smaller file or paste the relevant section into the question box.</span>';
     }
   });
 }
@@ -476,7 +553,7 @@ document.getElementById('phoneSave').addEventListener('click',()=>{const v=docum
 async function ask(){
   const text=q.value.trim();if(!text)return;
   if(!accessToken){location.href='/auth/?next=/student/';return}
-  add(text,'me');q.value='';send.disabled=true;typing(true);
+  add(text,'me');q.value='';q.style.height='auto';send.disabled=true;send.textContent='Thinking…';send.classList.add('is-busy');window.__nounSetStatus&&window.__nounSetStatus('working','Working');typing(true);
   try{
     const r=await fetch('/api/ai-study',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+accessToken},body:JSON.stringify({phone,question:text,mode,source_text:studyMaterial||undefined,source_name:studyMaterialName||undefined,media:studyMedia||undefined})});
     const d=await r.json();
@@ -488,8 +565,8 @@ async function ask(){
       s.textContent='Sources · '+d.sources.slice(0,3).map(x=>x.title).filter(Boolean).join(' · ');
       messages.appendChild(s);messages.scrollTop=messages.scrollHeight;
     }
-  }catch(e){typing(false);add('I could not complete that right now. You can continue with a human on WhatsApp.', 'bot', true)}
-  finally{send.disabled=false}
+  }catch(e){typing(false);window.__nounSetStatus&&window.__nounSetStatus('error','Needs attention');add('I could not complete that right now. You can continue with a human on WhatsApp.', 'bot', true)}
+  finally{send.disabled=false;send.textContent='Ask';send.classList.remove('is-busy');window.__nounSetStatus&&window.__nounSetStatus('ready','Ready')}
 }
 send.addEventListener('click',ask);
 q.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ask()}});
@@ -513,6 +590,107 @@ async function loadAccount(){
   }catch(e){document.getElementById('facts').innerHTML='<div class="empty">Please sign in again to load your private student space.</div>';}
 }
 loadAccount();
+</script>
+
+
+<script>
+/* Motion-grade interaction system: scroll reveal, pointer depth, focus states, file drop, ripples and resilient network UX. */
+(function(){
+  const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const body=document.body;
+  const progress=document.createElement('div'); progress.className='motion-progress'; document.body.appendChild(progress);
+  const glow=document.createElement('div'); glow.className='pointer-glow'; document.body.appendChild(glow);
+
+  function reveal(){
+    const nodes=[...document.querySelectorAll('.rv')];
+    if(reduced){nodes.forEach(x=>x.classList.add('in'));return;}
+    if(!('IntersectionObserver' in window)){nodes.forEach((x,i)=>setTimeout(()=>x.classList.add('in'),70+i*45));return;}
+    const io=new IntersectionObserver(entries=>{
+      entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('in');io.unobserve(entry.target);}});
+    },{threshold:.12,rootMargin:'0px 0px -4% 0px'});
+    nodes.forEach(x=>io.observe(x));
+  }
+  reveal();
+
+  function scrollProgress(){
+    const max=document.documentElement.scrollHeight-window.innerHeight;
+    const pct=max>0?window.scrollY/max:0;
+    progress.style.transform='scaleX('+Math.max(0,Math.min(1,pct))+')';
+  }
+  scrollProgress(); window.addEventListener('scroll',scrollProgress,{passive:true});
+
+  if(!reduced && window.matchMedia('(pointer:fine)').matches){
+    body.classList.add('motion-active');
+    let x=innerWidth/2,y=innerHeight/2,tx=x,ty=y,raf=0;
+    function follow(){x+=(tx-x)*.14;y+=(ty-y)*.14;glow.style.left=x+'px';glow.style.top=y+'px';raf=requestAnimationFrame(follow);}
+    window.addEventListener('pointermove',e=>{tx=e.clientX;ty=e.clientY;if(!raf)raf=requestAnimationFrame(follow)},{passive:true});
+    window.addEventListener('mouseleave',()=>body.classList.remove('motion-active'));
+    window.addEventListener('mouseenter',()=>body.classList.add('motion-active'));
+
+    document.querySelectorAll('[data-motion-tilt]').forEach(card=>{
+      card.addEventListener('pointermove',e=>{
+        const r=card.getBoundingClientRect(), px=(e.clientX-r.left)/r.width, py=(e.clientY-r.top)/r.height;
+        const rx=(.5-py)*3.2, ry=(px-.5)*4.2;
+        card.style.setProperty('--mx',(px*100).toFixed(1)+'%');
+        card.style.setProperty('--my',(py*100).toFixed(1)+'%');
+        card.style.transform='perspective(1100px) rotateX('+rx.toFixed(2)+'deg) rotateY('+ry.toFixed(2)+'deg) translateY(-3px)';
+      });
+      card.addEventListener('pointerleave',()=>{card.style.transform='';card.style.removeProperty('--mx');card.style.removeProperty('--my');});
+    });
+  }
+
+  function ripple(e){
+    const target=e.target.closest('button,.action,.mode,.material-action,.quick-prompts button');
+    if(!target || reduced)return;
+    const rect=target.getBoundingClientRect(), dot=document.createElement('i');
+    dot.className='ripple'; dot.style.left=(e.clientX-rect.left)+'px';dot.style.top=(e.clientY-rect.top)+'px';
+    target.appendChild(dot);setTimeout(()=>dot.remove(),650);
+  }
+  document.addEventListener('pointerdown',ripple,{passive:true});
+
+  const textarea=document.getElementById('question');
+  if(textarea){
+    const autoGrow=()=>{textarea.style.height='auto';textarea.style.height=Math.min(textarea.scrollHeight,150)+'px';};
+    textarea.addEventListener('input',autoGrow);autoGrow();
+  }
+
+  const statusEl=document.querySelector('.status');
+  function setStatus(state,label){
+    if(!statusEl)return;
+    statusEl.dataset.state=state;
+    statusEl.innerHTML='<i></i>'+label;
+  }
+  window.__nounSetStatus=setStatus;
+
+  window.__nounMarkAttached=function(name,type,kind){
+    if(!materialStatus)return;
+    materialStatus.innerHTML='';
+    const chip=document.createElement('span');chip.className='material-file';
+    const icon=document.createElement('span');icon.textContent=kind==='text'?'▤':kind==='audio'?'◒':'◩';icon.setAttribute('aria-hidden','true');
+    const b=document.createElement('b');b.textContent=name;
+    const remove=document.createElement('button');remove.type='button';remove.setAttribute('aria-label','Remove '+name);remove.textContent='×';
+    remove.addEventListener('click',()=>{studyMaterial='';studyMedia=null;studyMaterialName='';materialInput.value='';materialStatus.innerHTML='<span class="material-hint">Attachment removed. Nothing from it will be sent with the next request.</span>';});
+    chip.append(icon,b,remove);materialStatus.appendChild(chip);
+    const hint=document.createElement('span');hint.className='material-hint';hint.textContent=kind==='text'?'text is trimmed to 18,000 characters':'available to ABBA for this session';
+    materialStatus.appendChild(hint);
+  };
+
+  if(materialInput){
+    const box=document.querySelector('.material-box');
+    ['dragenter','dragover'].forEach(evt=>box&&box.addEventListener(evt,e=>{e.preventDefault();box.dataset.dropActive='';}));
+    ['dragleave','drop'].forEach(evt=>box&&box.addEventListener(evt,e=>{e.preventDefault();if(evt==='drop')handleDrop(e);delete box.dataset.dropActive;}));
+    function handleDrop(e){const file=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(file){const dt=new DataTransfer();dt.items.add(file);materialInput.files=dt.files;materialInput.dispatchEvent(new Event('change',{bubbles:true}));}}
+  }
+
+  document.addEventListener('click',e=>{
+    const link=e.target.closest('a[href]');
+    if(!link||link.target==='_blank'||link.origin!==location.origin)return;
+    if(reduced||!document.startViewTransition)return;
+    const href=link.href;
+    e.preventDefault();
+    document.startViewTransition(()=>{location.href=href;});
+  });
+})();
 </script>
 
 <script>
