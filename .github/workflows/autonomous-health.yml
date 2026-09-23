@@ -71,6 +71,8 @@ jobs:
           grep -q 'Create your student space' <<<"$auth"
           grep -q 'Academic pulse' <<<"$student"
           grep -q 'Ask ABBA' <<<"$student"
+          grep -q 'data-motion-tilt' <<<"$student"
+          grep -q 'startViewTransition' <<<"$student"
           grep -q 'Protected command center' <<<"$dashboard"
 
       - name: Check public alias reconciliation
@@ -93,7 +95,7 @@ jobs:
           {
             echo '## NOUN BOT autonomous health'
             echo '- Repository tests: executed'
-            echo '- Production probes: executed against noun.vercel.app'
+            echo '- Production probes: executed against the controlled Vercel production host'
             echo '- Timestamp: '"$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           } >> "$GITHUB_STEP_SUMMARY"
 
