@@ -22,11 +22,27 @@ test('student space keeps intelligence and AI underneath the simpler surface', (
   assert.match(source, /application\\/pdf/);
   assert.match(source, /image\\/png/);
   assert.match(source, /audio\\/mpeg/);
+  assert.match(source, /data-motion-tilt/);
+  assert.match(source, /motion-progress/);
+  assert.match(source, /pointer-glow/);
+  assert.match(source, /startViewTransition/);
+  assert.match(source, /AbortController/);
+  assert.match(source, /45000/);
+  assert.match(source, /1500000/);
   assert.doesNotMatch(source, /course_momentum|support_recommendations/);
 });
 
 test('student space does not expose raw student records', () => {
   assert.doesNotMatch(source, /password_hash|waec_result|neco_result/);
+});
+
+test('student space keeps motion resilient and accessible', () => {
+  assert.match(source, /prefers-reduced-motion/);
+  assert.match(source, /window\\.matchMedia/);
+  assert.match(source, /IntersectionObserver/);
+  assert.match(source, /dragover/);
+  assert.match(source, /material-file/);
+  assert.match(source, /Remove /);
 });
 
 test('student space uses rounded sans typography and accessible responsive behavior', () => {
