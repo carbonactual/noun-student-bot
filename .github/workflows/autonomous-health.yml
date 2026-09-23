@@ -16,7 +16,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  BASE_URL: https://noun.vercel.app
+  BASE_URL: https://noun-student-bot-dashboard.vercel.app
+  PUBLIC_ALIAS_URL: https://noun.vercel.app
   HEALTH_BASE_URL: https://noun-student-bot-dashboard.vercel.app
 
 jobs:
@@ -71,6 +72,20 @@ jobs:
           grep -q 'Academic pulse' <<<"$student"
           grep -q 'Ask ABBA' <<<"$student"
           grep -q 'Protected command center' <<<"$dashboard"
+
+      - name: Check public alias reconciliation
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          status="$(curl --silent --show-error --max-time 20 --output /tmp/public-alias.html --write-out '%{http_code}' "$PUBLIC_ALIAS_URL/" || true)"
+          echo "Public alias HTTP status: $status"
+          if [[ "$status" == "200" ]] && grep -q 'Study at NOUN' /tmp/public-alias.html; then
+            echo 'Public alias matches the controlled NOUN BOT surface.'
+          else
+            echo 'Public alias is reachable but is not serving the controlled NOUN BOT release.'
+            exit 1
+          fi
 
       - name: Write health summary
         if: always()
