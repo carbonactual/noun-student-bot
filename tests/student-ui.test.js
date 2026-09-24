@@ -6,7 +6,7 @@ const source = fs.readFileSync('student/index.html', 'utf8');
 const has = (value) => assert.ok(source.includes(value), 'missing marker: '+value);
 
 test('student space keeps the home simple and student-centered', () => {
-  for (const marker of ['Academic pulse', 'Your priorities', 'Your profile', 'Study Lab', 'Add notes / material', 'Study guide', '10-question practice', 'Flashcards', 'Explain simply', '25-minute plan', 'Quiz me', 'ABBA', 'Learn', 'Prepare', 'Plan', 'Get help', 'Ask ABBA']) has(marker);
+  for (const marker of ['Academic pulse', 'Your priorities', 'Your profile', 'Study Lab', 'Add notes / material', 'Study guide', '10-question practice', 'Flashcards', 'Explain simply', '25-minute plan', 'Quiz me', 'ABBA', 'Learn', 'Prepare', 'Plan', 'Get help', 'Ask ABBA', 'Built on the ecosystem', 'The product is the entry. The foundations carry it.']) has(marker);
   for (const removed of ['Your courses', 'Deadlines & events', 'Past-question matches', 'Human support']) assert.ok(!source.includes(removed), 'unexpected marker: '+removed);
 });
 
@@ -46,6 +46,8 @@ test('student space keeps motion resilient and accessible', () => {
 test('student space uses rounded sans typography and accessible responsive behavior', () => {
   has('ui-rounded');
   has('system-ui');
+  has('--ca-gold');
+  has('--ca-navy');
   assert.ok(!/Iowan Old Style|Palatino Linotype|Book Antiqua|Georgia,serif/i.test(source));
   has('aria-label');
   has('prefers-reduced-motion');
