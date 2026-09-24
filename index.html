@@ -192,7 +192,51 @@ h2{font-family:var(--display);font-size:clamp(35px,4.6vw,58px);line-height:.97;l
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/noun-system.css">
-</head>
+<style>
+.ca-foundation-field{padding:76px 0 86px;border-block:1px solid rgba(216,168,95,.16);background:
+  radial-gradient(circle at 50% 45%,rgba(216,168,95,.12),transparent 26%),
+  linear-gradient(180deg,rgba(7,21,34,.82),rgba(4,7,12,.9));overflow:hidden}
+.ca-foundation-head{max-width:760px;margin-bottom:26px}
+.ca-foundation-head h2{margin:8px 0 10px}
+.ca-foundation-orbit{position:relative;height:430px;max-width:900px;margin:0 auto;display:grid;place-items:center;isolation:isolate}
+.ca-orbit-ring{position:absolute;border:1px solid rgba(216,168,95,.18);border-radius:50%;transform:rotateX(68deg);box-shadow:0 0 40px rgba(216,168,95,.045)}
+.ca-orbit-ring.ring-outer{width:720px;height:260px;animation:caRing 18s linear infinite}
+.ca-orbit-ring.ring-inner{width:470px;height:170px;animation:caRingReverse 13s linear infinite}
+.ca-core{width:132px;height:132px;border-radius:50%;display:grid;place-items:center;align-content:center;gap:2px;
+  border:1px solid rgba(216,168,95,.45);
+  background:radial-gradient(circle,rgba(216,168,95,.2),rgba(7,21,34,.86) 68%);
+  box-shadow:0 0 70px rgba(216,168,95,.16),inset 0 0 40px rgba(216,168,95,.08);
+  position:relative;z-index:4;animation:caCore 4.8s ease-in-out infinite}
+.ca-core:before{content:"";position:absolute;inset:-13px;border-radius:50%;border:1px solid rgba(216,168,95,.1);animation:caPulse 3.8s ease-in-out infinite}
+.ca-core span{font-family:Georgia,"Times New Roman",serif;font-size:64px;line-height:.8;color:var(--ca-gold)}
+.ca-core small{font-size:8px;text-transform:uppercase;letter-spacing:.18em;color:var(--ca-muted)}
+.ca-node{position:absolute;z-index:5;padding:9px 12px;border:1px solid rgba(216,168,95,.22);border-radius:999px;background:rgba(3,8,14,.72);color:#efe3ce;font-size:10px;letter-spacing:.08em;backdrop-filter:blur(12px);box-shadow:0 10px 28px rgba(0,0,0,.2);transition:transform .35s cubic-bezier(.2,.78,.2,1),border-color .25s ease}
+.ca-node:hover{transform:translateY(-3px);border-color:rgba(216,168,95,.5)}
+.ca-node.n1{left:11%;top:24%}.ca-node.n2{left:4%;top:56%}.ca-node.n3{left:23%;bottom:7%}.ca-node.n4{left:39%;top:7%}
+.ca-node.n5{right:13%;top:22%}.ca-node.n6{right:4%;top:56%}.ca-node.n7{right:23%;bottom:7%}.ca-node.n8{right:39%;top:7%}
+.ca-path{position:absolute;bottom:16px;color:var(--ca-gold);font-size:9px;text-transform:uppercase;letter-spacing:.18em}
+.ca-path.path-left{left:14%}.ca-path.path-right{right:14%}
+@keyframes caRing{to{transform:rotateX(68deg) rotateZ(360deg)}}@keyframes caRingReverse{to{transform:rotateX(68deg) rotateZ(-360deg)}}
+@keyframes caCore{50%{transform:translateY(-5px) scale(1.025)}}
+@keyframes caPulse{0%,100%{transform:scale(.96);opacity:.35}50%{transform:scale(1.08);opacity:.08}}
+@media(max-width:760px){
+  .ca-foundation-field{padding:60px 0}
+  .ca-foundation-orbit{height:370px}
+  .ca-orbit-ring.ring-outer{width:650px;height:235px}.ca-orbit-ring.ring-inner{width:410px;height:150px}
+  .ca-node{font-size:8px;padding:7px 9px}
+  .ca-node.n1{left:4%;top:21%}.ca-node.n2{left:1%;top:55%}.ca-node.n3{left:18%;bottom:3%}.ca-node.n4{left:35%;top:2%}
+  .ca-node.n5{right:4%;top:21%}.ca-node.n6{right:1%;top:55%}.ca-node.n7{right:18%;bottom:3%}.ca-node.n8{right:35%;top:2%}
+  .ca-path.path-left{left:6%}.ca-path.path-right{right:6%}
+}
+@media(max-width:520px){
+  .ca-foundation-orbit{height:320px}.ca-orbit-ring.ring-outer{width:520px;height:190px}.ca-orbit-ring.ring-inner{width:330px;height:125px}
+  .ca-node{font-size:7px;padding:6px 8px}.ca-core{width:108px;height:108px}.ca-core span{font-size:52px}
+  .ca-path{bottom:6px;font-size:7px}
+}
+@media(prefers-reduced-motion:reduce){
+  .ca-orbit-ring,.ca-core,.ca-core:before{animation:none!important}
+}
+</style></head>
 <body class="noun-home">
 <div class="top"><div class="wrap nav">
   <a class="brand" href="/"><span class="logo">N</span><span>NOUN BOT</span></a>
@@ -227,6 +271,31 @@ h2{font-family:var(--display);font-size:clamp(35px,4.6vw,58px);line-height:.97;l
       <div class="thumb one"><img src="/assets/promo/noun-bot-ad-menu.jpg" alt="NOUN BOT menu preview" width="1250" height="1250" loading="lazy"><span>Ask, plan, prepare, get help</span></div>
       <div class="thumb two"><img src="/assets/promo/noun-bot-ad-primary.jpg" alt="NOUN BOT learning and exam preview" width="1250" height="1250" loading="lazy"><span>Courses · exams · success</span></div>
       <div class="pill"><i></i> ABBA is ready</div>
+    </div>
+  </div>
+</section>
+
+<section class="ca-foundation-field" aria-label="Carbon Actual foundations beneath NOUN BOT">
+  <div class="wrap">
+    <div class="ca-foundation-head reveal">
+      <span class="kicker">Built on the ecosystem</span>
+      <h2>The product is the entry. The foundations carry it.</h2>
+      <p class="sub">NOUN BOT presents one student route while remaining connected to the deeper Carbon Actual formation beneath it.</p>
+    </div>
+    <div class="ca-foundation-orbit" data-ca-field>
+      <div class="ca-orbit-ring ring-outer" aria-hidden="true"></div>
+      <div class="ca-orbit-ring ring-inner" aria-hidden="true"></div>
+      <div class="ca-core"><span>#</span><small>formation</small></div>
+      <span class="ca-node n1">Root</span>
+      <span class="ca-node n2">SEAL</span>
+      <span class="ca-node n3">Index</span>
+      <span class="ca-node n4">Actual</span>
+      <span class="ca-node n5">I/O</span>
+      <span class="ca-node n6">HAPI</span>
+      <span class="ca-node n7">ATLAS</span>
+      <span class="ca-node n8">Vault</span>
+      <span class="ca-path path-left">Product entry</span>
+      <span class="ca-path path-right">Becoming</span>
     </div>
   </div>
 </section>
@@ -359,6 +428,18 @@ h2{font-family:var(--display);font-size:clamp(35px,4.6vw,58px);line-height:.97;l
     if(!a||a.target==='_blank'||a.origin!==location.origin)return;
     e.preventDefault();const href=a.href;document.startViewTransition(()=>location.href=href);
   });
+})();
+</script><script>
+(function(){
+  const field=document.querySelector('[data-ca-field]');
+  if(!field||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  let tx=0,ty=0,x=0,y=0,raf=0;
+  field.addEventListener('pointermove',e=>{
+    const r=field.getBoundingClientRect();tx=((e.clientX-r.left)/r.width-.5)*8;ty=((e.clientY-r.top)/r.height-.5)*-5;
+    if(!raf)raf=requestAnimationFrame(loop);
+  });
+  field.addEventListener('pointerleave',()=>{tx=0;ty=0;if(!raf)raf=requestAnimationFrame(loop);});
+  function loop(){x+=(tx-x)*.1;y+=(ty-y)*.1;field.style.transform='translate3d('+x*.12+'px,'+y*.12+'px,0)';raf=(Math.abs(tx-x)+Math.abs(ty-y)>.03)?requestAnimationFrame(loop):0;}
 })();
 </script></body>
 </html>
