@@ -261,3 +261,37 @@ body.noun-dashboard .motion-line{background:linear-gradient(90deg,var(--ca-gold)
 @media(prefers-reduced-motion:reduce){
   *,*:before,*:after{transition:none!important;animation:none!important}
 }
+
+/* Canonical auth surface: same dark field, gold signal, no unrelated light-theme break. */
+body.noun-auth{color:var(--ca-text)}
+body.noun-auth .panel{background:
+  radial-gradient(circle at 80% 12%,rgba(216,168,95,.08),transparent 28%),
+  linear-gradient(180deg,#07101a,#06080c);color:var(--ca-text)}
+body.noun-auth .card{color:var(--ca-text)}
+body.noun-auth .back,body.noun-auth .intro,body.noun-auth .help,body.noun-auth .foot,
+body.noun-auth .why,.noun-auth .field label{color:var(--ca-muted)}
+body.noun-auth h1{font-family:Georgia,"Times New Roman",serif;font-weight:500;color:var(--ca-text)}
+body.noun-auth .mode-switch{background:rgba(255,255,255,.045);border:1px solid var(--ca-line-soft)}
+body.noun-auth .mode{color:#8996a1}
+body.noun-auth .mode.active{background:rgba(216,168,95,.12);color:var(--ca-gold);box-shadow:0 6px 18px rgba(0,0,0,.18)}
+body.noun-auth .field input{
+  background:rgba(255,255,255,.035);color:var(--ca-text);
+  border-color:var(--ca-line);box-shadow:none
+}
+body.noun-auth .field input::placeholder{color:#667583}
+body.noun-auth .field input:focus{border-color:rgba(216,168,95,.58);box-shadow:0 0 0 4px rgba(216,168,95,.09)}
+body.noun-auth .why{background:rgba(255,255,255,.025);border-color:var(--ca-line)}
+body.noun-auth .why b,body.noun-auth .linkbtn{color:var(--ca-gold)}
+body.noun-auth .progress .pstep{background:rgba(255,255,255,.08)}
+body.noun-auth .btn{
+  background:rgba(255,255,255,.035);color:var(--ca-text);border-color:var(--ca-line)
+}
+body.noun-auth .btn:hover{border-color:rgba(216,168,95,.45);background:rgba(216,168,95,.05)}
+body.noun-auth .btn.primary{
+  background:linear-gradient(135deg,var(--ca-gold),var(--ca-gold-bright));color:#111;
+  border-color:transparent;box-shadow:0 16px 40px rgba(216,168,95,.16)
+}
+body.noun-auth .status{background:rgba(216,168,95,.08);border-color:var(--ca-line);color:#f2ddb6}
+body.noun-auth .status.error{background:rgba(178,70,55,.12);border-color:rgba(220,103,88,.28);color:#ffc4bb}
+body.noun-auth .password-meter{background:rgba(255,255,255,.08)}
+body.noun-auth .password-meter span{background:linear-gradient(90deg,#9c7442,var(--ca-gold),#fff0bd)}
