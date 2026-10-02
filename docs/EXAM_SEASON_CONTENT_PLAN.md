@@ -71,7 +71,7 @@ Later posts: show the tailoring naturally where it fits — do not open every po
 ## Week 2 — Proof + support
 4. Mon Sept 28 — Study-group spotlight: how ABBA matches you to study groups. Educational + community.
 5. Wed Sept 30 — "Stuck at 2am?": 24/7 AI help + human support when it matters. Educational. CTA: WhatsApp.
-6. Fri Oct 2 — Independence day special: Nigeria-themed learning post, light tone. Entertaining.
+6. DONE (Oct 2): Independence day special post (post 122181340982976529) — Nigeria-themed, light/entertaining, WhatsApp CTA. Published 7:06 PM WAT.
 
 ## Week 3 — Conversion
 7. Mon Oct 5 — Tier explainer: Free vs Plus (₦10k) vs Pro (₦15k) vs Premium (₦20k) per semester — what each unlocks, Premium = ₦70k+ value. Promotional.
