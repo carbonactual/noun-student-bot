@@ -66,15 +66,15 @@ Later posts: show the tailoring naturally where it fits — do not open every po
 🌍 Your student space: https://noun-student-bot-dashboard.vercel.app
 
 #NOUN #TMA #ExamSeason #InstituteGPT" 
-3. Wed Sept 23 — "From course reg to exam card": course registration, exam registration, signing, exam cards — step-by-step help for every admin step left this semester. CTA: WhatsApp.
+3. MISSED (Sept 23): "From course reg to exam card" — not published during CIBN BOT build period. Held for catch-up or rotation.: course registration, exam registration, signing, exam cards — step-by-step help for every admin step left this semester. CTA: WhatsApp.
 
 ## Week 2 — Proof + support
-4. Mon Sept 28 — Study-group spotlight: how ABBA matches you to study groups. Educational + community.
-5. Wed Sept 30 — "Stuck at 2am?": 24/7 AI help + human support when it matters. Educational. CTA: WhatsApp.
+4. MISSED (Sept 28): Study-group spotlight — not published during CIBN BOT build period. Held for catch-up or rotation.: how ABBA matches you to study groups. Educational + community.
+5. MISSED (Sept 30): "Stuck at 2am?" — not published during CIBN BOT build period. Held for catch-up or rotation.: 24/7 AI help + human support when it matters. Educational. CTA: WhatsApp.
 6. DONE (Oct 2): Independence day special post (post 122181340982976529) — Nigeria-themed, light/entertaining, WhatsApp CTA. Published 7:06 PM WAT.
 
 ## Week 3 — Conversion
-7. Mon Oct 5 — Tier explainer: Free vs Plus (₦10k) vs Pro (₦15k) vs Premium (₦20k) per semester — what each unlocks, Premium = ₦70k+ value. Promotional.
+7. DONE (Oct 5): Tier explainer post (post 122181904340976529) — Free vs Plus vs Pro vs Premium breakdown, ₦70k+ value framing, WhatsApp CTA. Published ~7 PM WAT.
 8. Wed Oct 7 — Testimonial/results post (collect from early student WhatsApp feedback). Proof.
 9. Fri Oct 9 — Final-call mock exam push before exam week. Urgency.
 
