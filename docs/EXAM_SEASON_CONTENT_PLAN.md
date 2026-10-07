@@ -75,7 +75,7 @@ Later posts: show the tailoring naturally where it fits — do not open every po
 
 ## Week 3 — Conversion
 7. DONE (Oct 5): Tier explainer post (post 122181904340976529) — Free vs Plus vs Pro vs Premium breakdown, ₦70k+ value framing, WhatsApp CTA. Published ~7 PM WAT.
-8. Wed Oct 7 — Testimonial/results post (collect from early student WhatsApp feedback). Proof.
+8. DONE (Oct 7): Testimonial/results post (post 122182258988976529) — "What does prepared actually look like on exam day?" Educational outcomes focus, WhatsApp CTA. Published ~11 AM PT (7 PM WAT).
 9. Fri Oct 9 — Final-call mock exam push before exam week. Urgency.
 
 ## Amplification
