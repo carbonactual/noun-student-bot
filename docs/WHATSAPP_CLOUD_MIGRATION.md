@@ -23,8 +23,8 @@ number banned again — do not reuse any bridge on the new line.
 |---|---|
 | WA_CLOUD_TOKEN | Permanent system-user access token (whatsapp_business_messaging + whatsapp_business_management) |
 | WA_PHONE_NUMBER_ID | Phone number ID from Meta (not the phone number itself) |
-| WA_VERIFY_TOKEN | Any strong string we choose for the webhook handshake |
-| CRON_SECRET | (optional) lets the Vercel cron authenticate to /api/wa-drain |
+| WA_VERIFY_TOKEN | Webhook handshake string — **ALREADY SET on Vercel (Oct 10, 2026)**; tell the owner the value when wiring Meta, or rotate |
+| CRON_SECRET | **ALREADY SET on Vercel (Oct 10, 2026)** — lets the daily cron authenticate to /api/wa-drain |
 
 Existing vars (SUPABASE_*, GEMINI_API_KEY, WEBHOOK_SECRET, ADMIN_NUMBERS, ADMIN_EMAIL, RESEND_*) unchanged.
 
