@@ -1,3 +1,5 @@
+> **⚠️ CTA UPDATE — Oct 10, 2026: WhatsApp is SUSPENDED.** Both WhatsApp numbers (personal + bot) are currently banned. All wa.me/2347046481828 CTAs are replaced for future content by: **web chat** (CIBN: https://mcp-bot-eight.vercel.app — "Chat with ABBA"; NOUN: https://noun-student-bot-dashboard.vercel.app/student/ — in-page ABBA chat) **+ email institutegpt@gmail.com**. Do not publish wa.me links until the official WhatsApp Business Cloud API migration is live.
+
 # Institute GPT — TMA + Mock Exam Season Content Plan (Sept 17 – Oct 17, 2026)
 
 Current student stage: TMA season + mock exam season in parallel; exam reg + exam cards next. See SEMESTER_RAMP_SERVICES.md for the 5-stage service map.

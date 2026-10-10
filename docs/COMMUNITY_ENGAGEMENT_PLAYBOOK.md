@@ -1,3 +1,5 @@
+> **⚠️ CTA UPDATE — Oct 10, 2026: WhatsApp is SUSPENDED.** Both WhatsApp numbers (personal + bot) are currently banned. All wa.me/2347046481828 CTAs are replaced for future content by: **web chat** (CIBN: https://mcp-bot-eight.vercel.app — "Chat with ABBA"; NOUN: https://noun-student-bot-dashboard.vercel.app/student/ — in-page ABBA chat) **+ email institutegpt@gmail.com**. Do not publish wa.me links until the official WhatsApp Business Cloud API migration is live.
+
 # NOUN Community Engagement Playbook — ABBA · Institute GPT
 
 ## Our own community (LIVE)

@@ -382,7 +382,7 @@ button,.action,.mode,.material-action,.quick-prompts button,.send{position:relat
           <div class="bubble bot">Tell me what you are working on. I can explain a topic from the beginning, build a tutorial, create practice, or help you revise.</div>
         </div>
         <div class="composer">
-          <div class="need-phone" id="needPhone">Connect your WhatsApp number to personalise this session.<input id="phoneInput" inputmode="tel" placeholder="0803..."><button id="phoneSave">Connect</button></div>
+          <div class="need-phone" id="needPhone">Add your phone number to personalise this session.<input id="phoneInput" inputmode="tel" placeholder="0803..."><button id="phoneSave">Connect</button></div>
           <textarea id="question" aria-label="Ask ABBA" placeholder="What are you studying today?"></textarea>
           <button id="send" class="send">Ask</button>
         </div>
@@ -425,7 +425,7 @@ let studyMaterial='';
 let studyMaterialName='';
 let studyMedia=null;
 const messages=document.getElementById('messages'),q=document.getElementById('question'),send=document.getElementById('send');
-const WA='https://wa.me/2347046481828';
+const WA='mailto:institutegpt@gmail.com?subject=NOUN%20BOT%20support%20request';
 
 /* staggered reveal on load */
 /* reveal is coordinated by the motion layer below */
@@ -479,7 +479,7 @@ function add(text,who='bot',withWa=false){
   messages.appendChild(d);
   if(withWa){
     const chip=document.createElement('a');chip.className='wa-chip';chip.href=WA;chip.target='_blank';chip.rel='noopener';
-    chip.textContent='→ Continue with a human on WhatsApp';
+    chip.textContent='→ Continue with a human by email';
     messages.appendChild(chip);
   }
   messages.scrollTop=messages.scrollHeight;
@@ -565,7 +565,7 @@ async function ask(){
       s.textContent='Sources · '+d.sources.slice(0,3).map(x=>x.title).filter(Boolean).join(' · ');
       messages.appendChild(s);messages.scrollTop=messages.scrollHeight;
     }
-  }catch(e){typing(false);window.__nounSetStatus&&window.__nounSetStatus('error','Needs attention');add('I could not complete that right now. You can continue with a human on WhatsApp.', 'bot', true)}
+  }catch(e){typing(false);window.__nounSetStatus&&window.__nounSetStatus('error','Needs attention');add('I could not complete that right now. You can continue with a human by email.', 'bot', true)}
   finally{clearTimeout(timeout);send.disabled=false;send.textContent='Ask';send.classList.remove('is-busy');window.__nounSetStatus&&window.__nounSetStatus('ready','Ready')}
 }
 send.addEventListener('click',ask);
