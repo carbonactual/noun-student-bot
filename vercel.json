@@ -30,7 +30,7 @@
   "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':(exclude).github/**' ':(exclude)docs/**' ':(exclude)tests/**' ':(exclude)README.md'",
   "crons": [
     {
-      "path": "/api/wa-drain",
+      "path": "/api/wa-drain?pipeline=1",
       "schedule": "30 7 * * *"
     }
   ]
