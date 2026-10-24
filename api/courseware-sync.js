@@ -3,7 +3,6 @@ const {db,tenantId}=require('../lib/knowledge');
 const { cleanPhone, getStudent } = require('../lib/student-intelligence');
 const SECRET=process.env.WEBHOOK_SECRET;
 function score(q,row){const tokens=String(q||'').toLowerCase().split(/[^a-z0-9]+/).filter(x=>x.length>2);const blob=JSON.stringify(row).toLowerCase();return tokens.reduce((n,t)=>n+(blob.includes(t)?1:0),0);}
-const SECRET=process.env.WEBHOOK_SECRET;
 const FACULTIES={
   Agricultural_Sciences:'https://nou.edu.ng/ecourseware-faculty-of-agric/',
   Arts:'https://nou.edu.ng/ecourseware-faculty-of-arts/',
