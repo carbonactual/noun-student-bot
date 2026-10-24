@@ -20,6 +20,10 @@
     {
       "source": "/api/knowledge-query",
       "destination": "/api/ai-study"
+    },
+    {
+      "source": "/api/past-questions",
+      "destination": "/api/courseware-sync"
     }
   ],
   "functions": {

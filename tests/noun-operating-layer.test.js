@@ -40,7 +40,7 @@ test('event continuity creates replay-safe canonical envelopes', () => {
 });
 
 test('evidence contract distinguishes authoritative and stale evidence', () => {
-  const official = normalizeEvidence({ title: 'Exam timetable', url: 'https://nou.edu.ng/exam', authority_tier: 1, retrieved_at: '2026-09-16T08:00:00Z', effective_date: '2026-09-16' });
+  const official = normalizeEvidence({ title: 'Exam timetable', url: 'https://nou.edu.ng/exam', authority_tier: 1, retrieved_at: new Date(Date.now() - 3600e3).toISOString(), effective_date: new Date(Date.now() - 3600e3).toISOString().slice(0,10) });
   assert.equal(official.authority, 'official_noun');
   assert.equal(official.verification_state, 'verified');
   assert.equal(evidenceDecision([official]).decision, 'answer');

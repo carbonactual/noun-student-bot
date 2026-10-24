@@ -6,7 +6,7 @@ test('internal webhook/orchestration surfaces fail closed when secrets are absen
   const abba = fs.readFileSync('api/abba.js', 'utf8');
   const automation = fs.readFileSync('api/automation.js', 'utf8');
   const outbound = fs.readFileSync('api/outbound-ack.js', 'utf8');
-  const past = fs.readFileSync('api/past-questions.js', 'utf8');
+  const past = fs.readFileSync('api/courseware-sync.js', 'utf8');
 
   assert.match(abba, /Boolean\(SECRET && req\.headers/);
   assert.match(automation, /!intelligenceAuthorized\(req\)/);
